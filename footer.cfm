@@ -66,6 +66,25 @@
 			    });
 
 		    });
+
+			$(document).on('click', '.run-schedule', function(e){
+
+				var scheduleid = $(this).data('scheduleid');
+				var service = $(this).data('service');
+
+				$('.run-schedule').each(function(){
+					$(this).hide();
+				});
+				$('.progress').show();
+
+				$.get('<cfoutput>#request.webRoot#</cfoutput>tasks/' + service + '_automated.cfm?scheduleId=' + scheduleid, function(response){
+				})
+				.done(function(){
+					location.reload();
+				})
+				.fail(function(){})
+				.always(function(){});
+			});
 		});
 	</script>
 

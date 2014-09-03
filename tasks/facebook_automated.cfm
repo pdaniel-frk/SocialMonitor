@@ -2,15 +2,19 @@
 
 <!--- get everything on the schedule --->
 <cfquery name="getSchedule" datasource="#this.dsn#">
-	select 
+	select
 		scheduleId,
-		monitor_page_id, 
+		monitor_page_id,
 		monitor_post_id
 	from Schedules
 	where service = 'Facebook'
 	and isdate(deleteDate) = 0
-	and isnull(startdate, getdate()-1) <= getdate()
-	and isnull(endDate, getdate()+1) >= getdate()
+	<cfif structKeyExists(url, "scheduleId")>
+		and scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
+	<cfelse>
+		and isnull(startdate, getdate()-1) <= getdate()
+		and isnull(endDate, getdate()+1) >= getdate()
+	</cfif>
 </cfquery>
 
 <!--- the ajaxy/jquery stuff does not work when called via scheduled task, so trying a different approach (cfhttp) --->
@@ -39,7 +43,7 @@
 		<cfif len(getSchedule.monitor_post_id)>
 			<cfset post_id = getSchedule.monitor_post_id>
 			<cfset page_id = getToken(post_id, 1, '_')>
-			
+
 			<cftry>
 				<cfset page_result = get_page(getSchedule.scheduleId, page_id, true)>
 				<cfcatch type="any">
@@ -108,7 +112,7 @@
 	<cfargument name="userName" default="">
 	<cfargument name="pageType" default="">
 	<cfargument name="userId" default="#this.uid#">
-	
+
 	<cfif len(arguments.pageId) and len(arguments.userId)>
 
 		<cfquery datasource="#this.dsn#">
@@ -398,14 +402,14 @@
 	<cfif arguments.save_results>
 		<cfloop from="1" to="#arrayLen(user_result)#" index="i">
 			<cfset save_user(
-							user_id = user_result[i].uid, 
-							email = user_result[i].email, 
-							first_name = user_result[i].first_name, 
-							last_name = user_result[i].last_name, 
-							username = user_result[i].username, 
-							timezone = user_result[i].timezone, 
-							locale = user_result[i].locale, 
-							profile_url = user_result[i].profile_url, 
+							user_id = user_result[i].uid,
+							email = user_result[i].email,
+							first_name = user_result[i].first_name,
+							last_name = user_result[i].last_name,
+							username = user_result[i].username,
+							timezone = user_result[i].timezone,
+							locale = user_result[i].locale,
+							profile_url = user_result[i].profile_url,
 							birthday_date = user_result[i].birthday_date)>
 		</cfloop>
 	</cfif>

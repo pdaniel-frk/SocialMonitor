@@ -29,7 +29,7 @@ https://github.com/starlock/vino/wiki/API-Reference
 			</div>
 			<button type="submit" class="btn btn-default">Submit</button>
 			<cfif len(form.searchTerm)>
-				<button class="btn btn-success btn-small monitor-twitter-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
+				<button class="btn btn-success btn-small monitor-vine-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
 					<span class="glyphicon glyphicon-eye-open"></span>
 				</button>
 			</cfif>
@@ -47,6 +47,33 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#"></cfhttp>
 		<cfset searchResult = deserializeJson(cfhttp.fileContent)>
+
+		<!---
+		avatarUrl
+		created
+		description
+		explicitContent
+		permalinkUrl
+		postId
+		thumbnailUrl
+		userId
+		username
+		videoLowUrl
+		videoUrl
+		--->
+
+
+		<!--- <cfset userid = searchResult.data.records[1].userid><!--- 914755310672035840 --->
+		<cfoutput>
+			<p>userid: #userid#</p><!--- 9.14755310672E+017 --->
+			<p>numberformat(#userid#, #repeatString('9', 20)#): #numberFormat(userid, repeatString('9', 20))#</p><!--- 914755310672035840 --->
+			<p>numberformat(#userid#): #numberFormat(userid)#</p><!--- 914,755,310,672,035,840 --->
+			<p>precisionEvaluate(#userid#).toPlainString(): #precisionEvaluate(userid).toPlainString()#</p><!--- 914755310672000000 --->
+			<p>createObject('java', 'java.math.BigDecimal').init(#userid#): #createObject('java', 'java.math.BigDecimal').init(userid)#</p><!--- 914755310672035840 --->
+			<p>convertNum(#userid#): #convertNum(userid)#</p>
+		</cfoutput> --->
+
+
 		<!--- only returns 20 records at a time --->
 		<cfset searchCount = 0>
 		<cfset searchCount += searchResult.data.count>
@@ -86,7 +113,7 @@ https://github.com/starlock/vino/wiki/API-Reference
 									<cfif not structIsEmpty(record)>
 										<!--- <td><video preload="auto" src="<cfoutput>#record.videoUrl#</cfoutput>" width="535" height="535"></video></td> --->
 										<td><cfoutput><img src="#record.avatarUrl#" alt="#record.username#" style="width: 38px;height: 38px;border-radius: 50%;"></cfoutput></td>
-										<td><cfoutput>#record.userId#</cfoutput></td>
+										<td><cfoutput>#convertNum(record.userId)#</cfoutput></td>
 										<td><cfoutput>#getToken(record.created, 1, 'T')#</cfoutput></td><!--- eg 2014-07-03T01:50:52.000000 --->
 										<td><cfoutput>#record.description#</cfoutput></td>
 										<td><cfoutput><a href="#record.permalinkUrl#" target="_blank"><img src="#record.thumbnailUrl#" style="width:50px;height:50px;"></a></cfoutput></td>
@@ -128,3 +155,16 @@ https://github.com/starlock/vino/wiki/API-Reference
 	});
 </script>
 
+<!--- convert the scientific notation number of the long user/post/whatever ids to the actual value --->
+<cffunction name="convertNum" returntype="string">
+	<cfargument name="num" required="yes">
+	<cfset bigD = createObject('java', 'java.math.BigDecimal')>
+	<cfreturn bigD.init(arguments.num)>
+</cffunction>
+
+
+<cffunction name="getVineUser" returntype="struct">
+	<cfargument name="userId" required="yes"><!--- userId should first be passed to the convertNum function when calling this function --->
+	<cfhttp method="get" url="https://api.vineapp.com/users/profiles/#arguments.userId#"></cfhttp>
+	<cfreturn deserializeJson(cfhttp.fileContent).data>
+</cffunction>

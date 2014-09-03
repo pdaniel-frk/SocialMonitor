@@ -9,6 +9,7 @@
 				<li><a href="facebook.cfm">Facebook</a></li>
 				<li><a href="instagram.cfm">Instagram</a></li>
 				<li><a href="twitter.cfm">Twitter</a></li>
+				<li><a href="vine.cfm">Vine</a></li>
 				<li class="divider"></li>
 				<li class="disabled"><a href="foursquare.cfm">Foursquare</a></li>
 				<li class="disabled"><a href="gplus.cfm">Google+</a></li>
@@ -21,7 +22,7 @@
 </h1>
 
 <cfquery name="getSchedules" datasource="#this.dsn#">
-	select 
+	select
 		s.scheduleId,
 		s.name,
 		s.[service],
@@ -52,19 +53,19 @@
 			</cfoutput>
 		</p>
 	</div>
-	
+
 	<div class="panel-body">
 		<div class="panel-group" id="accordion">
-			
+
 			<cfoutput query="getSchedules" group="service">
-			
+
 				<cfquery name="getCount" datasource="#this.dsn#">
 					select count(1) as cnt
 					from Schedules
 					where isdate(deleteDate) = 0
 					and service = <cfqueryparam value="#service#" cfsqltype="cf_sql_varchar">
 				</cfquery>
-				
+
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h4 class="panel-title">
@@ -96,7 +97,7 @@
 									</thead>
 									<tbody>
 										<cfoutput>
-											
+
 											<cfquery name="getEntryCount" datasource="#this.dsn#">
 												<cfif service eq "Facebook">
 													<cfif len(monitor_page_id)>
@@ -129,15 +130,22 @@
 													where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
 													and searchTerm = <cfqueryparam value="#searchTerm#" cfsqltype="cf_sql_varchar">
 												</cfif>
-												
+
 												<cfif service eq "Twitter">
 													select count(1) as cnt
 													from TwitterEntries
 													where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
 													and searchTerm = <cfqueryparam value="#searchTerm#" cfsqltype="cf_sql_varchar">
 												</cfif>
+
+												<cfif service eq "Vine">
+													select count(1) as cnt
+													from VineEntries
+													where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+													and searchTerm = <cfqueryparam value="#searchTerm#" cfsqltype="cf_sql_varchar">
+												</cfif>
 											</cfquery>
-											
+
 											<tr>
 												<td>#currentRow#</td>
 												<td>#name#</td>
@@ -184,25 +192,38 @@
 														<button class="btn btn-warning btn-small monitor-instagram-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 															<span class="glyphicon glyphicon-wrench"></span>
 														</button>
-													</cfif>													
+													</cfif>
 													<cfif service eq "Twitter">
 														<button class="btn btn-warning btn-small monitor-twitter-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 															<span class="glyphicon glyphicon-wrench"></span>
 														</button>
 													</cfif>
+													<cfif service eq "Vine">
+														<button class="btn btn-warning btn-small monitor-vine-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
+															<span class="glyphicon glyphicon-wrench"></span>
+														</button>
+													</cfif>
+													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
 												</td>
-											</tr>								
-										</cfoutput>							
+											</tr>
+										</cfoutput>
 									</tbody>
 								</table>
 							</div>
 						</div>
 					</div>
 				</div>
-				
+
 			</cfoutput>
-			
+
 		</div>
+
+		<div class="progress progress-striped progress-info active" style="display:none;">
+			<div class="progress-bar" style="width: 100%;"></div>
+		</div>
+
 	</div>
-	
+
 </div>

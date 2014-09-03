@@ -1,10 +1,10 @@
 <!--- get monitored search terms --->
 <cfquery name="getTerms" datasource="#this.dsn#">
-	select 
+	select
 		s.scheduleId,
 		s.name,
-		s.searchTerm, 
-		s.startDate, 
+		s.searchTerm,
+		s.startDate,
 		s.endDate,
 		(select count(1) from TwitterEntries where searchTerm = s.searchTerm) as entry_count
 	from Schedules s
@@ -29,11 +29,11 @@
 			</cfoutput>
 		</p>
 	</div>
-	
+
 	<div class="panel-body">
 		<div class="panel-group" id="accordion">
-	
-			<cfif getTerms.recordCount gt 0>		
+
+			<cfif getTerms.recordCount gt 0>
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h4 class="panel-title">
@@ -71,17 +71,25 @@
 													<button class="btn btn-warning btn-small monitor-twitter-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
+													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="twitter" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
 												</td>
-											</tr>								
-										</cfoutput>							
+											</tr>
+										</cfoutput>
 									</tbody>
 								</table>
+
+								<div class="progress progress-striped progress-info active" style="display:none;">
+									<div class="progress-bar" style="width: 100%;"></div>
+								</div>
+
 							</div>
 						</div>
 					</div>
 				</div>
-			</cfif>			
-		</div>		
+			</cfif>
+		</div>
 	</div>
 </div>
 

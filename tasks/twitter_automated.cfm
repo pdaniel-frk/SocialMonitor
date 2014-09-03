@@ -2,23 +2,27 @@
 
 <!--- get everything on the schedule --->
 <cfquery name="getSchedule" datasource="#this.dsn#">
-	select 
-		scheduleId, 
+	select
+		scheduleId,
 		searchTerm
 	from Schedules
 	where service = 'Twitter'
 	and isdate(deleteDate) = 0
-	and isnull(startdate, getdate()-1) <= getdate()
-	and isnull(endDate, getdate()+1) >= getdate()
+	<cfif structKeyExists(url, "scheduleId")>
+		and scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
+	<cfelse>
+		and isnull(startdate, getdate()-1) <= getdate()
+		and isnull(endDate, getdate()+1) >= getdate()
+	</cfif>
 </cfquery>
 
 <cfif getSchedule.recordCount>
-	
+
 	<cfloop query="getSchedule">
-		
+
 		<!--- get latest id and pull entries later than it --->
 		<cfset since_id = "">
-		<cfquery name="getSinceId" datasource="#this.dsn#">	
+		<cfquery name="getSinceId" datasource="#this.dsn#">
 			select max(cast(id_str as bigint)) as since_id
 			from TwitterEntries
 			where scheduleId = <cfqueryparam value="#getSchedule.scheduleId#">
@@ -26,24 +30,24 @@
 		<cfif len(getSinceId.since_id)>
 			<cfset since_id = getSinceId.since_id>
 		</cfif>
-		
+
 		<cfset q = URLEncodedFormat(getSchedule.searchTerm)>
-		
+
 		<cftry>
-					
+
 			<cfset searchResult =  application.objMonkehTweet.search(q=q, since_id=since_id, count=100)>
-			
+
 			<cfset searchCount = 0>
-							
+
 			<cfset searchCount += arrayLen(searchResult.statuses)>
-			
+
 			<cfloop from="1" to="#arrayLen(searchResult.statuses)#" index="ndx">
-				
+
 				<cfset image_url = "">
 				<cfif structKeyExists(searchResult.statuses[ndx].entities, "media")>
 					<cfset image_url = searchResult.statuses[ndx].entities.media[1].media_url_https>
 				</cfif>
-				
+
 				<!--- import entries into database --->
 				<cfquery datasource="#this.dsn#">
 					if not exists (
@@ -89,7 +93,7 @@
 						)
 					end
 				</cfquery>
-				
+
 				<!--- import users --->
 				<cfquery datasource="#this.dsn#">
 					if not exists (
@@ -116,15 +120,15 @@
 						)
 					end
 				</cfquery>
-				
+
 			</cfloop>
-			
+
 			<cfcatch type="any">
 				<cfdump var="#cfcatch#">
 			</cfcatch>
-			
+
 		</cftry>
-		
+
 	</cfloop>
-	
+
 </cfif>

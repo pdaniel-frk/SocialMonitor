@@ -1,11 +1,11 @@
 <!--- get monitored pages --->
 <cfquery name="getPages" datasource="#this.dsn#">
-	select 
+	select
 		sched.scheduleId,
 		sched.name,
-		sched.monitor_page_id, 
-		sched.startDate, 
-		sched.endDate, 
+		sched.monitor_page_id,
+		sched.startDate,
+		sched.endDate,
 		page.[name] as pageName,
 		(select count(1) from FacebookPostComments where page_id = page.page_id) as comment_count,
 		(select count(1) from FacebookPostLikes where page_id = page.page_id) as like_count
@@ -16,13 +16,13 @@
 
 <!--- get monitored posts --->
 <cfquery name="getPosts" datasource="#this.dsn#">
-	select 
+	select
 		sched.scheduleId,
 		sched.name,
-		sched.monitor_post_id, 
-		sched.startDate, 
-		sched.endDate, 
-		post.[message], 
+		sched.monitor_post_id,
+		sched.startDate,
+		sched.endDate,
+		post.[message],
 		page.[name] as pageName,
 		(select count(1) from FacebookPostComments where post_id = post.post_id) as comment_count,
 		(select count(1) from FacebookPostLikes where post_id = post.post_id) as like_count
@@ -49,11 +49,11 @@
 			</cfoutput>
 		</p>
 	</div>
-	
+
 	<div class="panel-body">
 		<div class="panel-group" id="accordion">
-	
-			<cfif getPages.recordCount gt 0>		
+
+			<cfif getPages.recordCount gt 0>
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h4 class="panel-title">
@@ -91,18 +91,26 @@
 													<button class="btn btn-warning btn-small monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#pageName#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
+													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
 												</td>
-											</tr>								
-										</cfoutput>							
+											</tr>
+										</cfoutput>
 									</tbody>
 								</table>
+
+								<div class="progress progress-striped progress-info active" style="display:none;">
+									<div class="progress-bar" style="width: 100%;"></div>
+								</div>
+
 							</div>
 						</div>
 					</div>
 				</div>
 			</cfif>
-			
-			<cfif getPosts.recordCount gt 0>		
+
+			<cfif getPosts.recordCount gt 0>
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h4 class="panel-title">
@@ -143,8 +151,8 @@
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
 												</td>
-											</tr>								
-										</cfoutput>							
+											</tr>
+										</cfoutput>
 									</tbody>
 								</table>
 							</div>
@@ -152,8 +160,8 @@
 					</div>
 				</div>
 			</cfif>
-			
-		</div>		
+
+		</div>
 	</div>
 </div>
 

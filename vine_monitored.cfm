@@ -71,11 +71,19 @@
 													<button class="btn btn-warning btn-small monitor-vine-term-button" data-scheduleId="#scheduleId#" data-searchTerm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
+													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="vine" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
 												</td>
 											</tr>
 										</cfoutput>
 									</tbody>
 								</table>
+
+								<div class="progress progress-striped progress-info active" style="display:none;">
+									<div class="progress-bar" style="width: 100%;"></div>
+								</div>
+
 							</div>
 						</div>
 					</div>
@@ -84,4 +92,5 @@
 		</div>
 	</div>
 </div>
+
 
