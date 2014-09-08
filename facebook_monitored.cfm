@@ -99,11 +99,6 @@
 										</cfoutput>
 									</tbody>
 								</table>
-
-								<div class="progress progress-striped progress-info active" style="display:none;">
-									<div class="progress-bar" style="width: 100%;"></div>
-								</div>
-
 							</div>
 						</div>
 					</div>
@@ -150,6 +145,9 @@
 													<button class="btn btn-warning btn-small monitor-post-button" data-scheduleid="#scheduleId#" data-postid="#monitor_post_id#" data-postmessage="#message#" data-toggle="tooltip" data-placement="bottom" title="Edit Post Monitor">
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
+													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
 												</td>
 											</tr>
 										</cfoutput>
@@ -160,6 +158,10 @@
 					</div>
 				</div>
 			</cfif>
+
+			<div class="progress progress-striped progress-info active" style="display:none;">
+				<div class="progress-bar" style="width: 100%;"></div>
+			</div>
 
 		</div>
 	</div>
