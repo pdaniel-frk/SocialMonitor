@@ -1,6 +1,6 @@
 <!--- get everything on the schedule --->
 <cfquery name="getSchedule" datasource="#this.dsn#">
-	select 
+	select
 		s.scheduleId,
 		s.name,
 		s.monitor_page_id,
@@ -21,15 +21,15 @@
 
 <div id="fb-root"></div>
 <script>
-	
+
 	function showMonitorButton(type, id, text){
 		return '<button class="btn btn-success btn-small monitor-'+type+'-button" data-scheduleid="" data-pagename="'+text+'" data-postmessage="'+text+'" data-'+type+'id="'+id+'" data-name="'+text+'" data-message="'+text+'" data-toggle="tooltip" data-placement="bottom" title="Monitor this '+type+'"><span class="glyphicon glyphicon-eye-open"></span></button>';
 	}
-	
+
 	function showEditButton(type, id, text){
 		return '<button class="btn btn-warning btn-small monitor-'+type+'-button" data-scheduleid="" data-pagename="'+text+'" data-postmessage="'+text+'" data-'+type+'id="'+id+'" data-name="'+text+'" data-message="'+text+'" data-toggle="tooltip" data-placement="bottom" title="Edit '+type+' monitor"><span class="glyphicon glyphicon-wrench"></span></button>';
 	}
-	
+
 	$(function(){
 		var uid, accessToken, page_id, page_name, post_id = null;
 		<!--- loading via jquery --->
@@ -38,45 +38,45 @@
 			FB.init({
 				appId: '<cfoutput>#credentials.facebook.appId#</cfoutput>',
 				//channelUrl: '//promotions.mardenkane.com/common/channel.html',
-				status: true, 
+				status: true,
 				cookie: true,
 				xfbml: true,
 			});
-			
-			
+
+
 			/************ VALIDATING LOGIN STATUS ******************/
-			
+
 			FB.getLoginStatus(function(response) {
 				if (response.status === 'connected') {
 					uid = response.authResponse.userID;
 					accessToken = response.authResponse.accessToken;
-				} 
+				}
 				else if (response.status === 'not_authorized') {
 					fblogin();
-				} 
+				}
 				else {
 					fblogin();
 				}
 			});
-			
+
 			FB.Event.subscribe('auth.statusChange', function(response) {
 				if (response.status === 'connected') {
 					uid = response.authResponse.userID;
 					accessToken = response.authResponse.accessToken;
-				} 
+				}
 				else if (response.status === 'not_authorized') {
 					fblogin();
-				} 
+				}
 				else {
 					fblogin();
 				}
 			});
-			
+
 		});
-		
-		
+
+
 		/************ LOGGING IN AND SUCHLIKE ******************/
-		
+
 		function fblogin(){
 			$('#facebook-logged-out').show();
 			FB.login(function(response) {
@@ -89,10 +89,10 @@
 				}
 			}, {scope:'email,user_likes,read_stream,manage_pages'});
 		}
-		
-		
+
+
 		/************ FORM HIJACKS ******************/
-		
+
 		$('form[name=lookup-page]').submit(function(e){
 			e.preventDefault();
 			if($('input[name=managed_pages]').is(':checked'))
@@ -103,35 +103,64 @@
 			{
 				lookupPage($('input[name=pageId]').val());
 			}
-			
+
 		});
-		
+
 		$('form[name=lookup-post]').submit(function(e){
 			e.preventDefault();
 			searchPagePosts(page_id, $('input[name=query]').val());
 		});
-		
-				
+
+
 		/************ CLICK HIJACKS ******************/
-		
+
 		$(document).on('click', '.page-button', function(e){
 			e.preventDefault();
 			page_id = $(this).data('pageid');
 			$('form[name=lookup-post]').show();
 			lookupPagePosts(page_id);
 		});
-		
+
 		$(document).on('click', '.post-button', function(e){
 			e.preventDefault();
 			post_id = $(this).data('postid');
 			lookupPostComments(post_id);
 			lookupPostLikes(post_id);
 		});
-		
+
 		$(document).on('click', '#fb-login', function(e){
 			fblogin();
 		});
-		
+
+		$(document).on('click', '.monitor-facebook-term-button', function(e){
+			e.preventDefault();
+			var scheduleId = $(this).data('scheduleid');
+			var searchTerm = $(this).data('searchterm');
+			$('#myModal .modal-dialog .modal-content').empty();
+			$.get('services/monitor-facebook-term-form.cfm?scheduleId='+scheduleId+'&searchTerm='+encodeURIComponent(searchTerm), function(data){
+				$('#myModal .modal-dialog .modal-content').html(data);
+				$('#myModal').modal();
+			});
+		});
+
+		$(document).on('click', '.btn-save-facebook-term-monitor', function(e){
+			e.preventDefault();
+			$.post('services/monitor-facebook-term.cfm', $('form[name=monitorForm]').serialize(), function(response){
+			})
+			.done(function(){
+				$('#myModal').modal('hide');
+				location.reload();
+			})
+			.fail(function(){})
+			.always(function(){});
+		});
+
+		$(document).on('click', '.btn-stop-term-monitor', function(e){
+			e.preventDefault();
+			$('input[name=stopMonitor]').val('true');
+			$('.btn-save-facebook-term-monitor').click();
+		});
+
 		$(document).on('click', '.monitor-page-button', function(e){
 			e.preventDefault();
 			var scheduleId = $(this).data('scheduleid');
@@ -143,7 +172,7 @@
 				$('#myModal').modal();
 			});
 		});
-		
+
 		$(document).on('click', '.btn-save-page-monitor', function(e){
 			e.preventDefault();
 			$.post('services/monitor-page.cfm', $('form[name=monitorPageForm]').serialize(), function(response){
@@ -151,16 +180,16 @@
 			.done(function(){})
 			.fail(function(){})
 			.always(function(){});
-			
+
 			$('#myModal').modal('hide');
 		});
-		
+
 		$(document).on('click', '.btn-stop-page-monitor', function(e){
 			e.preventDefault();
 			$('input[name=stopMonitor]').val('true');
 			$('.btn-save-page-monitor').click();
 		});
-		
+
 		$(document).on('click', '.monitor-post-button', function(e){
 			e.preventDefault();
 			var scheduleId = $(this).data('scheduleid');
@@ -172,7 +201,7 @@
 				$('#myModal').modal();
 			});
 		});
-		
+
 		$(document).on('click', '.btn-save-post-monitor', function(e){
 			e.preventDefault();
 			$.post('services/monitor-post.cfm', $('form[name=monitorPostForm]').serialize(), function(response){
@@ -180,19 +209,19 @@
 			.done(function(){})
 			.fail(function(){})
 			.always(function(){});
-			
+
 			$('#myModal').modal('hide');
 		});
-		
+
 		$(document).on('click', '.btn-stop-post-monitor', function(e){
 			e.preventDefault();
 			$('input[name=stopMonitor]').val('true');
 			$('.btn-save-post-monitor').click();
 		});
-		
-		
+
+
 		/************ FQL CALLS ******************/
-		
+
 		<!--- this is misleading, cause im actually using a search term, not an actual pageId... --->
 		<!--- this also occasionally stops working cause FACEBOOK! --->
 		function lookupPage(pageId){
@@ -206,10 +235,10 @@
 				populatePageList(response);
 			});
 		}
-		
+
 		function lookupUserManagedPages(pageId){
 			pageId = pageId.replace("'", "\\\'");
-			
+
 			var query2 = 'select page_id, name, username, type, fan_count, page_url from page where page_id in (select page_id from #query1)';
 			if(pageId.length)
 			{
@@ -218,7 +247,7 @@
 				query2 += ' and strpos(lower(name), lower(\''+pageId+'\')) > 0';
 			}
 			query2 += ' order by fan_count desc';
-			
+
 			FB.api({
 				method: 'fql.multiquery',
 				queries:{
@@ -232,7 +261,7 @@
 				populatePageList(response);
 			});
 		}
-		
+
 		function lookupPagePosts(pageId){
 			FB.api({
 				<!--- https://developers.facebook.com/docs/reference/fql/stream/ --->
@@ -244,7 +273,7 @@
 				populatePostList(pageId, response);
 			});
 		}
-		
+
 		function searchPagePosts(pageId, query){
 			<!--- https://developers.facebook.com/docs/reference/fql/stream/ --->
 			FB.api({
@@ -256,7 +285,7 @@
 				populatePostList(pageId, response);
 			});
 		}
-		
+
 		function lookupPostComments(postId){
 			<!--- https://developers.facebook.com/docs/reference/fql/comment/ --->
 			FB.api({
@@ -267,8 +296,8 @@
 				populateCommentList(postId, response);
 			});
 		}
-		
-		
+
+
 		function lookupPostLikes(postId){
 			<!--- https://developers.facebook.com/docs/reference/fql/like/ --->
 			FB.api({
@@ -279,7 +308,7 @@
 				populateLikeList(postId, response);
 			});
 		}
-		
+
 		function lookupUser(userId){
 			<!--- https://developers.facebook.com/docs/reference/fql/user/ --->
 			FB.api({
@@ -287,17 +316,17 @@
 				query: 'select email, first_name, last_name, name, username, uid, timezone, locale, profile_url, age_range, birthday_date from user where uid = ' + userId,
 				return_ssl_resources: 1,
 			}, function(response){
-				showUserName(response);					
+				showUserName(response);
 			});
 		}
-		
+
 		/************ RESULTS DISPLAYANCE ******************/
-		
+
 		function showUserName(response){
 			var html = '<a class="btn btn-link" href="'+response[0].profile_url+'" target="_blank">'+response[0].name+'</a>';
 			$('.user-'+response[0].uid).html(html);
 		}
-		
+
 		function populatePageList(response){
 			$('#lookup-page-results-table tbody').empty();
 			$('#lookup-posts-results-table tbody').empty();
@@ -307,23 +336,23 @@
 			$('#lookup-likes-results-table tbody').empty();
 				$('#lookup-likes-results-wrapper').hide();
 			for(i=0;i<response.length;i++){
-						
+
 				$pageId = response[i].page_id;
 				$pageName = response[i].name;
 				$pageURL = response[i].page_url;
 				$username = response[i].username;
 				$type = response[i].type;
-				
+
 				var html = '<tr>';
 					html += '<td>';
 						html += '<button class="btn btn-primary btn-sm page-button" data-pageid="'+$pageId+'">'+$pageName+'</button>';
 					html += '</td>';
-					
+
 					html += '<td>';
 						if($pageURL.length)
 							html += '<a href="'+$pageURL+'" target="_blank">visit page</a>';
 					html += '</td>';
-					
+
 					html += '<td>';
 						if($.inArray($pageId, monitored_page_ids) > -1) {
 							html += showEditButton('page', $pageId, $pageName);
@@ -331,18 +360,18 @@
 						else {
 							html += showMonitorButton('page', $pageId, $pageName);
 						}
-						
+
 					html += '</td>';
-				
+
 				html += '</tr>';
-				
+
 				$('#lookup-page-results-table tbody').append(html);
-				
+
 			}
 			$('#lookup-page-results-wrapper').show();
 			location.href = '#pages';
 		}
-		
+
 		function populatePostList(pageId, response){
 			$('#lookup-posts-results-table tbody').empty();
 			$('#lookup-comments-results-table tbody').empty();
@@ -351,7 +380,7 @@
 				$('#lookup-likes-results-wrapper').hide();
 			for(i=0;i<response.length;i++){
 				if(response[i].message.length){
-					
+
 					$pageId = pageId;
 					$postId = response[i].post_id;
 					$message = response[i].message;
@@ -360,24 +389,24 @@
 					$commentCount = response[i].comment_info.comment_count;
 					$likeCount = response[i].like_info.like_count;
 					$shareCount = response[i].share_count;
-					
+
 					var html = '<tr>';
 						html += '<td>';
 							html += '<button class="btn btn-info btn-sm post-button" data-postid="'+$postId+'">'+$message.substr(0,100)+'...</button>';
 						html += '</td>';
-						
+
 						html += '<td>';
 							html += $commentCount;
 						html += '</td>';
-						
+
 						html += '<td>';
 							html += $likeCount;
 						html += '</td>';
-						
+
 						html += '<td>';
 							html += $shareCount;
 						html += '</td>';
-						
+
 						html += '<td>';
 							if($.inArray($postId, monitored_post_ids) > -1) {
 								html += showEditButton('post', $postId, $message);
@@ -385,69 +414,69 @@
 							else {
 								html += showMonitorButton('post', $postId, $message);
 							}
-							
+
 						html += '</td>';
 					html += '</tr>';
-					
+
 					$('#lookup-posts-results-table tbody').append(html);
-					
+
 				}
 			}
 			$('#lookup-posts-results-wrapper').show();
 			location.href = '#posts';
 		}
-		
+
 		function populateCommentList(postId, response){
 			$('#lookup-comments-results-count').text(''+response.length+' comments found for post');
 			$('#lookup-comments-results-table tbody').empty();
 			for(i=0;i<response.length;i++){
-				
+
 				var html = '<tr>';
-					
+
 					html += '<td>';
 						html += '<button class="btn btn-default btn-sm comment-button" data-id="'+response[i].id+'">'+response[i].text.substr(0,100)+'...</button>';
 					html += '</td>';
-					
+
 					html += '<td class="user-'+response[i].fromid+'">';
-						lookupUser(response[i].fromid);//this is hacky, but the function looks up the user name and then populates the td with it								
+						lookupUser(response[i].fromid);//this is hacky, but the function looks up the user name and then populates the td with it
 					html += '</td>';
-					
+
 					html += '<td>';
 						var d = new Date(response[i].time * 1000);
 						html += d;
 					html += '</td>';
-					
+
 				html += '</tr>';
-				
+
 				$('#lookup-comments-results-table tbody').append(html);
 			}
 			$('#lookup-comments-results-wrapper').show();
 			location.href = '#comments';
 		}
-		
+
 		function populateLikeList(postId, response){
 			$('#lookup-likes-results-count').text(''+response.length+' likes found for post');
 			$('#lookup-likes-results-table tbody').empty();
 			for(i=0;i<response.length;i++){
-								
+
 				var html = '<tr>';
 					html += '<td>';
 						html += response[i].user_id;
 					html += '</td>';
-					
+
 					html += '<td class="user-'+response[i].user_id+'">';
-						lookupUser(response[i].user_id);//this is hacky, but the function looks up the user name and then populates the td with it								
+						lookupUser(response[i].user_id);//this is hacky, but the function looks up the user name and then populates the td with it
 					html += '</td>';
 				html += '</tr>';
-								
+
 				$('#lookup-likes-results-table tbody').append(html);
 			}
 			$('#lookup-likes-results-wrapper').show();
 		}
-		
-		
+
+
 		/************ SAVORIES ******************/
-		
+
 		// the L stands for Value
 		function savePage(pageId,pageName,pageUrl,userName,pageType){
 			$.post('services/save-page.cfm', {
@@ -463,7 +492,7 @@
 			.fail(function(){})
 			.always(function(){});
 		}
-		
+
 		function savePagePost(pageId,postId,message,created_time,postType){
 			$.post('services/save-page-post.cfm', {
 								pageId: pageId,
@@ -478,7 +507,7 @@
 			.fail(function(){})
 			.always(function(){});
 		}
-		
+
 		function savePostComments(postId,fromid,postFBId,id,commentText,commentTime){
 			$.post('services/save-post-comments.cfm', {
 								postId: postId,
@@ -494,7 +523,7 @@
 			.fail(function(){})
 			.always(function(){});
 		};
-		
+
 		function savePostLikes(postId, user_id){
 			$.post('services/save-post-likes.cfm', {
 								postId: postId,
@@ -506,7 +535,7 @@
 			.fail(function(){})
 			.always(function(){});
 		};
-		
+
 		function saveFacebookUser(user_id, email, first_name, last_name, username, timezone, locale, profile_url, birthday_date){
 			$.post('services/save-facebook-user.cfm', {
 								user_id: user_id,
@@ -525,10 +554,10 @@
 			.fail(function(){})
 			.always(function(){});
 		};
-		
-						
+
+
 		/************ MISS ALLANY ******************/
-		
+
 		// create arrays of pages and posts being monitored
 		var monitored_page_ids = [];
 		var monitored_post_ids = [];

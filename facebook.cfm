@@ -11,7 +11,7 @@
 <!--- follow steps in this post (which involves a lot of cut-and-paste URL munging) --->
 <!--- http://stackoverflow.com/questions/10183625/extending-facebook-page-access-token/13477999#13477999 --->
 
-<!--- 
+<!---
 1: https://graph.facebook.com/oauth/authorize?client_id=173323626157418&scope=manage_pages&redirect_uri=http://www.facebook.com/connect/login_success.html
 1b: this is tricky, cause FB blanks the address bar, so you need to be ready to select all and copy
     http://www.facebook.com/connect/login_success.html?code=AQBedV_aWRQHkH4_CabKiUsLvyNAz_B_rik5VxQ0KMTFl3Jw7jzzi4ci0foW72OYTRMbGdHPD1iv4UDmAANYO-IIw6-gs8kc2A-U98NLKL3Lc7mJPp0xgUCX7-4sv7oFDEgNRhhEMZef4AlR2F8wxaM8BgYhB_1DtmgkgQu9PPDTyrcUQKOkNS10tZvwHFrN7e-bLLzeb-5g2Z_zeSXqBH2x-xbgIZMqbWKSB5lJmNvZYRuAJLPsehQKdha9PoT6u4uqoa0z9ScKZ8Qln0IfGS04r9vJ-775R74rP8pUEarwDm80v7Znys06Et5Mw69pFfk#_=_
@@ -21,6 +21,7 @@
 
  --->
 
+<cfparam name="form.searchTerm" default="">
 
 <h1 class="page-header">
 	Facebook
@@ -33,20 +34,41 @@
 		Please log in to Facebook and grant this application the requested permissions to continue.
 	</div>
 	<button class="btn btn-primary" id="fb-login">Log in to Facebook</button>
-	
+
 </div>
 
 <cfif structKeyExists(form, "searchKey")>
 	<cfif structKeyExists(form, "searchTerm") and len(form.searchTerm)>
 		<!--- lop off hash --->
 		<cfset form.searchTerm = replace(form.searchTerm, '##', '', 'All')><!---  --->
-		<cfhttp method="get" url="https://graph.facebook.com/search?q=""#form.searchTerm#""&type=post&access_token=#this.accessToken#"></cfhttp>
+		<!--- <cfhttp method="get" url="https://graph.facebook.com/search?q=""#form.searchTerm#""&type=post&access_token=#credentials.facebook.page_access_token#"></cfhttp> --->
 		<!--- <cfdump var="#cfhttp#"> --->
 		<!--- <cfdump var="#cfhttp.fileContent#"> --->
-		<cfset result = deserializeJson(cfhttp.fileContent)>
-		<cfdump var="#result#" label="Yes, I know these results are fugly."><!---  --->
+
+		<cfhttp method="get" url="https://graph.facebook.com/search">
+			<cfhttpparam type="url" name="q" value="#form.searchTerm#">
+			<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
+			<cfhttpparam type="url" name="type" value="post">
+		</cfhttp>
+		<cfset search_result = deserializeJson(cfhttp.fileContent)>
+		<cfdump var="#search_result#" label="Yes, I know these results are fugly."><!---  --->
 		<!--- <cfdump var="#result.data[1]#"> --->
 		<!--- <cfabort> --->
+
+		<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
+			<cfoutput>
+				<cfif search_result.data[i].type neq "link">
+					object_id = #search_result.data[i].object_id#<br>
+					name = #search_result.data[i].name#<br>
+					result_url = #search_result.data[i].link#<br>
+					caption = #search_result.data[i].caption#<br>
+					user_id = #search_result.data[i].from.id#<br>
+					type = #search_result.data[i].type#<br>
+				</cfif>
+			</cfoutput>
+		</cfloop>
+
+
 	</cfif>
 </cfif>
 
@@ -64,9 +86,32 @@
 <div class="panel panel-primary">
 
 	<div class="panel-heading">
+		<p class="panel-title"><strong>Search</strong></p>
+	</div>
+
+	<div class="panel-body">
+		<form name="lookup-term" method="post">
+			<div class="form-group">
+				<label for="searchTerm">Search Term</label>
+				<input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Hash tags are not allowed, and will be stripped out" value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>">
+			</div>
+			<button type="submit" class="btn btn-default">Submit</button>
+			<cfif len(form.searchTerm)>
+				<button class="btn btn-success btn-small monitor-facebook-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
+					<span class="glyphicon glyphicon-eye-open"></span>
+				</button>
+			</cfif>
+		</form>
+	</div>
+
+</div>
+
+<div class="panel panel-primary">
+
+	<div class="panel-heading">
 		<p class="panel-title"><strong>Look up page</strong></p>
 	</div>
-	
+
 	<div class="panel-body">
 		<form name="lookup-page">
 			<div class="form-group">
@@ -82,9 +127,9 @@
 			<button type="submit" class="btn btn-default">Submit</button>
 		</form>
 	</div>
-	
+
 	<!--- <div class="panel-body">
-		
+
 		<div id="lookup-page-results-wrapper" style="display:none;">
 			<!--- <div id="lookup-page-results-count"></div> --->
 			<div id="lookup-page-results">
@@ -104,12 +149,12 @@
 				</div>
 			</div>
 		</div>
-		
+
 	</div> --->
-	
-	
+
+
 	<div class="panel-body">
-		
+
 		<a name="pages" class="anchor"></a>
 		<div id="lookup-page-results-wrapper" style="display:none;">
 			<!--- <div id="lookup-page-results-count"></div> --->
@@ -129,7 +174,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<a name="posts" class="anchor"></a>
 		<div id="lookup-posts-results-wrapper" style="display:none;">
 			<!--- <div id="lookup-posts-results-count"></div> --->
@@ -142,7 +187,7 @@
 								<th>
 									Post
 									<div class="pull-right">
-									
+
 										<form name="lookup-post" style="display:none;" class="form-inline">
 											<div class="form-group">
 												<label for="query" class="sr-only">Post contains&hellip;</label>
@@ -150,7 +195,7 @@
 											</div>
 											<button type="submit" class="btn btn-default btn-sm">Search</button>
 										</form>
-										
+
 									</div>
 								</th>
 								<th>Comments</th>
@@ -164,7 +209,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<a name="comments" class="anchor"></a>
 		<div id="lookup-comments-results-wrapper" style="display:none;">
 			<!--- <div id="lookup-comments-results-count"></div> --->
@@ -184,8 +229,8 @@
 				</div>
 			</div>
 		</div>
-		
-		
+
+
 		<a name="likes" class="anchor"></a>
 		<div id="lookup-likes-results-wrapper" style="display:none;">
 			<!--- <div id="lookup-likes-results-count"></div> --->
@@ -204,13 +249,13 @@
 				</div>
 			</div>
 		</div>
-		
+
 	</div>
-	
+
 </div>
 
 
 
 
 
-	
+

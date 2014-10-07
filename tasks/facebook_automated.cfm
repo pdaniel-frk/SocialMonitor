@@ -4,6 +4,7 @@
 <cfquery name="getSchedule" datasource="#this.dsn#">
 	select
 		scheduleId,
+		searchTerm,
 		monitor_page_id,
 		monitor_post_id
 	from Schedules
@@ -22,6 +23,15 @@
 
 <cfif getSchedule.recordCount>
 	<cfloop query="getSchedule">
+		<cfif len(getSchedule.searchTerm)>
+			<cftry>
+				<cfset search_result = search_tags(getSchedule.scheduleId, getSchedule.searchTerm, true)>
+				<cfcatch type="any">
+					<h1>error parsing page_result</h1>
+					<cfdump var="#page_result#">
+				</cfcatch>
+			</cftry>
+		</cfif>
 		<cfif len(getSchedule.monitor_page_id)>
 			<cfset page_id = getSchedule.monitor_page_id>
 			<cftry>
@@ -76,6 +86,41 @@
 	</cfloop>
 </cfif>
 
+<cffunction name="search_tags">
+	<cfargument name="scheduleId" default="">
+	<cfargument name="searchTerm" required="true">
+	<cfargument name="save_results" required="no" default="false">
+	<!--- lop off hash --->
+	<cfset arguments.searchTerm = replace(arguments.searchTerm, '##', '', 'All')>
+	<cfhttp method="get" url="https://graph.facebook.com/search">
+		<cfhttpparam type="url" name="q" value="#arguments.searchTerm#">
+		<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
+		<cfhttpparam type="url" name="type" value="post">
+	</cfhttp>
+	<cfset search_result = deserializeJson(cfhttp.fileContent)>
+	<cfif arguments.save_results>
+		<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
+
+			<!--- <cfdump var="#search_result.data[i]#"> --->
+
+			<cfif search_result.data[i].type neq "link">
+				<cfset save_search (
+					scheduleId = arguments.scheduleId,
+					search_id = search_result.data[i].id,
+					object_id = search_result.data[i].object_id,
+					name = search_result.data[i].name,
+					result_url = search_result.data[i].link,
+					caption = search_result.data[i].caption,
+					user_id = search_result.data[i].from.id,
+					type = search_result.data[i].type
+				)>
+				<cfset get_user(search_result[i].from.id, true)>
+			</cfif>
+		</cfloop>
+	</cfif>
+	<cfreturn search_result>
+</cffunction>
+
 <cffunction name="get_page">
 	<cfargument name="scheduleId" default="">
 	<cfargument name="page_id" required="true">
@@ -89,6 +134,7 @@
 		<cfhttpparam type="url" name="format" value="json-strings">
 		<cfhttpparam type="url" name="pretty" value="1">
 	</cfhttp>
+
 	<cfset page_result = deserializeJson(cfhttp.fileContent)>
 	<cfif arguments.save_results>
 		<cfloop from="1" to="#arrayLen(page_result)#" index="i">
@@ -102,6 +148,58 @@
 		</cfloop>
 	</cfif>
 	<cfreturn page_result>
+</cffunction>
+
+<cffunction name="save_search">
+	<cfargument name="scheduleId" default="">
+	<cfargument name="search_id" default="">
+	<cfargument name="object_id" default="">
+	<cfargument name="name" default="">
+	<cfargument name="resultUrl" default="">
+	<cfargument name="caption" default="">
+	<cfargument name="user_id" default="">
+	<cfargument name="type" default="">
+	<cfargument name="userId" default="#this.uid#">
+
+	<cfif len(arguments.search_id) and len(arguments.userId)>
+
+		<cfquery datasource="#this.dsn#">
+			if not exists (
+				select 1
+				from FacebookSearches
+				where search_id = <cfqueryparam value="#arguments.search_id#" cfsqltype="cf_sql_varchar">
+				<cfif len(arguments.scheduleId)>
+					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+				</cfif>
+			)
+			begin
+				insert into FacebookSearches (
+					scheduleId,
+					search_id,
+					[object_id],
+					name,
+					result_url,
+					caption,
+					[user_id],
+					[type],
+					addedBy
+				)
+				values (
+					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
+					<cfqueryparam value="#arguments.search_id#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.object_id#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.name#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.result_url#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.caption#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.type#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
+				)
+			end
+		</cfquery>
+
+	</cfif>
+	<cfreturn>
 </cffunction>
 
 <cffunction name="save_page">

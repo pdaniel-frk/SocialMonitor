@@ -1,6 +1,5 @@
 <!---
 https://github.com/starlock/vino/wiki/API-Reference
-
 --->
 
 <cfparam name="form.searchTerm" default="">
@@ -45,7 +44,25 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 	<cftry>
 
-		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#"></cfhttp>
+		<!--- <script type="text/javascript">
+			$(function(){
+				$.get('https://api.vineapp.com/timelines/tags/<cfoutput>#form.searchTerm#</cfoutput>', function(data){
+					console.log(data);
+				})
+				.done(function(){
+					console.log('done');
+				})
+				.error(function(){
+					console.log('error');
+				})
+				.always(function(){
+					console.log('always');
+				});
+				//XMLHttpRequest cannot load https://api.vineapp.com/timelines/tags/test. No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://promotions.mardenkane.com' is therefore not allowed access.
+			});
+		</script> --->
+
+		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#" charset="utf-8"></cfhttp>
 		<cfset searchResult = deserializeJson(cfhttp.fileContent)>
 
 		<!---
