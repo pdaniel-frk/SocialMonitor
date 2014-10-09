@@ -82,15 +82,18 @@
 									<thead>
 										<tr>
 											<th>##</th>
-											<th>Name</th>
-											<th>Monitoring</th>
+											<th nowrap>Name of Program, Schedule, etc.</th>
+											<cfif service eq "Facebook">
+												<th>Page</th>
+												<th>Post</th>
+											</cfif>
+											<th>Term</th>
 											<th>Start</th>
 											<th>End</th>
+											<th>Entries</th>
 											<cfif service eq "Facebook">
 												<th>Comments</th>
 												<th>Likes</th>
-											<cfelse>
-												<th>Entries</th>
 											</cfif>
 											<th>Actions</th>
 										</tr>
@@ -100,30 +103,42 @@
 
 											<cfquery name="getEntryCount" datasource="#this.dsn#">
 												<cfif service eq "Facebook">
-													<cfif len(monitor_page_id)>
-														select count(1) as comment_count,
-														(
-															select count(1)
-															from FacebookPostLikes
-															where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
-															<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
-														) as like_count
+													<cfif len(searchTerm) and not len(monitor_page_id) and not len(monitor_post_id)>
+														select
+															count(1) as cnt,
+															null as comment_count,
+															null as like_count
+														from FacebookSearches
+														where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+													<cfelseif len(monitor_page_id)>
+														select
+															null as cnt,
+															count(1) as comment_count,
+															(
+																select count(1)
+																from FacebookPostLikes
+																where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
+																and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+															) as like_count
 														from FacebookPostComments
 														where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
-														<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
+														and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
 													<cfelseif len(monitor_post_id)>
-														select count(1) as comment_count,
-														(
-															select count(1)
-															from FacebookPostLikes
-															where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
-															<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
-														) as like_count
+														select
+															null as cnt,
+															count(1) as comment_count,
+															(
+																select count(1)
+																from FacebookPostLikes
+																where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
+																and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+															) as like_count
 														from FacebookPostComments
 														where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
-														<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
+														and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
 													</cfif>
 												</cfif>
+
 												<cfif service eq "Instagram">
 													select count(1) as cnt
 													from InstagramEntries
@@ -149,62 +164,72 @@
 											<tr>
 												<td>#currentRow#</td>
 												<td>#name#</td>
-												<td>
-													<cfif len(monitor_page_id)>
-														<cfquery name="getPage" datasource="#this.dsn#">
-															select *
-															from FacebookPages
-															where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
-														</cfquery>
-														<button class="btn btn-primary btn-sm page-button" data-id="#monitor_page_id#">#getPage.name#</button>
-													<cfelseif len(monitor_post_id)>
-														<cfquery name="getPost" datasource="#this.dsn#">
-															select *
-															from FacebookPagePosts
-															where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
-														</cfquery>
-														<button class="btn btn-info btn-sm post-button" data-id="#monitor_post_id#">#left(getPost.message, 50)#&hellip;</button>
-													<cfelseif len(searchTerm)>
-														#searchTerm#
-													</cfif>
-												</td>
+
+												<cfif service eq "Facebook">
+													<td>
+														<cfif len(monitor_page_id)>
+															<cfquery name="getPage" datasource="#this.dsn#">
+																select *
+																from FacebookPages
+																where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
+																and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+															</cfquery>
+															#getPage.name#
+														</cfif>
+													</td>
+													<td>
+														<cfif len(monitor_post_id)>
+															<cfquery name="getPost" datasource="#this.dsn#">
+																select *
+																from FacebookPagePosts
+																where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
+																and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+															</cfquery>
+															#left(getPost.message, 50)#&hellip;
+														</cfif>
+													</td>
+												</cfif>
+
+												<td>#searchTerm#</td>
 												<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 												<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
+												<td>#numberFormat(getEntryCount.cnt, ",")#</td>
 												<cfif service eq "Facebook">
 													<td>#numberFormat(getEntryCount.comment_count, ",")#</td>
 													<td>#numberFormat(getEntryCount.like_count, ",")#</td>
-												<cfelse>
-													<td>#numberFormat(getEntryCount.cnt, ",")#</td>
 												</cfif>
-												<td>
+												<td nowrap>
 													<cfif service eq "Facebook">
 														<cfif len(monitor_page_id)>
 															<button class="btn btn-warning btn-small monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#getPage.name#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
-																<span class="glyphicon glyphicon-wrench"></span>
+																<span class="glyphicon glyphicon-edit"></span>
 															</button>
 														<cfelseif len(monitor_post_id)>
 															<button class="btn btn-warning btn-small monitor-post-button" data-scheduleid="#scheduleId#" data-postid="#monitor_post_id#" data-postmessage="#getPost.message#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
-																<span class="glyphicon glyphicon-wrench"></span>
+																<span class="glyphicon glyphicon-edit"></span>
 															</button>
 														</cfif>
 													</cfif>
 													<cfif service eq "Instagram">
 														<button class="btn btn-warning btn-small monitor-instagram-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
-															<span class="glyphicon glyphicon-wrench"></span>
+															<span class="glyphicon glyphicon-edit"></span>
 														</button>
 													</cfif>
 													<cfif service eq "Twitter">
 														<button class="btn btn-warning btn-small monitor-twitter-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
-															<span class="glyphicon glyphicon-wrench"></span>
+															<span class="glyphicon glyphicon-edit"></span>
 														</button>
 													</cfif>
 													<cfif service eq "Vine">
 														<button class="btn btn-warning btn-small monitor-vine-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
-															<span class="glyphicon glyphicon-wrench"></span>
+															<span class="glyphicon glyphicon-edit"></span>
 														</button>
 													</cfif>
 													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
-														<span class="glyphicon glyphicon-refresh"></span>
+														<span class="glyphicon glyphicon-play-circle"></span>
+													</button>
+													<button class="btn btn-default btn-small export-entries" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Export collected entries">
+														<span class="glyphicon glyphicon-file"></span>
 													</button>
 												</td>
 											</tr>

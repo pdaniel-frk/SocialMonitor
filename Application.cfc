@@ -9,7 +9,7 @@
 	<cfset this.sessionTimeout = createTimeSpan(0,0,20,0)>
 	<cfset this.dsn = "SocialMonitor">
 	<cfset this.cfcPath = "BaseComponents">
-	
+
 	<cfset this.uid = 1348978015>
 	<!--- <cfif not findNoCase("localhost", cgi.server_name)>
 		<cfset this.facebookAppId = "101309246583448"><!--- mksandbox --->
@@ -20,28 +20,23 @@
 		<cfset this.uid = 1348978015>
 		<cfset this.accessToken = "CAACdow0rFWoBALfKTccgsZBsfk2QyBP8ARIlMwbkYlXqvbUJGrcc2LtT25Y6yUjWAmnnyFwD7T1ZANZByjZAI0UXVFxPspv88FEXFsBjo8DfgypKP8Hn316EPqpt2vRtTPBjLgukQUcYmUeUaXWyvugF3X0rkIRrDucv8fZCIfX201fJUbnTzRt0YRVvmGhAZD">
 	</cfif> --->
-	
-	<cfset this.debugMode = false>
-	<cfif findNoCase("mk01", cgi.server_name)
-		or findNoCase("localhost", cgi.server_name)>
-		<cfset this.debugMode = true>
-	</cfif>
-		
-	
-	<!--- onApplicationStart --->
+
+	<cfset init("Helpers","oHelpers","BaseComponents")>
+	<cfset this.debugMode = oHelpers.isDevServer()>
+
+
 	<cffunction name="onApplicationStart">
-			
+
 		<cfset application.initialized = now()>
-		
+
 		<cfset application.tzid = "EST">
 		<cfif getTimeZoneInfo().isDSTOn eq "yes"><cfset application.tzid = "EDT"></cfif>
-		
+
 	</cffunction>
-	
-	
-	<!--- onSessionStart --->
+
+
 	<cffunction name="onSessionStart">
-		
+
         <cfset session.loginTrackingID = "">
 		<cfset session.loggedin = false>
 		<cfset session.loginID = "">
@@ -49,49 +44,48 @@
 		<cfset session.emailaddress = "">
 		<cfset session.accesslevel = "">
 		<cfset session.stamp = hash(getTickCount(), "sha-1")>
-				
+
 	</cffunction>
-	
-		
-	<!--- onRequestStart --->
+
+
 	<cffunction name="onRequestStart" output="yes">
-		
+
 		<cfargument name="template" required="yes" type="string">
-            
+
 		<cfsetting requesttimeout="999" showdebugoutput="false" enablecfoutputonly="false">
-		
+
 		<cfif not structKeyExists(session, "stamp")>
 			<cfset session.stamp = hash(getTickCount(), "sha-1")>
 		</cfif>
-			
+
         <cfset startAt = getTickCount()>
-		
+
 		<cfset init("Helpers","oHelpers","BaseComponents")>
-		
+
 		<cftry>
 			<cfset browserShort = oHelpers.browserDetect(cgi.http_user_agent)>
 			<cfcatch type="any">
 				<cfset browserShort = "Unknown">
 			</cfcatch>
 		</cftry>
-		
+
 		<!--- determine root url of site (am i really going back to this?) --->
 		<cfset local = {}>
 		<cfset local.basePath = getDirectoryFromPath(getCurrentTemplatePath())>
 		<cfset local.targetPath = getDirectoryFromPath(expandPath(arguments.template))>
 		<cfset local.requestDepth = (listLen(local.targetPath, "\/") - listLen(local.basePath, "\/"))>
 		<cfset request.webRoot = repeatString("../", local.requestDepth)>
-		
+
 		<cfset request.siteURL = "http://#cgi.server_name#/SocialMonitor/">
-		
+
 		<cfif findNoCase("promotions", cgi.server_name)>
-			
+
 			<cfset request.siteURL = "https://promotions.mardenkane.com/SocialMonitor/">
-			
+
 		</cfif>
-		
+
 		<cfinclude template="credentials.cfm">
-				
+
 		<cfif not findNoCase(".cfc", arguments.template)
 			and not findNoCase("chromeless", arguments.template)
 			and not findNoCase("services", arguments.template)
@@ -100,32 +94,30 @@
 		<cfelse>
 			<cfsetting showdebugoutput="no">
 		</cfif>
-		
+
 	</cffunction>
-	
-	
-	<!--- onRequest --->
+
+
 	<cffunction name="onRequest" access="public" output="yes">
-		
-		<cfargument name="template" required="yes" type="string">			
-			
+
+		<cfargument name="template" required="yes" type="string">
+
 		<!--- that user is logged in --->
 		<cfif not session.loggedin
 			and not findNoCase("login.cfm", arguments.template)
-			and compareNoCase("cfschedule", cgi.http_user_agent) is not 0>			
-			<cfset arguments.template = "login.cfm">		
-		</cfif>				
-		
+			and compareNoCase("cfschedule", cgi.http_user_agent) is not 0>
+			<cfset arguments.template = "login.cfm">
+		</cfif>
+
 		<cfinclude template="#arguments.template#">
 	</cffunction>
-	
-	
-	<!--- onRequestEnd --->
+
+
 	<cffunction name="onRequestEnd">
-		
+
 		<cfargument name="template" required="yes" type="string">
-		
-		
+
+
 		<!--- if requested template is a cfc, do not display header or footer --->
 		<cfif not findNoCase(".cfc", arguments.template)
 			and not findNoCase("chromeless", arguments.template)
@@ -135,17 +127,17 @@
 		</cfif>
 
 		<cfset init("Tracking","oTracking","BaseComponents")>
-		
+
 		<cfset endAt = getTickCount()>
 		<cfset executionTime = endAt-startAt>
-		
+
 		<cftry>
 			<cfset browserShort = oTracking.browserDetect(cgi.http_user_agent)>
 			<cfcatch type="any">
 				<cfset browserShort = "Unknown">
 			</cfcatch>
 		</cftry>
-		
+
 		<!--- <cfscript>
 			oTracking.insertPageHit (
 							loginTrackingID = session.loginTrackingID,
@@ -161,39 +153,37 @@
 		</cfscript> --->
 
 	</cffunction>
-	
-	
-	<!--- onSessionEnd --->
+
+
 	<cffunction name="onSessionEnd"></cffunction>
-	
-	<!--- onMissingTemplate --->
+
+
 	<cffunction name="onMissingTemplate">
-		
+
 		<cfargument name="template" required="no" type="string" default="">
-		
+
 		<div class="error">
 			Sorry, but the page you've requested, <cfoutput>#arguments.template#</cfoutput>, was not found on this server.
 		</div>
-		
+
 	</cffunction>
-	
-	
-	<!--- onError --->
+
+
 	<cffunction name="onError">
-		
+
 		<cfargument name="Exception" type="any" required="no">
-		
+
 		<div class="alert alert-error alert-block error">An error was encountered, and a system administrator has been notified.</div>
-		
+
 		<!--- dont process cfaborts - these can be fired by cflocations, too --->
 		<cfif exception.type eq "coldfusion.runtime.AbortException" or (isDefined("exception.rootcause.type") and exception.rootCause.type eq "coldfusion.runtime.AbortException")>
 			<cfreturn>
 		</cfif>
-		
+
 		<cfif this.debugMode>
 			<cfoutput>#handleErrors(exception, true)#</cfoutput>
 		</cfif>
-		
+
 		<cfif not this.debugMode>
 			<cfmail from="mkexpert@gmail.com" to="#this.adminEmail#" subject="unhandled errors on #this.name#" type="html">
 				<style>
@@ -208,14 +198,13 @@
                	#handleErrors(exception, true)#
 			</cfmail>
 		</cfif>
-		
+
 		<!--- finish the page processing --->
 		<cfset onRequestEnd(cgi.script_name)>
-		
+
 	</cffunction>
-	
-	
-	<!--- handleErrors --->
+
+
 	<cffunction name="handleErrors">
 		<cfargument name="error" required="yes">
 		<cfargument name="verbose" required="no" type="boolean" default=false>
@@ -246,9 +235,9 @@
 		</cfsavecontent>
 		<cfreturn errorOutput>
 	</cffunction>
-	
-	
-	<!--- shortcut to init components - this is just a bit bril! --->
+
+
+	<!--- shortcut to initialize components --->
 	<cffunction name="init">
 		<cfargument name="component" required="yes">
 		<cfargument name="objName" required="no" default="o#arguments.component#">
@@ -258,5 +247,5 @@
 			<cfset "#arguments.objName#" = createObject("component", "#arguments.componentPath#.#arguments.component#").init(arguments.dsn)>
 		</cfif>
 	</cffunction>
-	
+
 </cfcomponent>

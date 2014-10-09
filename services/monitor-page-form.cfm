@@ -3,6 +3,7 @@
 <cfparam name="url.scheduleId" default="">
 <cfparam name="url.pageId" default="">
 <cfparam name="url.pageName" default="">
+<cfparam name="url.searchTerm" default="">
 <cfparam name="page.pageName" default="#url.pageName#">
 <cfparam name="page.pageId" default="#url.pageId#">
 <cfparam name="page.startDate" default="">
@@ -13,11 +14,11 @@
 </cfif>
 <cfif len(url.pageId) or len(url.scheduleId)>
 	<cfquery name="getScheduleInfo" datasource="#this.dsn#">
-		select 
+		select
 			s.scheduleId,
 			s.name,
-			s.startDate, 
-			s.endDate, 
+			s.startDate,
+			s.endDate,
 			s.searchTerm,
 			f.name as pageName
 		from Schedules s
@@ -53,6 +54,12 @@
 					<input type="text" id="name" name="name" value="<cfif isDefined('getScheduleInfo')>#HTMLEditFormat(getScheduleInfo.name)#</cfif>" maxlength="100" class="form-control">
 				</div>
 			</div>
+			<div class="col-xs-12">
+				<div class="form-group">
+					<label>Search Term</label>
+					<input type="text" id="searchTerm" name="searchTerm" value="#HTMLEditFormat(url.searchTerm)#" maxlength="100" class="form-control">
+				</div>
+			</div>
 			<div class="col-xs-6">
 				<div class="form-group">
 					<label>Start (at 00:00:00)</label>
@@ -63,7 +70,7 @@
 						</span>
 					</div>
 				</div>
-			</div>					
+			</div>
 			<div class="col-xs-6">
 				<div class="form-group">
 					<label>End (at 23:59:59)</label>

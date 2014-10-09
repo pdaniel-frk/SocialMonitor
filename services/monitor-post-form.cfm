@@ -3,20 +3,21 @@
 <cfparam name="url.scheduleId" default="">
 <cfparam name="url.postId" default="">
 <cfparam name="url.postMessage" default="">
+<cfparam name="url.searchTerm" default="">
 <cfparam name="post.postId" default="#url.postId#">
 <cfparam name="post.startDate" default="">
 <cfparam name="post.endDate" default="">
-<cfset formTitle = 'New Post Monitor'>	
+<cfset formTitle = 'New Post Monitor'>
 <cfif len(url.postMessage)>
 	<cfset formTitle &= ' - #left(url.postMessage, 25)#&hellip;'>
 </cfif>
 <cfif len(url.postId)>
 	<cfquery name="getScheduleInfo" datasource="#this.dsn#">
-		select 
+		select
 			s.scheduleId,
 			s.name,
-			s.startDate, 
-			s.endDate, 
+			s.startDate,
+			s.endDate,
 			s.searchTerm,
 			f.message
 		from Schedules s
@@ -49,6 +50,12 @@
 				<div class="form-group">
 					<label>Name of Program, Schedule, etc.</label>
 					<input type="text" id="name" name="name" value="<cfif isDefined('getScheduleInfo')>#HTMLEditFormat(getScheduleInfo.name)#</cfif>" maxlength="100" class="form-control">
+				</div>
+			</div>
+			<div class="col-xs-12">
+				<div class="form-group">
+					<label>Search Term</label>
+					<input type="text" id="searchTerm" name="searchTerm" value="#HTMLEditFormat(getScheduleInfo.searchTerm)#" maxlength="100" class="form-control">
 				</div>
 			</div>
 			<div class="col-xs-6">

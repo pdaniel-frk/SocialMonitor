@@ -67,12 +67,15 @@
 												<td>#numberFormat(entry_count, ",")#</td>
 												<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 												<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
-												<td>
+												<td nowrap>
 													<button class="btn btn-warning btn-small monitor-twitter-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
-														<span class="glyphicon glyphicon-wrench"></span>
+														<span class="glyphicon glyphicon-edit"></span>
 													</button>
 													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="twitter" data-toggle="tooltip" data-placement="bottom" title="Run this task">
-														<span class="glyphicon glyphicon-refresh"></span>
+														<span class="glyphicon glyphicon-play-circle"></span>
+													</button>
+													<button class="btn btn-default btn-small export-entries" data-scheduleid="#scheduleId#" data-service="twitter" data-toggle="tooltip" data-placement="bottom" title="Export collected entries">
+														<span class="glyphicon glyphicon-file"></span>
 													</button>
 												</td>
 											</tr>
