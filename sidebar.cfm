@@ -12,6 +12,10 @@
 
 			<li class="nav-divider"></li>
 
+			<li class="<cfif findNoCase('show_entries', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#show_entries.cfm</cfoutput>">Entries</a></li>
+
+			<li class="nav-divider"></li>
+
 			<li class="<cfif findNoCase('facebook', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#facebook.cfm</cfoutput>">Facebook</a></li>
 			<li class="<cfif findNoCase('instagram', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#instagram.cfm</cfoutput>">Instagram</a></li>
 			<li class="<cfif findNoCase('twitter', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#twitter.cfm</cfoutput>">Twitter</a></li>

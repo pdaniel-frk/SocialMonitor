@@ -3,8 +3,8 @@
 <h1 class="page-header">
 	Instagram
 	<span class="pull-right">
-		<button class="btn btn-success btn-small monitor-instagram-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
-			<span class="glyphicon glyphicon-eye-open"></span>
+		<button class="btn btn-success btn-sm monitor-instagram-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
+			<span class="glyphicon glyphicon-plus"></span>
 		</button>
 		<a href="instagram_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
 	</span>
@@ -24,7 +24,7 @@
 			</div>
 			<button type="submit" class="btn btn-default">Submit</button>
 			<cfif len(form.searchTerm)>
-				<button class="btn btn-success btn-small monitor-instagram-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
+				<button class="btn btn-success btn-xs monitor-instagram-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
 					<span class="glyphicon glyphicon-eye-open"></span>
 				</button>
 			</cfif>

@@ -13,25 +13,13 @@
 	<cfset formTitle &= ' - #url.pageName#'>
 </cfif>
 <cfif len(url.pageId) or len(url.scheduleId)>
-	<cfquery name="getScheduleInfo" datasource="#this.dsn#">
-		select
-			s.scheduleId,
-			s.name,
-			s.startDate,
-			s.endDate,
-			s.searchTerm,
-			f.name as pageName
-		from Schedules s
-		left join FacebookPages f on s.scheduleId = f.scheduleId
-		where s.service = 'Facebook'
-		and isdate(s.deleteDate) = 0
-		<cfif len(url.scheduleId)>
-			and s.scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-		</cfif>
-		<cfif len(url.pageId)>
-			and s.monitor_page_id = <cfqueryparam value="#url.pageId#" cfsqltype="cf_sql_varchar">
-		</cfif>
-	</cfquery>
+
+	<cfset init("Schedules")>
+	<cfset getScheduleInfo = oSchedules.getSchedules (
+		service = 'Facebook',
+		scheduleId = url.scheduleId,
+		monitor_page_id = url.pageId
+	)>
 	<cfif getScheduleInfo.recordCount>
 		<cfset formTitle = 'Edit Page Monitor - #getScheduleInfo.pageName#'>
 		<cfset page.pageName = getScheduleInfo.pageName>

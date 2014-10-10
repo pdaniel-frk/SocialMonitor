@@ -46,7 +46,7 @@
 					<div id="collapseOne" class="panel-collapse collapse in">
 						<div class="panel-body">
 							<div class="table-responsive">
-								<table class="table table-striped">
+								<table class="table table-striped" style="font-family:sans-serif;font-size:12px;">
 									<thead>
 										<tr>
 											<th>#</th>
@@ -68,14 +68,19 @@
 												<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 												<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
 												<td>
-													<button class="btn btn-warning btn-small monitor-vine-term-button" data-scheduleId="#scheduleId#" data-searchTerm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
+													<button class="btn btn-warning btn-xs monitor-vine-term-button" data-scheduleId="#scheduleId#" data-searchTerm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 														<span class="glyphicon glyphicon-edit"></span>
 													</button>
-													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="vine" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="vine" data-toggle="tooltip" data-placement="bottom" title="Run this task">
 														<span class="glyphicon glyphicon-play-circle"></span>
 													</button>
-													<button class="btn btn-default btn-small export-entries" data-scheduleid="#scheduleId#" data-service="vine" data-toggle="tooltip" data-placement="bottom" title="Export collected entries">
-														<span class="glyphicon glyphicon-file"></span>
+													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
+														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="vine" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+															<span class="glyphicon glyphicon-eye-open"></span>
+														</button>
+													</a>
+													<button class="btn btn-default btn-xs download-entries" data-scheduleid="#scheduleId#" data-service="vine" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+														<span class="glyphicon glyphicon-download-alt"></span>
 													</button>
 												</td>
 											</tr>

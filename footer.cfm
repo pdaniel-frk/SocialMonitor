@@ -85,6 +85,15 @@
 				.fail(function(){})
 				.always(function(){});
 			});
+
+			$(document).on('click', '.download-entries', function(e){
+
+				var scheduleid = $(this).data('scheduleid');
+				var service = $(this).data('service');
+
+				window.open('<cfoutput>#request.webRoot#</cfoutput>tasks/export_entries.cfm?scheduleId=' + scheduleid);
+
+			});
 		});
 	</script>
 

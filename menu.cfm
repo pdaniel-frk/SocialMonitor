@@ -15,13 +15,13 @@
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Reports <b class="caret"></b></a>
 						<ul class="dropdown-menu">
-							<li><a href="">Entries</a></li>
-							<li><a href="">Traffic</a></li>
+							<li class="disabled"><a href="">Entries</a></li>
+							<li class="disabled"><a href="">Traffic</a></li>
 						</ul>
 					</li>
-					<li><a href="<cfoutput>#request.webRoot#</cfoutput>logout.cfm" data-target="#"><span class="add-on"><i class="glyphicon glyphicon-user"></i></span> Sign Out</a></li>
+					<li><a href="<cfoutput>#request.webRoot#</cfoutput>logout.cfm" data-target="#"><span class="add-on"><i class="glyphicon glyphicon-log-out"></i></span> Sign Out</a></li>
 				<cfelse>
-					<li><a href="<cfoutput>#request.webRoot#</cfoutput>login.cfm" data-target="#"><span class="add-on"><i class="glyphicon glyphicon-user"></i></span> Sign In</a></li>
+					<li><a href="<cfoutput>#request.webRoot#</cfoutput>login.cfm" data-target="#"><span class="add-on"><i class="glyphicon glyphicon-log-in"></i></span> Sign In</a></li>
 				</cfif>
 			</ul>
 			<cfif session.loggedIn>

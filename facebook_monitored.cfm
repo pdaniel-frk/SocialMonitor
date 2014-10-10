@@ -91,7 +91,7 @@
 					<div id="collapseTerms" class="panel-collapse collapse in">
 						<div class="panel-body">
 							<div class="table-responsive">
-								<table class="table table-striped">
+								<table class="table table-striped" style="font-family:sans-serif;font-size:12px;">
 									<thead>
 										<tr>
 											<th>#</th>
@@ -113,14 +113,19 @@
 												<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 												<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
 												<td nowrap>
-													<button class="btn btn-warning btn-small monitor-facebook-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
+													<button class="btn btn-warning btn-xs monitor-facebook-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 														<span class="glyphicon glyphicon-edit"></span>
 													</button>
-													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
 														<span class="glyphicon glyphicon-play-circle"></span>
 													</button>
-													<button class="btn btn-default btn-small export-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Export collected entries">
-														<span class="glyphicon glyphicon-file"></span>
+													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
+														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+															<span class="glyphicon glyphicon-eye-open"></span>
+														</button>
+													</a>
+													<button class="btn btn-default btn-xs download-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+														<span class="glyphicon glyphicon-download-alt"></span>
 													</button>
 												</td>
 											</tr>
@@ -172,11 +177,19 @@
 												<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 												<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
 												<td nowrap>
-													<button class="btn btn-warning btn-small monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#pageName#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
+													<button class="btn btn-warning btn-xs monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#pageName#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
-													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
 														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
+													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
+														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+															<span class="glyphicon glyphicon-eye-open"></span>
+														</button>
+													</a>
+													<button class="btn btn-default btn-xs download-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+														<span class="glyphicon glyphicon-download-alt"></span>
 													</button>
 												</td>
 											</tr>
@@ -230,11 +243,19 @@
 												<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 												<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
 												<td nowrap>
-													<button class="btn btn-warning btn-small monitor-post-button" data-scheduleid="#scheduleId#" data-postid="#monitor_post_id#" data-postmessage="#message#" data-toggle="tooltip" data-placement="bottom" title="Edit Post Monitor">
+													<button class="btn btn-warning btn-xs monitor-post-button" data-scheduleid="#scheduleId#" data-postid="#monitor_post_id#" data-postmessage="#message#" data-toggle="tooltip" data-placement="bottom" title="Edit Post Monitor">
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
-													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
 														<span class="glyphicon glyphicon-refresh"></span>
+													</button>
+													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
+														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+															<span class="glyphicon glyphicon-eye-open"></span>
+														</button>
+													</a>
+													<button class="btn btn-default btn-xs download-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+														<span class="glyphicon glyphicon-download-alt"></span>
 													</button>
 												</td>
 											</tr>

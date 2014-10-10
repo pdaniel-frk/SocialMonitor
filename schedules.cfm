@@ -1,9 +1,12 @@
+<cfset init("Schedules")>
+<cfset getSchedules = oSchedules.getSchedules()>
+
 <h1 class="page-header">
 	Schedules
 	<span class="pull-right">
 		<div class="btn-group">
-			<button class="btn btn-success btn-small dropdown-toggle" data-toggle="dropdown" title="Schedule new monitor">
-				<span class="glyphicon glyphicon-eye-open"></span> <span class="caret"></span>
+			<button class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" title="Schedule new monitor">
+				<span class="glyphicon glyphicon-plus"></span> <span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu dropdown-menu-right" role="menu">
 				<li><a href="facebook.cfm">Facebook</a></li>
@@ -20,27 +23,6 @@
 		</div>
 	</span>
 </h1>
-
-<cfquery name="getSchedules" datasource="#this.dsn#">
-	select
-		s.scheduleId,
-		s.name,
-		s.[service],
-		s.monitor_page_id,
-		s.monitor_post_id,
-		s.searchTerm,
-		s.startDate,
-		s.endDate,
-		page.name as pageName,
-		post.[message] as postMessage
-	from Schedules s
-	left join FacebookPages page on s.scheduleId = page.scheduleId and s.monitor_page_id = page.page_id
-	left join FacebookPagePosts post on s.scheduleId = post.scheduleId and s.monitor_post_id = post.post_id
-	where isdate(s.deleteDate) = 0
-	order by s.service,
-		s.startDate,
-		s.endDate
-</cfquery>
 
 <div class="panel panel-primary">
 
@@ -78,7 +60,7 @@
 					<div id="collapse#service#" class="panel-collapse collapse <cfif currentRow eq 1>in</cfif>">
 						<div class="panel-body">
 							<div class="table-responsive">
-								<table class="table table-striped">
+								<table class="table table-striped" style="font-family:sans-serif;font-size:12px;">
 									<thead>
 										<tr>
 											<th>##</th>
@@ -201,35 +183,40 @@
 												<td nowrap>
 													<cfif service eq "Facebook">
 														<cfif len(monitor_page_id)>
-															<button class="btn btn-warning btn-small monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#getPage.name#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
+															<button class="btn btn-warning btn-xs monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#getPage.name#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
 																<span class="glyphicon glyphicon-edit"></span>
 															</button>
 														<cfelseif len(monitor_post_id)>
-															<button class="btn btn-warning btn-small monitor-post-button" data-scheduleid="#scheduleId#" data-postid="#monitor_post_id#" data-postmessage="#getPost.message#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
+															<button class="btn btn-warning btn-xs monitor-post-button" data-scheduleid="#scheduleId#" data-postid="#monitor_post_id#" data-postmessage="#getPost.message#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
 																<span class="glyphicon glyphicon-edit"></span>
 															</button>
 														</cfif>
 													</cfif>
 													<cfif service eq "Instagram">
-														<button class="btn btn-warning btn-small monitor-instagram-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
+														<button class="btn btn-warning btn-xs monitor-instagram-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 															<span class="glyphicon glyphicon-edit"></span>
 														</button>
 													</cfif>
 													<cfif service eq "Twitter">
-														<button class="btn btn-warning btn-small monitor-twitter-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
+														<button class="btn btn-warning btn-xs monitor-twitter-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 															<span class="glyphicon glyphicon-edit"></span>
 														</button>
 													</cfif>
 													<cfif service eq "Vine">
-														<button class="btn btn-warning btn-small monitor-vine-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
+														<button class="btn btn-warning btn-xs monitor-vine-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 															<span class="glyphicon glyphicon-edit"></span>
 														</button>
 													</cfif>
-													<button class="btn btn-info btn-small run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
 														<span class="glyphicon glyphicon-play-circle"></span>
 													</button>
-													<button class="btn btn-default btn-small export-entries" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Export collected entries">
-														<span class="glyphicon glyphicon-file"></span>
+													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
+														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+															<span class="glyphicon glyphicon-eye-open"></span>
+														</button>
+													</a>
+													<button class="btn btn-default btn-xs download-entries" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+														<span class="glyphicon glyphicon-download-alt"></span>
 													</button>
 												</td>
 											</tr>

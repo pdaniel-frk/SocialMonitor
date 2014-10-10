@@ -9,23 +9,14 @@
 	<cfset formTitle &= ' - #url.searchTerm#'>
 </cfif>
 <cfif len(url.searchTerm) or len(url.scheduleId)>
-	<cfquery name="getScheduleInfo" datasource="#this.dsn#">
-		select
-			s.scheduleId,
-			s.name,
-			s.startDate,
-			s.endDate,
-			s.searchTerm
-		from Schedules s
-		where s.service = 'Vine'
-		and isdate(s.deleteDate) = 0
-		<cfif len(url.scheduleId)>
-			and s.scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-		</cfif>
-		<cfif len(url.searchTerm)>
-			and s.searchTerm = <cfqueryparam value="#url.searchTerm#" cfsqltype="cf_sql_varchar">
-		</cfif>
-	</cfquery>
+
+	<cfset init("Schedules")>
+	<cfset getScheduleInfo = oSchedules.getSchedules (
+		service = 'Vine',
+		scheduleId = url.scheduleId,
+		searchTerm = url.searchTerm
+	)>
+
 	<cfif getScheduleInfo.recordCount>
 		<cfset formTitle = 'Edit Vine Search Term Monitor - #getScheduleInfo.searchTerm#'>
 		<cfset startDate = getScheduleInfo.startDate>

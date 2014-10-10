@@ -214,26 +214,25 @@
 			<cfset user_id = search_result.data[i].from.id>
 			<cfset type = search_result.data[i].type>
 
-			<cfif search_result.data[i].type neq "link">
+			<cfset save_search (
+				scheduleId = arguments.scheduleId,
+				search_id = search_id,
+				object_id = object_id,
+				name = name,
+				result_url = result_url,
+				caption = caption,
+				created_time = created_time,
+				user_id = user_id,
+				type = type
+			)>
 
-				<cfset save_search (
-					scheduleId = arguments.scheduleId,
-					search_id = search_id,
-					object_id = object_id,
-					name = name,
-					result_url = result_url,
-					caption = caption,
-					created_time = created_time,
-					user_id = user_id,
-					type = type
-				)>
+			<cfset get_user (
+				user_id = user_id,
+				save_results = arguments.save_results
+			)>
 
-				<cfset get_user (
-					user_id = user_id,
-					save_results = arguments.save_results
-				)>
-			</cfif>
 		</cfloop>
+
 	</cfif>
 	<cfreturn search_result>
 </cffunction>
@@ -308,13 +307,13 @@
 				values (
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.search_id#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.object_id#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.name#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.result_url#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.caption#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.created_time#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.type#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.object_id#" null="#not len(arguments.object_id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.result_url#" null="#not len(arguments.result_url)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.caption#" null="#not len(arguments.caption)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.created_time#" null="#not len(arguments.created_time)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user_id#" null="#not len(arguments.user_id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.type#" null="#not len(arguments.type)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
 				)
 			end

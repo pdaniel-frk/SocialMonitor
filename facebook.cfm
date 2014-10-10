@@ -25,7 +25,12 @@
 
 <h1 class="page-header">
 	Facebook
-	<span class="pull-right"><a href="facebook_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a></span>
+	<span class="pull-right">
+		<button class="btn btn-success btn-sm monitor-facebook-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
+			<span class="glyphicon glyphicon-plus"></span>
+		</button>
+		<a href="facebook_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
+	</span>
 </h1>
 
 <div id="facebook-logged-out" style="position:absolute;top:0;right:0;left:0;bottom:0;padding:10em;background-color:rgba(0,0,0,.4);z-index:2;display:none;">
@@ -36,42 +41,6 @@
 	<button class="btn btn-primary" id="fb-login">Log in to Facebook</button>
 
 </div>
-
-<cfif structKeyExists(form, "searchKey")>
-	<cfif structKeyExists(form, "searchTerm") and len(form.searchTerm)>
-		<!--- lop off hash --->
-		<cfset form.searchTerm = replace(form.searchTerm, '##', '', 'All')><!---  --->
-		<!--- <cfhttp method="get" url="https://graph.facebook.com/search?q=""#form.searchTerm#""&type=post&access_token=#credentials.facebook.page_access_token#"></cfhttp> --->
-		<!--- <cfdump var="#cfhttp#"> --->
-		<!--- <cfdump var="#cfhttp.fileContent#"> --->
-
-		<cfhttp method="get" url="https://graph.facebook.com/search">
-			<cfhttpparam type="url" name="q" value="#form.searchTerm#">
-			<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
-			<cfhttpparam type="url" name="type" value="post">
-		</cfhttp>
-		<cfset search_result = deserializeJson(cfhttp.fileContent)>
-		<cfdump var="#search_result#" label="Yes, I know these results are fugly."><!---  --->
-		<!--- <cfdump var="#result.data[1]#"> --->
-		<!--- <cfabort> --->
-
-		<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
-			<cfoutput>
-				<cfif search_result.data[i].type neq "link">
-					object_id = #search_result.data[i].object_id#<br>
-					name = #search_result.data[i].name#<br>
-					result_url = #search_result.data[i].link#<br>
-					caption = #search_result.data[i].caption#<br>
-					user_id = #search_result.data[i].from.id#<br>
-					type = #search_result.data[i].type#<br>
-				</cfif>
-			</cfoutput>
-		</cfloop>
-
-
-	</cfif>
-</cfif>
-
 
 <!--- <div class="row" style="padding:2em 0;">
 	<div class="col-sm-8 col-sm-offset-2">
@@ -97,7 +66,7 @@
 			</div>
 			<button type="submit" class="btn btn-default">Submit</button>
 			<cfif len(form.searchTerm)>
-				<button class="btn btn-success btn-small monitor-facebook-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
+				<button class="btn btn-success btn-xs monitor-facebook-term-button" data-scheduleid="" data-searchterm="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor this term">
 					<span class="glyphicon glyphicon-eye-open"></span>
 				</button>
 			</cfif>
@@ -105,6 +74,66 @@
 	</div>
 
 </div>
+
+<cfif len(form.searchTerm)>
+	<!--- lop off hash --->
+	<cfset form.searchTerm = replace(form.searchTerm, '##', '', 'All')><!---  --->
+	<!--- <cfhttp method="get" url="https://graph.facebook.com/search?q=""#form.searchTerm#""&type=post&access_token=#credentials.facebook.page_access_token#"></cfhttp> --->
+	<!--- <cfdump var="#cfhttp#"> --->
+	<!--- <cfdump var="#cfhttp.fileContent#"> --->
+
+	<cfhttp method="get" url="https://graph.facebook.com/search">
+		<cfhttpparam type="url" name="q" value="#form.searchTerm#">
+		<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
+		<cfhttpparam type="url" name="type" value="post">
+	</cfhttp>
+	<cfset search_result = deserializeJson(cfhttp.fileContent)>
+	<!--- <cfdump var="#search_result#" label="Yes, I know these results are fugly."> --->
+	<!--- <cfdump var="#result.data[1]#"> --->
+	<!--- <cfabort> --->
+
+	<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
+
+		<!--- defaults --->
+		<cfset search_id = search_result.data[i].id>
+		<cfset object_id = "">
+		<cfif structKeyExists(search_result.data[i], "object_id")>
+			<cfset object_id = search_result.data[i].object_id>
+		</cfif>
+		<cfset name = "">
+		<cfif structKeyExists(search_result.data[i], "name")>
+			<cfset name = search_result.data[i].name>
+		</cfif>
+		<cfset result_url = "">
+		<cfif structKeyExists(search_result.data[i], "link")>
+			<cfset result_url = search_result.data[i].link>
+		</cfif>
+		<cfset caption = "">
+		<cfif structKeyExists(search_result.data[i], "caption")>
+			<cfset caption = search_result.data[i].caption>
+		<cfelseif structKeyExists(search_result.data[i], "message")>
+			<cfset caption = search_result.data[i].message>
+		</cfif>
+		<cfset created_time = search_result.data[i].created_time>
+		<cfset user_id = search_result.data[i].from.id>
+		<cfset type = search_result.data[i].type>
+
+		<cfoutput>
+			<div class="well">
+				search_id = #search_id#<br>
+				object_id = #object_id#<br>
+				name = #name#<br>
+				result_url = #result_url#<br>
+				caption = #caption#<br>
+				created_time = #created_time#<br>
+				user_id = #user_id#<br>
+				type = #type#<br>
+			</div>
+		</cfoutput>
+	</cfloop>
+
+
+</cfif>
 
 <div class="panel panel-primary">
 
@@ -193,7 +222,7 @@
 												<label for="query" class="sr-only">Post contains&hellip;</label>
 												<input type="text" class="form-control input-sm" id="query" name="query">
 											</div>
-											<button type="submit" class="btn btn-default btn-sm">Search</button>
+											<button type="submit" class="btn btn-default btn-xs">Search</button>
 										</form>
 
 									</div>

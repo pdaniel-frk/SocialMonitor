@@ -11,28 +11,16 @@
 <cfif len(url.postMessage)>
 	<cfset formTitle &= ' - #left(url.postMessage, 25)#&hellip;'>
 </cfif>
-<cfif len(url.postId)>
-	<cfquery name="getScheduleInfo" datasource="#this.dsn#">
-		select
-			s.scheduleId,
-			s.name,
-			s.startDate,
-			s.endDate,
-			s.searchTerm,
-			f.message
-		from Schedules s
-		left join FacebookPagePosts f on s.scheduleId = f.scheduleId
-		where s.service = 'Facebook'
-		and isdate(s.deleteDate) = 0
-		<cfif len(url.scheduleId)>
-			and s.scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-		</cfif>
-		<cfif len(url.postId)>
-			and s.monitor_post_id = <cfqueryparam value="#url.postId#" cfsqltype="cf_sql_varchar">
-		</cfif>
-	</cfquery>
+<cfif len(url.postId) or len(url.scheduleId)>
+
+	<cfset init("Schedules")>
+	<cfset getScheduleInfo = oSchedules.getSchedules (
+		service = 'Facebook',
+		scheduleId = url.scheduleId,
+		monitor_post_id = url.postId
+	)>
 	<cfif getScheduleInfo.recordCount>
-		<cfset formTitle = 'Edit Post Monitor - #left(getScheduleInfo.message, 25)#&hellip;'>
+		<cfset formTitle = 'Edit Post Monitor - #left(getScheduleInfo.postMessage, 25)#&hellip;'>
 		<cfset post.startDate = getScheduleInfo.startDate>
 		<cfset post.endDate = getScheduleInfo.endDate>
 	</cfif>

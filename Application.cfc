@@ -8,19 +8,9 @@
 	<cfset this.sessionManagement = "true">
 	<cfset this.sessionTimeout = createTimeSpan(0,0,20,0)>
 	<cfset this.dsn = "SocialMonitor">
-	<cfset this.cfcPath = "BaseComponents">
+	<cfset this.cfcPath = "SocialMonitor.components">
 
 	<cfset this.uid = 1348978015>
-	<!--- <cfif not findNoCase("localhost", cgi.server_name)>
-		<cfset this.facebookAppId = "101309246583448"><!--- mksandbox --->
-		<cfset this.uid = 1348978015>
-		<cfset this.accessToken = "CAABcIZBWnspgBAMENEMSNUD7v5b4qp3Jfw4F5OzSxkTyilciZAbvvZApOJI2Scx0STZAEgyzExZAslTFMjPga4bdB7kciaTJYmc0HLlKHE5MEJoY0j59GRjbZAsTp9I0A56ucZCiScaAHTEVS4R4Tbg2i8631EEaKKYCUnVreSaJEeJHomZAUaa3KUNsJcw7hA8ZD">
-	<cfelse>
-		<cfset this.facebookAppId = "173323626157418"><!--- mk01testing --->
-		<cfset this.uid = 1348978015>
-		<cfset this.accessToken = "CAACdow0rFWoBALfKTccgsZBsfk2QyBP8ARIlMwbkYlXqvbUJGrcc2LtT25Y6yUjWAmnnyFwD7T1ZANZByjZAI0UXVFxPspv88FEXFsBjo8DfgypKP8Hn316EPqpt2vRtTPBjLgukQUcYmUeUaXWyvugF3X0rkIRrDucv8fZCIfX201fJUbnTzRt0YRVvmGhAZD">
-	</cfif> --->
-
 	<cfset init("Helpers","oHelpers","BaseComponents")>
 	<cfset this.debugMode = oHelpers.isDevServer()>
 

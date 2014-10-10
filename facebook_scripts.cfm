@@ -23,11 +23,11 @@
 <script>
 
 	function showMonitorButton(type, id, text){
-		return '<button class="btn btn-success btn-small monitor-'+type+'-button" data-scheduleid="" data-pagename="'+text+'" data-postmessage="'+text+'" data-'+type+'id="'+id+'" data-name="'+text+'" data-message="'+text+'" data-toggle="tooltip" data-placement="bottom" title="Monitor this '+type+'"><span class="glyphicon glyphicon-eye-open"></span></button>';
+		return '<button class="btn btn-success btn-xs monitor-'+type+'-button" data-scheduleid="" data-pagename="'+text+'" data-postmessage="'+text+'" data-'+type+'id="'+id+'" data-name="'+text+'" data-message="'+text+'" data-toggle="tooltip" data-placement="bottom" title="Monitor this '+type+'"><span class="glyphicon glyphicon-eye-open"></span></button>';
 	}
 
 	function showEditButton(type, id, text){
-		return '<button class="btn btn-warning btn-small monitor-'+type+'-button" data-scheduleid="" data-pagename="'+text+'" data-postmessage="'+text+'" data-'+type+'id="'+id+'" data-name="'+text+'" data-message="'+text+'" data-toggle="tooltip" data-placement="bottom" title="Edit '+type+' monitor"><span class="glyphicon glyphicon-wrench"></span></button>';
+		return '<button class="btn btn-warning btn-xs monitor-'+type+'-button" data-scheduleid="" data-pagename="'+text+'" data-postmessage="'+text+'" data-'+type+'id="'+id+'" data-name="'+text+'" data-message="'+text+'" data-toggle="tooltip" data-placement="bottom" title="Edit '+type+' monitor"><span class="glyphicon glyphicon-wrench"></span></button>';
 	}
 
 	$(function(){
@@ -345,7 +345,7 @@
 
 				var html = '<tr>';
 					html += '<td>';
-						html += '<button class="btn btn-primary btn-sm page-button" data-pageid="'+$pageId+'">'+$pageName+'</button>';
+						html += '<button class="btn btn-primary btn-xs page-button" data-pageid="'+$pageId+'">'+$pageName+'</button>';
 					html += '</td>';
 
 					html += '<td>';
@@ -392,7 +392,7 @@
 
 					var html = '<tr>';
 						html += '<td>';
-							html += '<button class="btn btn-info btn-sm post-button" data-postid="'+$postId+'">'+$message.substr(0,100)+'...</button>';
+							html += '<button class="btn btn-info btn-xs post-button" data-postid="'+$postId+'">'+$message.substr(0,100)+'...</button>';
 						html += '</td>';
 
 						html += '<td>';
@@ -434,7 +434,7 @@
 				var html = '<tr>';
 
 					html += '<td>';
-						html += '<button class="btn btn-default btn-sm comment-button" data-id="'+response[i].id+'">'+response[i].text.substr(0,100)+'...</button>';
+						html += '<button class="btn btn-default btn-xs comment-button" data-id="'+response[i].id+'">'+response[i].text.substr(0,100)+'...</button>';
 					html += '</td>';
 
 					html += '<td class="user-'+response[i].fromid+'">';

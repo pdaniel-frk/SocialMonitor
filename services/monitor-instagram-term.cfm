@@ -17,56 +17,26 @@
 	<cfset form.endDate = dateAdd("d", -1, now())>
 </cfif>
 
+<cfset init("Schedules")>
+
 <cfif not len(form.scheduleId) and len(form.searchTerm)>
 
-	<cfquery datasource="#this.dsn#">
-		if not exists (
-			select 1
-			from Schedules
-			where searchTerm = <cfqueryparam value="#form.searchTerm#" cfsqltype="cf_sql_varchar">
-			and service = 'Instagram'
-			<cfif len(form.name)>
-				and name = <cfqueryparam value="#form.name#" cfsqltype="cf_sql_varchar">
-			</cfif>
-		)
-		begin
-			insert into Schedules (
-				name,
-				searchTerm,
-				service,
-				startDate,
-				endDate
-			)
-			values (
-				<cfqueryparam value="#form.name#" null="#not len(form.name)#" cfsqltype="cf_sql_varchar">,
-				<cfqueryparam value="#form.searchTerm#" cfsqltype="cf_sql_varchar">,
-				'Instagram',
-				<cfqueryparam value="#form.startDate#" null="#not isdate(form.startDate)#" cfsqltype="cf_sql_timestamp">,
-				<cfqueryparam value="#form.endDate#" null="#not isdate(form.endDate)#" cfsqltype="cf_sql_timestamp">
-			)
-		end
-	</cfquery>
+	<cfset scheduleId = oSchedules.insertSchedule (
+		name = form.name,
+		service = 'Instagram',
+		searchTerm = form.searchTerm,
+		startDate = form.startDate,
+		endDate = form.endDate
+	)>
 
 <cfelseif len(form.scheduleId)>
 
-	<cfquery datasource="#this.dsn#">
-		update Schedules
-		set
-			modifyDate = getdate()
-			<cfif len(form.name)>
-				, name = <cfqueryparam value="#form.name#" cfsqltype="cf_sql_varchar">
-			</cfif>
-			<cfif len(form.searchTerm)>
-				, searchTerm = <cfqueryparam value="#form.searchTerm#" cfsqltype="cf_sql_varchar">
-			</cfif>
-			<cfif len(form.startDate) and isDate(form.startDate)>
-				, startDate = <cfqueryparam value="#form.startDate#" null="#not isdate(form.startDate)#" cfsqltype="cf_sql_timestamp">
-			</cfif>
-			<cfif len(form.endDate) and isDate(form.endDate)>
-				, endDate = <cfqueryparam value="#form.endDate#" null="#not isdate(form.endDate)#" cfsqltype="cf_sql_timestamp">
-			</cfif>
-		where service = 'Instagram'
-		and scheduleId = <cfqueryparam value="#form.scheduleId#" cfsqltype="cf_sql_integer">
-	</cfquery>
+	<cfset oSchedules.updateSchedule (
+		scheduleId = form.scheduleId,
+		name = form.name,
+		searchTerm = form.searchTerm,
+		startDate = form.startDate,
+		endDate = form.endDate
+	)>
 
 </cfif>
