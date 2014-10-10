@@ -514,40 +514,12 @@
 	<cfargument name="userId" default="#this.uid#">
 	<cfif len(arguments.pageId) and len(arguments.postId) and len(arguments.fromId) and len(arguments.userId)>
 		<cfif not len(arguments.searchTerm) or len(arguments.searchTerm) and findNoCase(arguments.searchTerm, arguments.commentText)>
-			<cfquery datasource="#this.dsn#">
-				if not exists (
-					select 1
-					from FacebookPostComments
-					where post_fbid = <cfqueryparam value="#arguments.postFBId#" cfsqltype="cf_sql_varchar">
-					<cfif len(arguments.scheduleId)>
-						and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-					</cfif>
-				)
-				begin
-					insert into FacebookPostComments (
-						scheduleId,
-						page_id,
-						post_id,
-						[text],
-						id,
-						post_fbid,
-						fromid,
-						[time],
-						addedBy
-					)
-					values (
-						<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-						<cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.commentText#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.postFBId#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.fromId#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.commentTime#" cfsqltype="cf_sql_bigint">,
-						<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
-					)
-				end
-			</cfquery>
+
+			<cfset init("Entries")>
+			<cfset oEntries.insertFacebookPostComment (
+				argumentCollection = arguments
+			)>
+
 		</cfif>
 	</cfif>
 	<cfreturn>
@@ -587,33 +559,12 @@
 	<cfargument name="user_id" default="">
 	<cfargument name="userId" default="#this.uid#">
 	<cfif len(arguments.pageId) and len(arguments.postId) and len(arguments.user_id) and len(arguments.userId)>
-		<cfquery datasource="#this.dsn#">
-			if not exists (
-				select 1
-				from FacebookPostLikes
-				where post_id = <cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">
-				and user_id = <cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
-					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-				</cfif>
-			)
-			begin
-				insert into FacebookPostLikes (
-					scheduleId,
-					page_id,
-					post_id,
-					[user_id],
-					addedBy
-				)
-				values (
-					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-					<cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
-				)
-			end
-		</cfquery>
+
+		<cfset init("Entries")>
+		<cfset oEntries.insertFacebookPostLike (
+			argumentCollection = arguments
+		)>
+
 	</cfif>
 	<cfreturn>
 </cffunction>
@@ -662,39 +613,12 @@
 	<cfargument name="birthday_date" default="">
 	<cfargument name="userId" default="#this.uid#">
 	<cfif len(arguments.user_id) and len(arguments.userId)>
-		<cfquery datasource="#this.dsn#">
-			if not exists (
-				select 1
-				from FacebookUsers
-				where user_id = <cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">
-			)
-			begin
-				insert into FacebookUsers (
-					user_id,
-					email,
-					first_name,
-					last_name,
-					username,
-					timezone,
-					locale,
-					profile_url,
-					birthday_date,
-					addedBy
-				)
-				values (
-					<cfqueryparam value="#arguments.user_id#" null="#not len(arguments.user_id) or compareNoCase(arguments.user_id, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.email#" null="#not len(arguments.email) or compareNoCase(arguments.email, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.first_name#" null="#not len(arguments.first_name) or compareNoCase(arguments.first_name, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.last_name#" null="#not len(arguments.last_name) or compareNoCase(arguments.last_name, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.username#" null="#not len(arguments.username) or compareNoCase(arguments.username, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.timezone#" null="#not len(arguments.timezone) or compareNoCase(arguments.timezone, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.locale#" null="#not len(arguments.locale) or compareNoCase(arguments.locale, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.profile_url#" null="#not len(arguments.profile_url) or compareNoCase(arguments.profile_url, 'null') eq 0#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.birthday_date#" null="#not len(arguments.birthday_date) or not isdate(arguments.birthday_date) or compareNoCase(arguments.birthday_date, 'null') eq 0#" cfsqltype="cf_sql_timestamp">,
-					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
-				)
-			end
-		</cfquery>
+
+		<cfset init("Users")>
+		<cfset oUsers.insertFacebookUser(
+			argumentCollection = arguments
+		)>
+
 	</cfif>
 	<cfreturn>
 </cffunction>

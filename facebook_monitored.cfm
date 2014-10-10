@@ -181,7 +181,7 @@
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
 													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
-														<span class="glyphicon glyphicon-refresh"></span>
+														<span class="glyphicon glyphicon-play-circle"></span>
 													</button>
 													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
 														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
@@ -247,7 +247,7 @@
 														<span class="glyphicon glyphicon-wrench"></span>
 													</button>
 													<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="Run this task">
-														<span class="glyphicon glyphicon-refresh"></span>
+														<span class="glyphicon glyphicon-play-circle"></span>
 													</button>
 													<a href="#request.webRoot#show_entries.cfm?scheduleId=#scheduleId#">
 														<button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="facebook" data-toggle="tooltip" data-placement="bottom" title="View collected entries">

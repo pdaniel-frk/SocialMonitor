@@ -116,4 +116,97 @@
 		)>
 	</cffunction>
 
+
+	<cffunction name="insertFacebookPostComment" output="no" returntype="void">
+
+		<cfargument name="scheduleId" default="">
+		<cfargument name="pageId" default="#getToken(arguments.postId, 1, '_')#">
+		<cfargument name="postId" default="">
+		<cfargument name="fromId" default="">
+		<cfargument name="postFBId" default="">
+		<cfargument name="id" default="">
+		<cfargument name="commentText" default="">
+		<cfargument name="commentTime" default="">
+		<cfargument name="userId" default="">
+
+		<cfquery datasource="#variables.dsn#">
+			if not exists (
+				select 1
+				from FacebookPostComments
+				where post_fbid = <cfqueryparam value="#arguments.postFBId#" cfsqltype="cf_sql_varchar">
+				<cfif len(arguments.scheduleId)>
+					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+				</cfif>
+			)
+			begin
+				insert into FacebookPostComments (
+					scheduleId,
+					page_id,
+					post_id,
+					[text],
+					id,
+					post_fbid,
+					fromid,
+					[time],
+					addedBy
+				)
+				values (
+					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
+					<cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.commentText#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.postFBId#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.fromId#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.commentTime#" cfsqltype="cf_sql_bigint">,
+					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
+				)
+			end
+		</cfquery>
+
+		<cfreturn>
+
+	</cffunction>
+
+
+	<cffunction name="insertFacebookPostLike" output="no" returntype="void">
+
+		<cfargument name="scheduleId" default="">
+		<cfargument name="pageId" default="#getToken(arguments.postId, 1, '_')#">
+		<cfargument name="postId" default="">
+		<cfargument name="user_id" default="">
+		<cfargument name="userId" default="">
+
+		<cfquery datasource="#variables.dsn#">
+			if not exists (
+				select 1
+				from FacebookPostLikes
+				where post_id = <cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">
+				and user_id = <cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">
+				<cfif len(arguments.scheduleId)>
+					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+				</cfif>
+			)
+			begin
+				insert into FacebookPostLikes (
+					scheduleId,
+					page_id,
+					post_id,
+					[user_id],
+					addedBy
+				)
+				values (
+					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
+					<cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
+				)
+			end
+		</cfquery>
+
+		<cfreturn>
+
+	</cffunction>
+
 </cfcomponent>
