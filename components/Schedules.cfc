@@ -97,6 +97,7 @@
 		<cfargument name="endDate" required="no" default="">
 		<cfargument name="pageName" required="no" default="">
 		<cfargument name="postMessage" required="no" default="">
+		<cfargument name="currentlyRunning" required="no" default="false">
 
 		<cfquery name="getSchedules" datasource="#variables.dsn#">
 			select
@@ -143,6 +144,10 @@
 			</cfif>
 			<cfif len(arguments.postMessage)>
 				and post.[message] = <cfqueryparam value="#arguments.postMessage#" cfsqltype="cf_sql_varchar">
+			</cfif>
+			<cfif arguments.currentlyRunning>
+				and isnull(s.startdate, getdate()-1) <= getdate()
+				and isnull(s.endDate, getdate()+1) >= getdate()
 			</cfif>
 			order by
 				s.service,

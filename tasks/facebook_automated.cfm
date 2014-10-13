@@ -1,22 +1,12 @@
 <cfsetting requesttimeout="999">
 
-<!--- get everything on the schedule --->
-<cfquery name="getSchedule" datasource="#this.dsn#">
-	select
-		scheduleId,
-		searchTerm,
-		monitor_page_id,
-		monitor_post_id
-	from Schedules
-	where service = 'Facebook'
-	and isdate(deleteDate) = 0
-	<cfif structKeyExists(url, "scheduleId")>
-		and scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-	<cfelse>
-		and isnull(startdate, getdate()-1) <= getdate()
-		and isnull(endDate, getdate()+1) >= getdate()
-	</cfif>
-</cfquery>
+<cfparam name="url.scheduleId" default="">
+<cfset init("Schedules")>
+<cfset getSchedule = oSchedules.getSchedules (
+	service = 'Facebook',
+	scheduleId = url.scheduleId,
+	currentlyRunning = true
+)>
 
 <!--- the ajaxy/jquery stuff does not work when called via scheduled task, so trying a different approach (cfhttp) --->
 <cfset since = ''>
@@ -269,6 +259,7 @@
 </cffunction>
 
 <cffunction name="save_search">
+
 	<cfargument name="scheduleId" default="">
 	<cfargument name="search_id" default="">
 	<cfargument name="object_id" default="">
@@ -282,48 +273,17 @@
 
 	<cfif len(arguments.search_id) and len(arguments.userId)>
 
-		<cfquery datasource="#this.dsn#">
-			if not exists (
-				select 1
-				from FacebookSearches
-				where search_id = <cfqueryparam value="#arguments.search_id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
-					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-				</cfif>
-			)
-			begin
-				insert into FacebookSearches (
-					scheduleId,
-					search_id,
-					[object_id],
-					name,
-					result_url,
-					caption,
-					created_time,
-					[user_id],
-					[type],
-					addedBy
-				)
-				values (
-					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-					<cfqueryparam value="#arguments.search_id#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.object_id#" null="#not len(arguments.object_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.result_url#" null="#not len(arguments.result_url)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.caption#" null="#not len(arguments.caption)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.created_time#" null="#not len(arguments.created_time)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.user_id#" null="#not len(arguments.user_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.type#" null="#not len(arguments.type)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
-				)
-			end
-		</cfquery>
+		<cfset init("Facebook")>
+		<cfset oFacebook.insertFacebookSearchResult (
+			argumentCollection = arguments
+		)>
 
 	</cfif>
 	<cfreturn>
 </cffunction>
 
 <cffunction name="save_page">
+
 	<cfargument name="scheduleId" default="">
 	<cfargument name="pageId" default="">
 	<cfargument name="searchTerm" default="">
@@ -335,36 +295,11 @@
 
 	<cfif len(arguments.pageId) and len(arguments.userId)>
 
-		<cfquery datasource="#this.dsn#">
-			if not exists (
-				select 1
-				from FacebookPages
-				where page_id = <cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
-					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-				</cfif>
-			)
-			begin
-				insert into FacebookPages (
-					scheduleId,
-					page_id,
-					name,
-					page_url,
-					username,
-					type,
-					addedBy
-				)
-				values (
-					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-					<cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.pageName#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.pageUrl#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.userName#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.pageType#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
-				)
-			end
-		</cfquery>
+		<cfset init("Facebook")>
+		<cfset oFacebook.insertFacebookPage (
+			argumentCollection = arguments
+		)>
+
 	</cfif>
 	<cfreturn>
 </cffunction>
@@ -421,37 +356,11 @@
 	<cfargument name="userId" default="#this.uid#">
 	<cfif len(arguments.pageId) and len(arguments.postId) and len(arguments.userId)>
 		<!--- should the post message be filtered against a search term? possibly! --->
-		<cfif not len(arguments.searchTerm) or len(arguments.searchTerm) and findNoCase(arguments.searchTerm, arguments.message)>
-			<cfquery datasource="#this.dsn#">
-				if not exists (
-					select 1
-					from FacebookPagePosts
-					where post_id = <cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">
-					<cfif len(arguments.scheduleId)>
-						and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-					</cfif>
-				)
-				begin
-					insert into FacebookPagePosts (
-						scheduleId,
-						page_id,
-						post_id,
-						message,
-						created_time,
-						type,
-						addedBy
-					)
-					values (
-						<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-						<cfqueryparam value="#arguments.pageId#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.message#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.created_time#" cfsqltype="cf_sql_bigint">,
-						<cfqueryparam value="#arguments.postType#" cfsqltype="cf_sql_varchar">,
-						<cfqueryparam value="#arguments.userId#" cfsqltype="cf_sql_varchar">
-					)
-				end
-			</cfquery>
+		<cfif not len(arguments.searchTerm) or ( len(arguments.searchTerm) and findNoCase(arguments.searchTerm, arguments.message) )>
+			<cfset init("Facebook")>
+			<cfset oFacebook.insertFacebookPost (
+				argumentCollection = arguments
+			)>
 		</cfif>
 	</cfif>
 	<cfreturn>
@@ -515,8 +424,8 @@
 	<cfif len(arguments.pageId) and len(arguments.postId) and len(arguments.fromId) and len(arguments.userId)>
 		<cfif not len(arguments.searchTerm) or len(arguments.searchTerm) and findNoCase(arguments.searchTerm, arguments.commentText)>
 
-			<cfset init("Entries")>
-			<cfset oEntries.insertFacebookPostComment (
+			<cfset init("Facebook")>
+			<cfset oFacebook.insertFacebookPostComment (
 				argumentCollection = arguments
 			)>
 
@@ -560,8 +469,8 @@
 	<cfargument name="userId" default="#this.uid#">
 	<cfif len(arguments.pageId) and len(arguments.postId) and len(arguments.user_id) and len(arguments.userId)>
 
-		<cfset init("Entries")>
-		<cfset oEntries.insertFacebookPostLike (
+		<cfset init("Facebook")>
+		<cfset oFacebook.insertFacebookPostLike (
 			argumentCollection = arguments
 		)>
 

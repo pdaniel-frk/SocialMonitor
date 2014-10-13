@@ -1,36 +1,22 @@
 <cfsetting requesttimeout="999">
 
-<!--- get everything on the schedule --->
-<cfquery name="getSchedule" datasource="#this.dsn#">
-	select
-		scheduleId,
-		searchTerm
-	from Schedules
-	where service = 'Twitter'
-	and isdate(deleteDate) = 0
-	<cfif structKeyExists(url, "scheduleId")>
-		and scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-	<cfelse>
-		and isnull(startdate, getdate()-1) <= getdate()
-		and isnull(endDate, getdate()+1) >= getdate()
-	</cfif>
-</cfquery>
+<cfparam name="url.scheduleId" default="">
+<cfset init("Schedules")>
+<cfset getSchedule = oSchedules.getSchedules (
+	service = 'Twitter',
+	scheduleId = url.scheduleId,
+	currentlyRunning = false
+)>
 
 <cfif getSchedule.recordCount>
 
 	<cfloop query="getSchedule">
 
-		<!--- get latest id and pull entries later than it --->
-		<cfset since_id = "">
-		<cfquery name="getSinceId" datasource="#this.dsn#">
-			select max(cast(id_str as bigint)) as since_id
-			from TwitterEntries
-			where scheduleId = <cfqueryparam value="#getSchedule.scheduleId#">
-		</cfquery>
-		<cfif len(getSinceId.since_id)>
-			<cfset since_id = getSinceId.since_id>
-		</cfif>
-
+		<cfset init("Twitter")>
+		<cfset since_id = oTwitter.getSinceId (
+			scheduleId = getSchedule.scheduleId,
+			searchTerm = getSchedule.searchTerm
+		)>
 		<cfset q = URLEncodedFormat(getSchedule.searchTerm)>
 
 		<cftry>
@@ -43,83 +29,47 @@
 
 			<cfloop from="1" to="#arrayLen(searchResult.statuses)#" index="ndx">
 
+				<cfset thisResult = structGet("searchResult.statuses[#ndx#]")>
+
+				<!--- set up some defaults for keys that might not exist or have value --->
+				<cfset latitude = "">
+				<cfset longitude = "">
+				<cfset geo_type = "">
 				<cfset image_url = "">
-				<cfif structKeyExists(searchResult.statuses[ndx].entities, "media")>
-					<cfset image_url = searchResult.statuses[ndx].entities.media[1].media_url_https>
+				<cfif isStruct(thisResult.geo)>
+					<cfset latitude = thisResult.geo.coordinates[1]>
+					<cfset longitude = thisResult.geo.coordinates[2]>
+					<cfset geo_type = thisResult.geo.type>
+				</cfif>
+				<cfif structKeyExists(thisResult.entities, "media")>
+					<cfset image_url = thisResult.entities.media[1].media_url_https>
 				</cfif>
 
-				<!--- import entries into database --->
-				<cfquery datasource="#this.dsn#">
-					if not exists (
-						select 1
-						from TwitterEntries
-						where id_str = <cfqueryparam value="#searchResult.statuses[ndx].id_str#" cfsqltype="cf_sql_varchar">
-						and scheduleId = <cfqueryparam value="#getSchedule.scheduleId#" cfsqltype="cf_sql_integer">
-					)
-					begin
-						insert into TwitterEntries (
-							[scheduleId],
-							[searchTerm],
-							[Id],
-							[id_str],
-							[created_at],
-							[geo.coordinates.latitude],
-							[geo.coordinates.longitude],
-							[geo.coordinates.type],
-							[lang],
-							[text],
-							[user.id],
-							[media.media_url_https]
-						)
-						values (
-							<cfqueryparam value="#getSchedule.scheduleId#" cfsqltype="cf_sql_integer">,
-							<cfqueryparam value="#getSchedule.searchTerm#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].Id#" cfsqltype="cf_sql_bigint">,
-							<cfqueryparam value="#searchResult.statuses[ndx].id_str#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].created_at#" cfsqltype="cf_sql_varchar">,
-							<cfif isStruct(searchResult.statuses[ndx].geo)>
-								<cfqueryparam value="#searchResult.statuses[ndx].geo.coordinates[1]#" cfsqltype="cf_sql_float">,
-								<cfqueryparam value="#searchResult.statuses[ndx].geo.coordinates[2]#" cfsqltype="cf_sql_float">,
-								<cfqueryparam value="#searchResult.statuses[ndx].geo.type#" cfsqltype="cf_sql_varchar">,
-							<cfelse>
-								null,
-								null,
-								null,
-							</cfif>
-							<cfqueryparam value="#searchResult.statuses[ndx].lang#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].text#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].user.id#" cfsqltype="cf_sql_bigint">,
-							<cfqueryparam value="#image_url#" cfsqltype="cf_sql_varchar">
-						)
-					end
-				</cfquery>
+				<cfset init("Twitter")>
+				<cfset oTwitter.insertTwitterEntry (
+					scheduleId = getSchedule.scheduleId,
+					searchTerm = getSchedule.searchTerm,
+					Id = thisResult.id,
+					id_str = thisResult.id_str,
+					created_at = thisResult.created_at,
+					latitude = latitude,
+					longitude = longitude,
+					geo_type = geo_type,
+					lang = thisResult.lang,
+					text = thisResult.text,
+					user_id = thisResult.user.id,
+					image_url = image_url
+				)>
 
-				<!--- import users --->
-				<cfquery datasource="#this.dsn#">
-					if not exists (
-						select 1
-						from TwitterUsers
-						where [user.id] = <cfqueryparam value="#searchResult.statuses[ndx].user.id#" cfsqltype="cf_sql_bigint">
-					)
-					begin
-						insert into TwitterUsers (
-							[user.id],
-							[user.id_str],
-							[user.location],
-							[user.name],
-							[user.screen_name],
-							[user.url]
-						)
-						values (
-							<cfqueryparam value="#searchResult.statuses[ndx].user.id#" cfsqltype="cf_sql_bigint">,
-							<cfqueryparam value="#searchResult.statuses[ndx].user.id_str#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].user.location#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].user.name#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].user.screen_name#" cfsqltype="cf_sql_varchar">,
-							<cfqueryparam value="#searchResult.statuses[ndx].user.url#" cfsqltype="cf_sql_varchar">
-						)
-					end
-				</cfquery>
+				<cfset init("Users")>
+				<cfset oUsers.insertTwitterUser (
+					id = thisResult.user.id,
+					id_str = thisResult.user.id_str,
+					location = thisResult.user.location,
+					name = thisResult.user.name,
+					screen_name = thisResult.user.screen_name,
+					url = thisResult.user.url
+				)>
 
 			</cfloop>
 

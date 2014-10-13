@@ -1,6 +1,9 @@
 <!--- <cflocation url="reports.cfm" addtoken="no"> --->
 
-<h1 class="page-header">Dashboard</h1>
+<div class="page-header">
+	<h1>Dashboard</h1>
+	<small>This is just a dummy page until I figure out something to do with it</small>
+</div>
 
 <div class="row placeholders">
 	<div class="col-xs-6 col-sm-3 placeholder">

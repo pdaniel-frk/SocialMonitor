@@ -1,20 +1,12 @@
 <cfsetting requesttimeout="999">
 
-<!--- get everything on the schedule --->
-<cfquery name="getSchedule" datasource="#this.dsn#">
-	select
-		scheduleId,
-		searchTerm
-	from Schedules
-	where service = 'Vine'
-	and isdate(deleteDate) = 0
-	<cfif structKeyExists(url, "scheduleId")>
-		and scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-	<cfelse>
-		and isnull(startdate, getdate()-1) <= getdate()
-		and isnull(endDate, getdate()+1) >= getdate()
-	</cfif>
-</cfquery>
+<cfparam name="url.scheduleId" default="">
+<cfset init("Schedules")>
+<cfset getSchedule = oSchedules.getSchedules (
+	service = 'Vine',
+	scheduleId = url.scheduleId,
+	currentlyRunning = true
+)>
 
 <cfif getSchedule.recordCount>
 

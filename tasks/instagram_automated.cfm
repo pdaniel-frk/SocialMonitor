@@ -1,20 +1,12 @@
 <cfsetting requesttimeout="999">
 
-<!--- get everything on the schedule --->
-<cfquery name="getSchedule" datasource="#this.dsn#">
-	select
-		scheduleId,
-		searchTerm
-	from Schedules
-	where service = 'Instagram'
-	and isdate(deleteDate) = 0
-	<cfif structKeyExists(url, "scheduleId")>
-		and scheduleId = <cfqueryparam value="#url.scheduleId#" cfsqltype="cf_sql_integer">
-	<cfelse>
-		and isnull(startdate, getdate()-1) <= getdate()
-		and isnull(endDate, getdate()+1) >= getdate()
-	</cfif>
-</cfquery>
+<cfparam name="url.scheduleId" default="">
+<cfset init("Schedules")>
+<cfset getSchedule = oSchedules.getSchedules (
+	service = 'Instagram',
+	scheduleId = url.scheduleId,
+	currentlyRunning = true
+)>
 
 <cfif getSchedule.recordCount>
 
@@ -24,19 +16,11 @@
 		<!--- with no since_id, it'll crawl back FOREVER, so give it something reasonable as a minimum' --->
 		<!--- <cfset since_id = "1405036800000"> ---><!--- select cast(abs(dateDiff(s, '2014-07-11', '1970-01-01')) as bigint)*1000 --->
 
-		<cfquery name="getSinceId" datasource="#this.dsn#">
-			select coalesce(
-				max(created_time)*1000,
-				cast(abs(dateDiff(s, dateadd(dd, datediff(dd, 0, getdate())-7, 0), '1970-01-01')) as bigint)*1000
-			) as since_id
-			from InstagramEntries
-			where searchTerm = <cfqueryparam value="#getSchedule.searchTerm#" cfsqltype="cf_sql_varchar">
-			and scheduleId = <cfqueryparam value="#getSchedule.scheduleId#" cfsqltype="cf_sql_integer">
-		</cfquery>
-
-		<cfif len(getSinceId.since_id)>
-			<cfset since_id = getSinceId.since_id>
-		</cfif>
+		<cfset init("Instagram")>
+		<cfset since_id = oInstagram.getSinceId (
+			scheduleId = getSchedule.scheduleId,
+			searchTerm = getSchedule.searchTerm
+		)>
 
 		<cfset min_tag_id = "#since_id#">
 		<cfset max_tag_id = "">
@@ -60,116 +44,75 @@
 
 						<cftry>
 
-							<!--- save to database --->
-							<cfquery datasource="#this.dsn#">
-								if not exists (
-									select 1
-									from InstagramEntries
-									where Id = <cfqueryparam value="#result.data[ndx].id#">
-									and scheduleId = <cfqueryparam value="#getSchedule.scheduleId#" cfsqltype="cf_sql_integer">
-								)
-								begin
-									insert into InstagramEntries (
-										[scheduleId],
-										[Id],
-										[SearchTerm],
-										[caption.created_time],
-										[caption.from.full_name],
-										[caption.from.id],
-										[caption.from.profile_picture],
-										[caption.from.username],
-										[caption.id],
-										[caption.text],
-										[created_time],
-										[images.low_resolution.url],
-										[images.standard_resolution.url],
-										[images.thumbnail.url],
-										[link],
-										[location.latitude],
-										[location.longitude],
-										[location.id],
-										[tags],
-										[type],
-										[user.id]
-									)
-									values (
-										<cfqueryparam value="#getSchedule.scheduleId#" cfsqltype="cf_sql_integer">,
-										<cfqueryparam value="#result.data[ndx].id#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#getSchedule.searchTerm#" cfsqltype="cf_sql_varchar">,
-										<cfif isStruct(result.data[ndx].caption)>
-											<cfqueryparam value="#result.data[ndx].caption.created_time#" cfsqltype="cf_sql_bigint">,
-											<cfqueryparam value="#result.data[ndx].caption.from.full_name#" cfsqltype="cf_sql_varchar">,
-											<cfqueryparam value="#result.data[ndx].caption.from.id#" cfsqltype="cf_sql_bigint">,
-											<cfqueryparam value="#result.data[ndx].caption.from.profile_picture#" cfsqltype="cf_sql_varchar">,
-											<cfqueryparam value="#result.data[ndx].caption.from.username#" cfsqltype="cf_sql_varchar">,
-											<cfqueryparam value="#result.data[ndx].caption.id#" cfsqltype="cf_sql_bigint">,
-											<cfqueryparam value="#result.data[ndx].caption.text#" cfsqltype="cf_sql_varchar">,
-										<cfelse>
-											null,
-											null,
-											null,
-											null,
-											null,
-											null,
-											null,
-										</cfif>
-										<cfqueryparam value="#result.data[ndx].created_time#" cfsqltype="cf_sql_bigint">,
-										<cfqueryparam value="#result.data[ndx].images.low_resolution.url#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].images.standard_resolution.url#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].images.thumbnail.url#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].link#" cfsqltype="cf_sql_varchar">,
-										<!--- location might be null OR IT MIGHT BE AN ID! --->
-										<cfif isStruct(result.data[ndx].location)>
-											<cfif structKeyExists(result.data[ndx].location, "id")>
-												null,
-												null,
-												<cfqueryparam value="#result.data[ndx].location.id#" cfsqltype="cf_sql_bigint">,
-											<cfelse>
-												<cfqueryparam value="#result.data[ndx].location.latitude#" cfsqltype="cf_sql_float">,
-												<cfqueryparam value="#result.data[ndx].location.longitude#" cfsqltype="cf_sql_float">,
-												null,
-											</cfif>
-										<cfelse>
-											null,
-											null,
-											null,
-										</cfif>
-										<cfif isArray(result.data[ndx].tags)>
-											<cfqueryparam value="#arrayToList(result.data[ndx].tags)#" cfsqltype="cf_sql_varchar">,
-										<cfelse>
-											null,
-										</cfif>
-										<cfqueryparam value="#result.data[ndx].type#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].user.id#" cfsqltype="cf_sql_bigint">
-									)
-								end
-							</cfquery>
+							<cfset thisResult = structGet("result.data[#ndx#]")>
 
-							<cfquery datasource="#this.dsn#">
-								if not exists (
-									select 1
-									from InstagramUsers
-									where [user_id] = <cfqueryparam value="#result.data[ndx].user.id#">
-								)
-								begin
-									insert into InstagramUsers (
-										[bio],
-										[full_name],
-										[user_id],
-										[profile_picture],
-										[username],
-										[website]
-									)
-									values (
-										<cfqueryparam value="#result.data[ndx].user.bio#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].user.full_name#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].user.id#" cfsqltype="cf_sql_bigint">,
-										<cfqueryparam value="#result.data[ndx].user.profile_picture#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].user.username#" cfsqltype="cf_sql_varchar">,
-										<cfqueryparam value="#result.data[ndx].user.website#" cfsqltype="cf_sql_varchar">
-									)
-								end
-							</cfquery>
+							<!--- set up some defaults for keys that might not exist or have value --->
+							<cfset caption_created_time = "">
+							<cfset from_full_name = "">
+							<cfset from_id = "">
+							<cfset from_profile_picture = "">
+							<cfset from_username = "">
+							<cfset caption_id = "">
+							<cfset caption_text = "">
+							<cfset latitude = "">
+							<cfset longitude = "">
+							<cfset location_id = "">
+							<cfset tags = "">
+							<cfif isStruct(thisResult.caption)>
+								<cfset caption_created_time = thisResult.caption.created_time>
+								<cfset from_full_name = thisResult.caption.from.full_name>
+								<cfset from_id = thisResult.caption.from.id>
+								<cfset from_profile_picture = thisResult.caption.from.profile_picture>
+								<cfset from_username = thisResult.caption.from.username>
+								<cfset caption_id = thisResult.caption.id>
+								<cfset caption_text = thisResult.caption.text>
+							</cfif>
+							<cfif isStruct(thisResult.location)>
+								<cfif structKeyExists(thisResult.location, "id")>
+									<cfset location_id = thisResult.location.id>
+								<cfelse>
+									<cfset latitude = thisResult.location.latitude>
+									<cfset longitude = thisResult.location.longitude>
+								</cfif>
+							</cfif>
+							<cfif isArray(thisResult.tags)>
+								<cfset tags = arrayToList(thisResult.tags)>
+							</cfif>
+
+							<cfset init("Instagram")>
+							<cfset oInstagram.insertInstagramEntry (
+								scheduleId = getSchedule.scheduleId,
+								Id = thisResult.id,
+								searchTerm = getSchedule.searchTerm,
+								caption_created_time = caption_created_time,
+								from_full_name = from_full_name,
+								from_id = from_id,
+								from_profile_picture = from_profile_picture,
+								from_username = from_username,
+								caption_id = caption_id,
+								caption_text = caption_text,
+								created_time = thisResult.created_time,
+								low_resolution_url = thisResult.images.low_resolution.url,
+								standard_resolution_url = thisResult.images.standard_resolution.url,
+								thumbnail_url = thisResult.images.thumbnail.url,
+								link = thisResult.link,
+								latitude = latitude,
+								longitude = longitude,
+								location_id = location_id,
+								tags = tags,
+								type = thisResult.type,
+								user_id = thisResult.user.id
+							)>
+
+							<cfset init("Users")>
+							<cfset oUsers.insertInstagramUser (
+								user_id = result.data[ndx].user.id,
+								bio = result.data[ndx].user.bio,
+								full_name = result.data[ndx].user.full_name,
+								profile_picture = result.data[ndx].user.profile_picture,
+								username = result.data[ndx].user.username,
+								website = result.data[ndx].user.website
+							)>
 
 							<cfcatch type="any">
 								<cfdump var="#cfcatch#">

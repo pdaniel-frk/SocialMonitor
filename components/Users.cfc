@@ -172,4 +172,84 @@
 
 	</cffunction>
 
+
+	<cffunction name="insertInstagramUser" output="no" returntype="void">
+
+		<cfargument name="user_id" required="no" default="">
+		<cfargument name="bio" required="no" default="">
+		<cfargument name="full_name" required="no" default="">
+		<cfargument name="profile_picture" required="no" default="">
+		<cfargument name="username" required="no" default="">
+		<cfargument name="website" required="no" default="">
+
+		<cfquery datasource="#variables.dsn#">
+			if not exists (
+				select 1
+				from InstagramUsers
+				where [user_id] = <cfqueryparam value="#arguments.user_id#">
+			)
+			begin
+				insert into InstagramUsers (
+					[user_id],
+					[bio],
+					[full_name],
+					[profile_picture],
+					[username],
+					[website]
+				)
+				values (
+					<cfqueryparam value="#arguments.user_id#" null="#not len(arguments.user_id)#" cfsqltype="cf_sql_bigint">,
+					<cfqueryparam value="#arguments.bio#" null="#not len(arguments.bio)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.full_name#" null="#not len(arguments.full_name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.profile_picture#" null="#not len(arguments.profile_picture)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.username#" null="#not len(arguments.username)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.website#" null="#not len(arguments.website)#" cfsqltype="cf_sql_varchar">
+				)
+			end
+		</cfquery>
+
+
+		<cfreturn>
+
+	</cffunction>
+
+
+	<cffunction name="insertTwitterUser" output="no" returntype="void">
+
+		<cfargument name="id" required="no" default="">
+		<cfargument name="id_str" required="no" default="">
+		<cfargument name="location" required="no" default="">
+		<cfargument name="name" required="no" default="">
+		<cfargument name="screen_name" required="no" default="">
+		<cfargument name="url" required="no" default="">
+
+		<cfquery datasource="#variables.dsn#">
+			if not exists (
+				select 1
+				from TwitterUsers
+				where [user.id] = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_bigint">
+			)
+			begin
+				insert into TwitterUsers (
+					[user.id],
+					[user.id_str],
+					[user.location],
+					[user.name],
+					[user.screen_name],
+					[user.url]
+				)
+				values (
+					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_bigint">,
+					<cfqueryparam value="#arguments.id_str#" null="#not len(arguments.id_str)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.location#" null="#not len(arguments.location)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.screen_name#" null="#not len(arguments.screen_name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.url#" null="#not len(arguments.url)#" cfsqltype="cf_sql_varchar">
+				)
+			end
+		</cfquery>
+
+		<cfreturn>
+	</cffunction>
+
 </cfcomponent>
