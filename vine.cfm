@@ -44,24 +44,6 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 	<cftry>
 
-		<!--- <script type="text/javascript">
-			$(function(){
-				$.get('https://api.vineapp.com/timelines/tags/<cfoutput>#form.searchTerm#</cfoutput>', function(data){
-					console.log(data);
-				})
-				.done(function(){
-					console.log('done');
-				})
-				.error(function(){
-					console.log('error');
-				})
-				.always(function(){
-					console.log('always');
-				});
-				//XMLHttpRequest cannot load https://api.vineapp.com/timelines/tags/test. No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://promotions.mardenkane.com' is therefore not allowed access.
-			});
-		</script> --->
-
 		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#" charset="utf-8"></cfhttp>
 		<cfset searchResult = deserializeJson(cfhttp.fileContent)>
 
@@ -102,13 +84,13 @@ https://github.com/starlock/vino/wiki/API-Reference
 				<thead>
 					<tr>
 						<th>#</th>
-						<!--- <th></th> --->
+						<!--- <th>Video</th> --->
 						<th>User</th>
 						<th>User Id</th>
 						<th>Created</th>
 						<th>Description</th>
 						<th>Permalink</th>
-						<th>raw</th>
+						<!--- <th>raw</th> --->
 					</tr>
 				</thead>
 				<tbody>
@@ -123,24 +105,28 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 							<cftry>
 
-								<cfset record = structGet('pageResult.data.records[#ndx#]')>
+								<cfset thisResult = structGet('pageResult.data.records[#ndx#]')>
 
-								<tr <cfif record.explicitContent>class="danger"</cfif>>
-									<td><cfoutput>#ndx + ((page-1)*20)#</cfoutput></td>
-									<cfif not structIsEmpty(record)>
-										<!--- <td><video preload="auto" src="<cfoutput>#record.videoUrl#</cfoutput>" width="535" height="535"></video></td> --->
-										<td><cfoutput><img src="#record.avatarUrl#" alt="#record.username#" style="width: 38px;height: 38px;border-radius: 50%;"></cfoutput></td>
-										<td><cfoutput>#convertNum(record.userId)#</cfoutput></td>
-										<td><cfoutput>#getToken(record.created, 1, 'T')#</cfoutput></td><!--- eg 2014-07-03T01:50:52.000000 --->
-										<td><cfoutput>#record.description#</cfoutput></td>
-										<td><cfoutput><a href="#record.permalinkUrl#" target="_blank"><img src="#record.thumbnailUrl#" style="width:50px;height:50px;"></a></cfoutput></td>
-									</cfif>
-									<td class="view-raw"><div style="display:none;"><cfdump var="#record#"></div></td>
-								</tr>
+								<cfoutput>
+
+									<tr <cfif thisResult.explicitContent>class="danger"</cfif>>
+										<td>#ndx + ((page-1)*20)#</td>
+										<cfif not structIsEmpty(thisResult)>
+											<!--- <td><video preload="auto" src="#thisResult.videoUrl#" width="535" height="535"></video></td> --->
+											<td><img src="#thisResult.avatarUrl#" alt="#thisResult.username#" style="width: 38px;height: 38px;border-radius: 50%;"></td>
+											<td>#convertNum(thisResult.userId)#</td>
+											<td>#getToken(thisResult.created, 1, 'T')#</td><!--- eg 2014-07-03T01:50:52.000000 --->
+											<td>#thisResult.description#</td>
+											<td><a href="#thisResult.permalinkUrl#" target="_blank"><img src="#thisResult.thumbnailUrl#" style="width:50px;height:50px;"></a></td>
+										</cfif>
+										<!--- <td class="view-raw"><div style="display:none;"><cfdump var="#thisResult#"></div></td> --->
+									</tr>
+
+								</cfoutput>
 
 								<cfcatch type="any">
 									<cfdump var="#cfcatch#">
-									<cfdump var="#record#">
+									<cfdump var="#thisResult#">
 									<cfabort>
 								</cfcatch>
 

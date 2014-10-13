@@ -14,16 +14,7 @@
 
 	<cfset init("Users")>
 	<cfset oUsers.insertFacebookUser(
-		user_id = form.user_id,
-		email = form.email,
-		first_name = form.first_name,
-		last_name = form.last_name,
-		username = form.username,
-		timezone = form.timezone,
-		locale = form.locale,
-		profile_url = form.profile_url,
-		birthday_date = form.birthday_date,
-		addedBy = form.userId
+		argumentCollection = form
 	)>
 
 </cfif>

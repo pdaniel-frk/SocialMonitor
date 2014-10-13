@@ -1,23 +1,6 @@
 <!--- get everything on the schedule --->
-<cfquery name="getSchedule" datasource="#this.dsn#">
-	select
-		s.scheduleId,
-		s.name,
-		s.monitor_page_id,
-		s.monitor_post_id,
-		s.startDate,
-		s.endDate,
-		page.name as pageName,
-		post.[message] as postMessage
-	from Schedules s
-	left join FacebookPages page on s.scheduleId = page.scheduleId and s.monitor_page_id = page.page_id
-	left join FacebookPagePosts post on s.scheduleId = post.scheduleId and s.monitor_post_id = post.post_id
-	where s.service = 'Facebook'
-	and isdate(s.deleteDate) = 0
-	order by s.service,
-		s.startDate,
-		s.endDate
-</cfquery>
+<cfset init("Schedules")>
+<cfset getSchedule = oSchedules.getSchedules(service='Facebook')>
 
 <div id="fb-root"></div>
 <script>
@@ -345,7 +328,7 @@
 
 				var html = '<tr>';
 					html += '<td>';
-						html += '<button class="btn btn-primary btn-xs page-button" data-pageid="'+$pageId+'">'+$pageName+'</button>';
+						html += '<button class="btn btn-primary btn-xs page-button" data-pageid="'+$pageId+'" data-toggle="tooltip" data-placement="bottom" title="View posts on this page">'+$pageName+'</button>';
 					html += '</td>';
 
 					html += '<td>';
@@ -392,7 +375,7 @@
 
 					var html = '<tr>';
 						html += '<td>';
-							html += '<button class="btn btn-info btn-xs post-button" data-postid="'+$postId+'">'+$message.substr(0,100)+'...</button>';
+							html += '<button class="btn btn-info btn-xs post-button" data-postid="'+$postId+'" data-toggle="tooltip" data-placement="bottom" title="View comments on this post">'+$message.substr(0,100)+'...</button>';
 						html += '</td>';
 
 						html += '<td>';

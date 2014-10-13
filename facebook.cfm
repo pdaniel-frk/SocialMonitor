@@ -92,31 +92,33 @@
 	<!--- <cfdump var="#result.data[1]#"> --->
 	<!--- <cfabort> --->
 
-	<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
+	<cfloop from="1" to="#arrayLen(search_result.data)#" index="ndx">
 
-		<!--- defaults --->
-		<cfset search_id = search_result.data[i].id>
+		<cfset thisResult = structGet("search_result.data[#ndx#]")>
+
+		<!--- set up some defaults for keys that might not exist or have value --->
+		<cfset search_id = thisResult.id>
 		<cfset object_id = "">
-		<cfif structKeyExists(search_result.data[i], "object_id")>
-			<cfset object_id = search_result.data[i].object_id>
-		</cfif>
 		<cfset name = "">
-		<cfif structKeyExists(search_result.data[i], "name")>
-			<cfset name = search_result.data[i].name>
-		</cfif>
 		<cfset result_url = "">
-		<cfif structKeyExists(search_result.data[i], "link")>
-			<cfset result_url = search_result.data[i].link>
-		</cfif>
 		<cfset caption = "">
-		<cfif structKeyExists(search_result.data[i], "caption")>
-			<cfset caption = search_result.data[i].caption>
-		<cfelseif structKeyExists(search_result.data[i], "message")>
-			<cfset caption = search_result.data[i].message>
+		<cfset created_time = thisResult.created_time>
+		<cfset user_id = thisResult.from.id>
+		<cfset type = thisResult.type>
+		<cfif structKeyExists(thisResult, "object_id")>
+			<cfset object_id = thisResult.object_id>
 		</cfif>
-		<cfset created_time = search_result.data[i].created_time>
-		<cfset user_id = search_result.data[i].from.id>
-		<cfset type = search_result.data[i].type>
+		<cfif structKeyExists(thisResult, "name")>
+			<cfset name = thisResult.name>
+		</cfif>
+		<cfif structKeyExists(thisResult, "link")>
+			<cfset result_url = thisResult.link>
+		</cfif>
+		<cfif structKeyExists(thisResult, "caption")>
+			<cfset caption = thisResult.caption>
+		<cfelseif structKeyExists(thisResult, "message")>
+			<cfset caption = thisResult.message>
+		</cfif>
 
 		<cfoutput>
 			<div class="well">

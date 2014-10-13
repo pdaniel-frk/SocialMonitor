@@ -1,3 +1,4 @@
+<cfprocessingdirective pageencoding="utf-8">
 <cfparam name="form.searchTerm" default="">
 
 <h1 class="page-header">
@@ -39,18 +40,8 @@
 	<!--- with no since_id, it'll crawl back FOREVER, so give it something reasonable as a minimum' --->
 	<!--- <cfset since_id = "1405036800000"> ---><!--- select cast(abs(dateDiff(s, '2014-07-11', '1970-01-01')) as bigint)*1000 --->
 
-	<cfquery name="getSinceId" datasource="#this.dsn#">
-		select coalesce(
-			max(created_time)*1000,
-			cast(abs(dateDiff(s, dateadd(dd, datediff(dd, 0, getdate())-7, 0), '1970-01-01')) as bigint)*1000
-		) as since_id
-		from InstagramEntries
-		where searchTerm = <cfqueryparam value="#form.searchTerm#" cfsqltype="cf_sql_varchar">
-	</cfquery>
-
-	<cfif len(getSinceId.since_id)>
-		<cfset since_id = getSinceId.since_id>
-	</cfif>
+	<cfset init("Instagram")>
+	<cfset since_id = oInstagram.getSinceId(searchTerm=form.searchTerm)>
 
 	<cfset min_tag_id = "#since_id#">
 	<cfset max_tag_id = "">
@@ -107,7 +98,7 @@ MAX_TAG_ID	Return media after this max_tag_id. --->
 											<td>#result.data[ndx].user.full_name#</td>
 											<td>
 												<a href="#result.data[ndx].link#" target='_blank'><!---
-													 ---><img src="#result.data[ndx].images.thumbnail.url#">
+													 ---><img src="#result.data[ndx].images.thumbnail.url#" style="width:100px;height:100px;border-radius:25%;">
 												</a>
 											</td>
 											<td>
