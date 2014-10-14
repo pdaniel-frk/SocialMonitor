@@ -20,7 +20,7 @@
 		<form name="lookup-term" method="post">
 			<div class="form-group">
 				<label for="searchTerm">Search Term</label>
-				<input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="" value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>">
+				<input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="This is not presently working, just returning a 'Name in certificate `*.a.ssl.fastly.net` does not match host name `api.foursquare.com`' error." value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>">
 			</div>
 			<button type="submit" class="btn btn-default">Submit</button>
 			<cfif len(form.searchTerm)>
