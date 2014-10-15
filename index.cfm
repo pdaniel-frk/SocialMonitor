@@ -1,28 +1,71 @@
 <!--- <cflocation url="reports.cfm" addtoken="no"> --->
+<cfset init("Schedules")>
+<cfset getSchedules = oSchedules.getSchedules()>
+<cfquery name="getScheduleServices" dbtype="query">
+	select service, count(1) as cnt
+	from getSchedules
+	group by service
+</cfquery>
 
 <div class="page-header">
 	<h1>Dashboard <small>This is just a dummy page until I figure out something to do with it</small></h1>
 </div>
 
+<div class="row">
+	<div class="col-xs-12">
+		<cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="red">
+			<cfchartseries type="pie" datalabelstyle="none" query="getScheduleServices" itemcolumn="service" valuecolumn="cnt"/>
+		</cfchart>
+	</div>
+</div>
+
 <div class="row placeholders">
 	<div class="col-xs-6 col-sm-3 placeholder">
-		<img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
-		<h4>Label</h4>
+		<!--- <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail"> --->
+		<cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="blue">
+			<cfchartseries type="pie" datalabelstyle="none">
+				<cfchartdata item="Comments" value="#randRange(1,1000)#">
+				<cfchartdata item="Likes" value="#randRange(1000,2000)#">
+				<cfchartdata item="Shares" value="#randRange(1,100)#">
+			</cfchartseries>
+		</cfchart>
+		<h4>Facebook</h4>
 		<span class="text-muted">Something else</span>
 	</div>
 	<div class="col-xs-6 col-sm-3 placeholder">
-		<img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
-		<h4>Label</h4>
+		<!--- <img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail"> --->
+		<cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="beige">
+			<cfchartseries type="pie" datalabelstyle="none">
+				<cfchartdata item="Comments" value="#randRange(1,1000)#">
+				<cfchartdata item="Likes" value="#randRange(1000,2000)#">
+				<cfchartdata item="Shares" value="#randRange(1,100)#">
+			</cfchartseries>
+		</cfchart>
+		<h4>Instagram</h4>
 		<span class="text-muted">Something else</span>
 	</div>
 	<div class="col-xs-6 col-sm-3 placeholder">
-		<img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
-		<h4>Label</h4>
+		<!--- <img data-src="holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail"> --->
+		<cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="silver">
+			<cfchartseries type="pie" datalabelstyle="none">
+				<cfchartdata item="Comments" value="#randRange(1,1000)#">
+				<cfchartdata item="Likes" value="#randRange(1000,2000)#">
+				<cfchartdata item="Shares" value="#randRange(1,100)#">
+			</cfchartseries>
+		</cfchart>
+		<h4>Twitter</h4>
 		<span class="text-muted">Something else</span>
 	</div>
 	<div class="col-xs-6 col-sm-3 placeholder">
-		<img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
-		<h4>Label</h4>
+		<!--- <img data-src="holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail"> --->
+		<cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="yellow">
+			<cfchartseries type="pie" datalabelstyle="none">
+				<cfchartdata item="Comments" value="#randRange(1,1000)#">
+				<cfchartdata item="Likes" value="#randRange(1000,2000)#">
+				<cfchartdata item="Shares" value="#randRange(1,100)#">
+			</cfchartseries>
+		</cfchart>
+		<h4>Vine</h4>
 		<span class="text-muted">Something else</span>
 	</div>
 </div>

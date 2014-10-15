@@ -7,7 +7,7 @@
 		<button class="btn btn-success btn-sm monitor-instagram-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
-		<a href="instagram_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
+		<a href="schedules.cfm?service=Instagram"><button class="btn btn-sm btn-warning">Monitored</button></a>
 	</span>
 </h1>
 

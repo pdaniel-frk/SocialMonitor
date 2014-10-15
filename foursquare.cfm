@@ -6,7 +6,7 @@
 		<button class="btn btn-success btn-sm monitor-foursquare-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
-		<a href="foursquare_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
+		<a href="schedules.cfm?service=Foursquare"><button class="btn btn-sm btn-warning">Monitored</button></a>
 	</span>
 </h1>
 

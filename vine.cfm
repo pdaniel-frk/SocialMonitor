@@ -10,7 +10,7 @@ https://github.com/starlock/vino/wiki/API-Reference
 		<button class="btn btn-success btn-sm monitor-vine-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
-		<a href="vine_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
+		<a href="schedules.cfm?service=Vine"><button class="btn btn-sm btn-warning">Monitored</button></a>
 	</span>
 </h1>
 

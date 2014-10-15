@@ -29,7 +29,7 @@
 		<button class="btn btn-success btn-sm monitor-facebook-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
-		<a href="facebook_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
+		<a href="schedules.cfm?service=Facebook"><button class="btn btn-sm btn-warning">Monitored</button></a>
 	</span>
 </h1>
 
@@ -87,8 +87,11 @@
 		<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
 		<cfhttpparam type="url" name="type" value="post">
 	</cfhttp>
+
+	<p><cfoutput>https://graph.facebook.com/search?q=#form.searchTerm#&access_token=#credentials.facebook.page_access_token#&type=post</cfoutput></p>
+
 	<cfset search_result = deserializeJson(cfhttp.fileContent)>
-	<!--- <cfdump var="#search_result#" label="Yes, I know these results are fugly."> --->
+	<cfdump var="#search_result#" label="Yes, I know these results are fugly."><!---  --->
 	<!--- <cfdump var="#result.data[1]#"> --->
 	<!--- <cfabort> --->
 

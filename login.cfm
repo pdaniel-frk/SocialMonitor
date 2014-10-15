@@ -39,7 +39,7 @@
 	<div class="row">
 		<div class="col-xs-12">
 			<div class="form-group">
-				<input class="form-control" type="password" name="uPass" id="uPass" placeholder="Password" required>
+				<input class="form-control" type="password" name="uPass" id="uPass" placeholder="Password" required autocomplete="off">
 			</div>
 		</div>
 	</div>
@@ -47,6 +47,11 @@
 		<div class="col-xs-12">
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Sign In</button>
 		</div>
-	</div>	
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<a href="" class="btn btn-link">Forgot username or password?</a>
+		</div>
+	</div>
 	<input type="hidden" name="signInKey" value="<cfoutput>#hash(getTickCount(), 'sha-1')#</cfoutput>">
 </form>

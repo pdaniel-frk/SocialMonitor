@@ -6,7 +6,7 @@
 		<button class="btn btn-success btn-sm monitor-twitter-term-button" data-scheduleid="" data-searchterm="" data-message="" data-toggle="tooltip" data-placement="bottom" title="Monitor new search term">
 			<span class="glyphicon glyphicon-plus"></span>
 		</button>
-		<a href="twitter_monitored.cfm"><button class="btn btn-sm btn-warning">Monitored</button></a>
+		<a href="schedules.cfm?service=Twitter"><button class="btn btn-sm btn-warning">Monitored</button></a>
 	</span>
 </h1>
 
@@ -42,7 +42,7 @@
 
 	<cftry>
 
-		<cfset searchResult =  application.objMonkehTweet.search(q=q, since_id=since_id, count=100)>
+		<cfset searchResult = application.objMonkehTweet.search(q=q, since_id=since_id, count=100)>
 
 		<cfset searchCount = 0>
 
@@ -58,6 +58,7 @@
 						<th>Handle</th>
 						<th>Text</th>
 						<th>Media</th>
+						<!--- <th></th> --->
 					</tr>
 				</thead>
 				<tbody>
@@ -65,6 +66,10 @@
 					<cfloop from="1" to="#arrayLen(searchResult.statuses)#" index="ndx">
 
 						<cfset thisResult = structGet("searchResult.statuses[#ndx#]")>
+
+						<cfif isStruct(thisResult.place)>
+							<cfdump var="#thisResult.place#">
+						</cfif>
 
 						<cfoutput>
 
@@ -80,6 +85,7 @@
 										</a>
 									</cfif>
 								</td>
+								<!--- <td class="view-raw"><div style="display:none;"><cfdump var="#thisResult#"></div></td> --->
 							</tr>
 
 						</cfoutput>
@@ -108,3 +114,11 @@
 	</cftry>
 
 </cfif>
+
+<script>
+	$(function(){
+		$(document).on('click', '.view-raw', function(){
+			$(this).find('div').show();
+		});
+	});
+</script>
