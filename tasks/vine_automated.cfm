@@ -1,3 +1,7 @@
+<!--- this is currently failing on production (throwing 500 errors), so I'm halting it for now (EG 2014-10-24 11:00) --->
+
+<!---
+
 <cfsetting requesttimeout="999">
 
 <cfparam name="url.scheduleId" default="">
@@ -138,3 +142,5 @@
 	<cfhttp method="get" url="https://api.vineapp.com/users/profiles/#arguments.userId#"></cfhttp>
 	<cfreturn deserializeJson(cfhttp.fileContent).data>
 </cffunction>
+
+ --->

@@ -99,6 +99,9 @@
 		<cfargument name="postMessage" required="no" default="">
 		<cfargument name="currentlyRunning" required="no" default="false">
 
+		<cfset arguments.scheduleId = listChangeDelims(arguments.scheduleId, ",", "|")>
+		<cfset arguments.scheduleId = listChangeDelims(arguments.scheduleId, ",", ":")>
+
 		<cfquery name="getSchedules" datasource="#variables.dsn#">
 			select
 				s.scheduleId,
@@ -112,11 +115,11 @@
 				page.name as pageName,
 				post.[message] as postMessage
 			from Schedules s
-			left join FacebookPages page on s.scheduleId = page.scheduleId and s.monitor_page_id = page.page_id
-			left join FacebookPagePosts post on s.scheduleId = post.scheduleId and s.monitor_post_id = post.post_id
+			left join FacebookPages page on s.monitor_page_id = page.Id
+			left join FacebookPosts post on s.monitor_post_id = post.Id
 			where isdate(s.deleteDate) = 0
 			<cfif len(arguments.scheduleId)>
-				and s.scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+				and s.scheduleId in (<cfqueryparam value="#arguments.scheduleId#" list="yes" cfsqltype="cf_sql_integer">)
 			</cfif>
 			<cfif len(arguments.name)>
 				and s.name = <cfqueryparam value="#arguments.name#" cfsqltype="cf_sql_varchar">

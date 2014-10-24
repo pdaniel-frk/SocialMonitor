@@ -44,7 +44,20 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 	<cftry>
 
-		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#" charset="utf-8"></cfhttp>
+		<div class="alert alert-warning">Note: This works on localhost and mk02, but fails on production server.</div>
+
+		<!--- none of these headers has made a difference --->
+		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#" charset="utf-8" resolveurl="yes">
+		    <!--- <cfhttpparam type="header" name="User-Agent" value="Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36">
+			<cfhttpparam type="Header" name="Accept-Encoding" value="no-compression">
+			<cfhttpparam type="Header" name="TE" value="deflate;q=0"> --->
+			<cfhttpparam type="header" name="user-agent" value="com.vine.iphone/1.0.3 (unknown, iPhone OS 6.1.0, iPhone, Scale/2.000000)">
+			<!--- <cfhttpparam type="header" name="vine-session-id" value="mardenkane-1231ed86-80a0-4f07-9389-b03199690f73"> ---><!--- this might, but i need to figure out how to create a valid vine-session-id --->
+			<cfhttpparam type="header" name="accept-language" value="en, sv, fr, de, ja, nl, it, es, pt, pt-PT, da, fi, nb, ko, zh-Hans, zh-Hant, ru, pl, tr, uk, ar, hr, cs, el, he, ro, sk, th, id, ms, en-GB, ca, hu, vi, en-us;q=0.8">
+			<cfhttpparam type="header" name="accept" value="*/*">
+			<cfhttpparam type="header" name="accept-encoding" value="gzip">
+		</cfhttp>
+
 		<cfset searchResult = deserializeJson(cfhttp.fileContent)>
 
 		<!---
@@ -143,7 +156,9 @@ https://github.com/starlock/vino/wiki/API-Reference
 		</div>
 
 		<cfcatch type="any">
-			<cfdump var="#cfcatch#">
+			<cfdump var="#cfhttp#" label="cfhttp">
+			<cfdump var="#cfhttp.fileContent#" label="cfhttp.filecontent">
+			<cfdump var="#cfcatch#" label="cfcatch">
 		</cfcatch>
 
 	</cftry>

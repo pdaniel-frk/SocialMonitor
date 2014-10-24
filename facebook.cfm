@@ -1,26 +1,6 @@
 <!--- KEEP THIS FOR POSTERITY, CAUSE ITS A GOOD EXAMPLE AS OF 10302013 --->
 <!--- https://developers.facebook.com/tools/explorer?method=GET&path=search%3Fq%3D%22Jethro%20Tull%22%26type%3Dpost%26updated_time%3E1347494400 --->
 
-<!--- I PROBABLY NEED A PAGE ACCESS TOKEN, AS THEY ARE NON-EXPIRING --->
-<!--- Marden Kane, Inc. PAGE ACCESS TOKEN: --->
-<!--- DID THIS: went to https://developers.facebook.com/tools/explorer; created access token w/ extended permissions - manage_pages; called /get/user-id/accounts; copied access token for Marden Kane FB page --->
-
-<!--- NOT TRUE BY DEFAULT! THEY EXPIRE AFTER 1 OR 2 HOURS; NEED TO LOOK INTO GENERATING A NON-EXPIRING TOKEN --->
-<!--- GOOD STARTING INFO HERE: --->
-<!--- http://stackoverflow.com/questions/7696372/facebook-page-access-tokens-do-these-expire --->
-<!--- follow steps in this post (which involves a lot of cut-and-paste URL munging) --->
-<!--- http://stackoverflow.com/questions/10183625/extending-facebook-page-access-token/13477999#13477999 --->
-
-<!---
-1: https://graph.facebook.com/oauth/authorize?client_id=173323626157418&scope=manage_pages&redirect_uri=http://www.facebook.com/connect/login_success.html
-1b: this is tricky, cause FB blanks the address bar, so you need to be ready to select all and copy
-    http://www.facebook.com/connect/login_success.html?code=AQBedV_aWRQHkH4_CabKiUsLvyNAz_B_rik5VxQ0KMTFl3Jw7jzzi4ci0foW72OYTRMbGdHPD1iv4UDmAANYO-IIw6-gs8kc2A-U98NLKL3Lc7mJPp0xgUCX7-4sv7oFDEgNRhhEMZef4AlR2F8wxaM8BgYhB_1DtmgkgQu9PPDTyrcUQKOkNS10tZvwHFrN7e-bLLzeb-5g2Z_zeSXqBH2x-xbgIZMqbWKSB5lJmNvZYRuAJLPsehQKdha9PoT6u4uqoa0z9ScKZ8Qln0IfGS04r9vJ-775R74rP8pUEarwDm80v7Znys06Et5Mw69pFfk#_=_
-    https://www.facebook.com/connect/login_success.html?code=AQDQBgvfiC_gM2UgHMvWsRABTFvFyRd-HSU5gSJvuCmSNyJAPkm2_14RZKSK6ZUwz8xdAZ3xOD-Y7twxLe7saCfFQPBcyO4dJN3Tt9nJnPkS67JPjqROTOJ5OF1Dtzl3LEmYL-JHtaMJwY8oY2eVZL-1mMxVJc9TF7icxW1ZmfiYLopEc5aPt3Tx4mE-wAji6Zf8PvyqVR6kla0NdLl3qkTB6KiNAxet2tUBigWoY_Jx4h8tSXQr1EpiMFbOWoRfCc04Cz8iX739dpJ_l75d1eUn8lyix8KkxCxRk_F_nrG_JvkZUwDmGnDOD42hX0qEgSY#_=_
-2: https://graph.facebook.com/oauth/access_token?client_id=173323626157418&redirect_uri=http://www.facebook.com/connect/login_success.html&client_secret=72ccc33faaab61f18a27e7ebcb0cec2e&code=AQBedV_aWRQHkH4_CabKiUsLvyNAz_B_rik5VxQ0KMTFl3Jw7jzzi4ci0foW72OYTRMbGdHPD1iv4UDmAANYO-IIw6-gs8kc2A-U98NLKL3Lc7mJPp0xgUCX7-4sv7oFDEgNRhhEMZef4AlR2F8wxaM8BgYhB_1DtmgkgQu9PPDTyrcUQKOkNS10tZvwHFrN7e-bLLzeb-5g2Z_zeSXqBH2x-xbgIZMqbWKSB5lJmNvZYRuAJLPsehQKdha9PoT6u4uqoa0z9ScKZ8Qln0IfGS04r9vJ-775R74rP8pUEarwDm80v7Znys06Et5Mw69pFfk#_=_
-3: copy/paste the access token from this page and hope for the best
-
- --->
-
 <cfparam name="form.searchTerm" default="">
 
 <h1 class="page-header">
@@ -33,25 +13,6 @@
 	</span>
 </h1>
 
-<div id="facebook-logged-out" style="position:absolute;top:0;right:0;left:0;bottom:0;padding:10em;background-color:rgba(0,0,0,.4);z-index:2;display:none;">
-
-	<div class="alert alert-danger">
-		Please log in to Facebook and grant this application the requested permissions to continue.
-	</div>
-	<button class="btn btn-primary" id="fb-login">Log in to Facebook</button>
-
-</div>
-
-<!--- <div class="row" style="padding:2em 0;">
-	<div class="col-sm-8 col-sm-offset-2">
-		<div class="progress">
-			<div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-				<span class="sr-only">0% Complete</span>
-			</div>
-		</div>
-	</div>
-</div> --->
-
 <div class="panel panel-primary">
 
 	<div class="panel-heading">
@@ -62,7 +23,7 @@
 		<form name="lookup-term" method="post">
 			<div class="form-group">
 				<label for="searchTerm">Search Term</label>
-				<input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Hash tags are not allowed, and will be stripped out" value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>">
+				<input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Hash tags are not allowed, and will be stripped out, but multiple terms are OK" value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>">
 			</div>
 			<button type="submit" class="btn btn-default">Submit</button>
 			<cfif len(form.searchTerm)>
@@ -76,69 +37,185 @@
 </div>
 
 <cfif len(form.searchTerm)>
-	<!--- lop off hash --->
-	<cfset form.searchTerm = replace(form.searchTerm, '##', '', 'All')><!---  --->
-	<!--- <cfhttp method="get" url="https://graph.facebook.com/search?q=""#form.searchTerm#""&type=post&access_token=#credentials.facebook.page_access_token#"></cfhttp> --->
-	<!--- <cfdump var="#cfhttp#"> --->
-	<!--- <cfdump var="#cfhttp.fileContent#"> --->
 
-	<cfhttp method="get" url="https://graph.facebook.com/search">
+	<!--- lop off hash --->
+	<cfset form.searchTerm = replace(form.searchTerm, '##', '', 'All')>
+
+	<!--- "random" search --->
+
+
+	<!--- get page --->
+	<!--- get page feed (this may actually be the endpoint i want, as posts is basically a filtered version of this) --->
+	<!--- get page posts --->
+	<!--- get post comments --->
+	<!--- get page likes --->
+	<!--- get post likes --->
+	<!--- get post comment likes --->
+	<!--- get post object comments ( --->
+
+
+	<!--- (#11) Post search has been deprecated --->
+	<!--- <cfhttp method="get" url="https://graph.facebook.com/v2.1/search">
+		<cfhttpparam type="url" name="q" value="#form.searchTerm#">
+		<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
+		<cfhttpparam type="url" name="type" value="post">
+	</cfhttp> --->
+
+
+	<cfset init("Facebook")>
+	<cfset since = oFacebook.getSince()>
+
+	<cfset search_result = oFacebook.searchFacebook(searchTerm=form.searchTerm, since=since, access_token=credentials.facebook.page_access_token)>
+	<cfdump var="#search_result#">
+
+
+	<!--- <cfset page_result = oFacebook.getPage(searchTerm=form.searchTerm, since=since, access_token=credentials.facebook.page_access_token)>
+	<cfif structKeyExists(page_result, 'data')>
+		<h1>Pages</h1>
+		<div class="table-responsive">
+			<table class="table table-condensed table-striped">
+				<thead>
+					<tr>
+						<th></th>
+						<th>id</th>
+						<th>name</th>
+						<th>likes</th>
+					</tr>
+				</thead>
+				<tbody>
+					<cfloop from="1" to="#arrayLen(page_result.data)#" index="ndx">
+						<!--- <cfdump var="#page_result.data[ndx]#"> --->
+						<cfset page = structGet('page_result.data[#ndx#]')>
+						<cfset id = page.id>
+						<!--- <cfset name = oFacebook.getPageName(pageId=id, access_token=credentials.facebook.page_access_token)> --->
+						<cfset name = page.name>
+						<cfset likes = 0>
+						<cfif structKeyExists(page, 'likes')>
+							<cfset likes = page.likes>
+						</cfif>
+						<cfoutput>
+							<tr>
+								<td>#ndx#</td>
+								<td>#id#</td>
+								<td>#name#</td>
+								<td>#numberFormat(likes, ",")#</td>
+							</tr>
+
+							<cfif ndx eq 1>
+
+								<cfset feed_result = oFacebook.getPageFeed(pageId=id, since=since, access_token=credentials.facebook.page_access_token)>
+								<tr>
+									<td>&nbsp;</td>
+									<td colspan="3">
+
+										<h1>Page Feed</h1>
+										<div class="table-responsive">
+											<table class="table table-condensed table-striped">
+												<thead>
+													<tr>
+														<th></th>
+														<th>id</th>
+														<th>from</th>
+														<th>message</th>
+														<th>type</th>
+														<th>created_time</th>
+													</tr>
+												</thead>
+												<tbody>
+													<cfloop from="1" to="#arrayLen(feed_result.data)#" index="i">
+														<cfset feed = structGet('feed_result.data[#i#]')>
+														<tr>
+															<td>#i#</td>
+															<td>#feed.id#</td>
+															<td>#feed.from.name#</td>
+															<td>#feed.message#</td>
+															<td>#feed.type#</td>
+															<td>#feed.created_time#</td>
+														</tr>
+													</cfloop>
+												</tbody>
+											</table>
+										</div>
+
+									</td>
+								</tr>
+
+							</cfif>
+
+						</cfoutput>
+					</cfloop>
+				</tbody>
+			</table>
+		</div>
+	</cfif> --->
+	<!--- <cfdump var="#page_result#"> --->
+
+	<!--- <cfset feed_result = oFacebook.getPageFeed(pageId=page_result.data[1].id, access_token=credentials.facebook.page_access_token)>
+	<cfdump var="#feed_result#">
+
+	<cfset post_result = oFacebook.getPost(postId=feed_result.data[1].id, access_token=credentials.facebook.page_access_token)>
+	<cfdump var="#post_result#"> --->
+
+	<!--- <cfhttp method="get" url="https://graph.facebook.com/search">
 		<cfhttpparam type="url" name="q" value="#form.searchTerm#">
 		<cfhttpparam type="url" name="access_token" value="#credentials.facebook.page_access_token#">
 		<cfhttpparam type="url" name="type" value="post">
 	</cfhttp>
 
-	<p><cfoutput>https://graph.facebook.com/search?q=#form.searchTerm#&access_token=#credentials.facebook.page_access_token#&type=post</cfoutput></p>
-
-	<cfset search_result = deserializeJson(cfhttp.fileContent)>
-	<cfdump var="#search_result#" label="Yes, I know these results are fugly."><!---  --->
-	<!--- <cfdump var="#result.data[1]#"> --->
-	<!--- <cfabort> --->
-
-	<cfloop from="1" to="#arrayLen(search_result.data)#" index="ndx">
-
-		<cfset thisResult = structGet("search_result.data[#ndx#]")>
-
-		<!--- set up some defaults for keys that might not exist or have value --->
-		<cfset search_id = thisResult.id>
+	<cfset searchResult = deserializeJson(cfhttp.fileContent)>
+	<cfloop from="1" to="#arrayLen(searchResult.data)#" index="ndx">
+		<cfset thisResult = structGet('searchResult.data[#ndx#]')>
+		<cfset id = "">
+		<cfset from.name = "">
+		<cfset from.id = "">
+		<cfset message = "">
+		<cfset type = "">
+		<cfset status_type = "">
 		<cfset object_id = "">
-		<cfset name = "">
-		<cfset result_url = "">
-		<cfset caption = "">
-		<cfset created_time = thisResult.created_time>
-		<cfset user_id = thisResult.from.id>
+		<cfset created_time = "">
+		<cfset shares.count = "">
+		<cfset likes.count = "">
+
+		<cfset id = thisResult.id>
+		<cfset from.name = thisResult.from.name>
+		<cfset from.id = thisResult.from.id>
 		<cfset type = thisResult.type>
-		<cfif structKeyExists(thisResult, "object_id")>
+		<cfset created_time = thisResult.created_time>
+
+		<cfif structKeyExists(thisResult, 'message')>
+			<cfset message = thisResult.message>
+		</cfif>
+		<cfif structKeyExists(thisResult, 'status_type')>
+			<cfset status_type = thisResult.status_type>
+		</cfif>
+		<cfif structKeyExists(thisResult, 'object_id')>
 			<cfset object_id = thisResult.object_id>
 		</cfif>
-		<cfif structKeyExists(thisResult, "name")>
-			<cfset name = thisResult.name>
+		<cfif structKeyExists(thisResult, 'shares.count')>
+			<cfset shares.count = thisResult.shares.count>
 		</cfif>
-		<cfif structKeyExists(thisResult, "link")>
-			<cfset result_url = thisResult.link>
-		</cfif>
-		<cfif structKeyExists(thisResult, "caption")>
-			<cfset caption = thisResult.caption>
-		<cfelseif structKeyExists(thisResult, "message")>
-			<cfset caption = thisResult.message>
+		<cfif structKeyExists(thisResult, 'likes')>
+			<cfset likes.count = arrayLen(thisResult.likes.data)>
 		</cfif>
 
-		<cfoutput>
-			<div class="well">
-				search_id = #search_id#<br>
-				object_id = #object_id#<br>
-				name = #name#<br>
-				result_url = #result_url#<br>
-				caption = #caption#<br>
-				created_time = #created_time#<br>
-				user_id = #user_id#<br>
-				type = #type#<br>
-			</div>
-		</cfoutput>
-	</cfloop>
-
+		<cfdump var="#thisResult#">
+	</cfloop> --->
 
 </cfif>
+
+
+
+
+<cfset onRequestEnd(cgi.script_name)>
+<cfabort>
+
+
+
+
+
+
+
+
 
 <div class="panel panel-primary">
 

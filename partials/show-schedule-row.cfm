@@ -64,7 +64,7 @@
 				</cfif>
 			</cfquery>
 
-			<tr>
+			<tr class="<cfif len(endDate) and dateCompare(endDate, now()) lt 0>finished warning</cfif>">
 				<td>#lc#</td>
 				<td>#name#</td>
 				<cfif service eq "Facebook">
@@ -74,7 +74,7 @@
 								select *
 								from FacebookPages
 								where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
-								and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+								<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
 							</cfquery>
 							#getPage.name#
 						</cfif>
@@ -85,9 +85,9 @@
 								select *
 								from FacebookPagePosts
 								where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
-								and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+								<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
 							</cfquery>
-							#left(getPost.message, 50)#&hellip;
+							#left(getPost.message, 250)#<cfif len(getPost.message) gt 250>&hellip;</cfif>
 						</cfif>
 					</td>
 				</cfif>

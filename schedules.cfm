@@ -8,6 +8,7 @@
 		&raquo; <cfoutput>#HTMLEditFormat(url.service)#</cfoutput>
 	</cfif>
 	<span class="pull-right">
+		<button class="btn btn-sm show-finished">Show finished</button>
 		<div class="btn-group">
 			<button class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" title="Schedule new monitor">
 				<span class="glyphicon glyphicon-plus"></span> <span class="caret"></span>
@@ -62,7 +63,7 @@
 						</h4>
 					</div>
 					<div id="collapse#service#" class="panel-collapse collapse <cfif currentRow eq 1>in</cfif>">
-						<div class="panel-body">
+						<!--- <div class="panel-body"> --->
 
 							<div class="table-responsive">
 								<table class="table table-striped" style="font-family:sans-serif;font-size:12px;">
@@ -92,7 +93,7 @@
 										</cfoutput>
 									</tbody>
 								</table>
-							</div>
+							<!--- </div> --->
 						</div>
 					</div>
 				</div>
@@ -108,3 +109,15 @@
 	</div>
 
 </div>
+
+
+<script>
+	$(function(){
+		$('.finished').css('display', 'none');
+		$(document).on('click', '.show-finished', function(e){
+			e.preventDefault();
+			console.log('!');
+			$('.finished').toggle('slow');
+		});
+	});
+</script>
