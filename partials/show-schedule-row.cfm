@@ -6,7 +6,13 @@
 		<cfoutput query="scheduleDetails">
 			<cfquery name="getEntryCount" datasource="#this.dsn#">
 				<cfif service eq "Facebook">
-					<cfif len(searchTerm) and not len(monitor_page_id) and not len(monitor_post_id)>
+
+					select count(1) as cnt
+					from uvwSelectFacebookEntries
+					where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
+
+
+					<!--- <cfif len(searchTerm) and not len(monitor_page_id) and not len(monitor_post_id)>
 						select
 							count(1) as cnt,
 							null as comment_count,
@@ -39,7 +45,7 @@
 						from FacebookPostComments
 						where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
 						and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					</cfif>
+					</cfif> --->
 				</cfif>
 
 				<cfif service eq "Instagram">
@@ -73,7 +79,7 @@
 							<cfquery name="getPage" datasource="#this.dsn#">
 								select *
 								from FacebookPages
-								where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
+								where id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
 								<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
 							</cfquery>
 							#getPage.name#
@@ -83,8 +89,8 @@
 						<cfif len(monitor_post_id)>
 							<cfquery name="getPost" datasource="#this.dsn#">
 								select *
-								from FacebookPagePosts
-								where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
+								from FacebookPosts
+								where id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
 								<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
 							</cfquery>
 							#left(getPost.message, 250)#<cfif len(getPost.message) gt 250>&hellip;</cfif>
@@ -95,10 +101,10 @@
 				<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 				<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
 				<td>#numberFormat(getEntryCount.cnt, ",")#</td>
-				<cfif service eq "Facebook">
+				<!--- <cfif service eq "Facebook">
 					<td>#numberFormat(getEntryCount.comment_count, ",")#</td>
 					<td>#numberFormat(getEntryCount.like_count, ",")#</td>
-				</cfif>
+				</cfif> --->
 				<td nowrap>
 					<cfif service eq "Facebook">
 						<cfif len(monitor_page_id)>

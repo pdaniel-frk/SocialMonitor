@@ -26,6 +26,7 @@
 		<cfargument name="pageId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="until" required="no" default="">
+		<cfargument name="since" required="no" default="">
 		<cfargument name="limit" required="no" default=25>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
@@ -35,6 +36,7 @@
 			<cfhttp url="#variables.api_url##arguments.pageId#" method="get" charset="utf-8">
 				<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 				<cfhttpparam type="url" name="until" value="#arguments.until#">
+				<cfhttpparam type="url" name="since" value="#arguments.since#">
 				<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 				<cfhttpparam type="url" name="fields" value="id,category,checkins,description,likes,link,name,username">
 			</cfhttp>
@@ -101,6 +103,7 @@
 				<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 				<cfhttpparam type="url" name="q" value="#arguments.searchTerm#">
 				<cfhttpparam type="url" name="until" value="#arguments.until#">
+				<cfhttpparam type="url" name="since" value="#arguments.since#">
 				<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 				<cfhttpparam type="url" name="type" value="page">
 				<cfhttpparam type="url" name="fields" value="id,category,checkins,description,likes,link,name,username">
@@ -154,6 +157,7 @@
 		<cfargument name="pageId" required="yes">
 		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="until" required="no" default="">
+		<cfargument name="since" required="no" default="">
 		<cfargument name="limit" required="no" default=25>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
@@ -161,6 +165,7 @@
 		<cfhttp url="#variables.api_url##arguments.pageId#/feed" method="get" charset="utf-8">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
+			<cfhttpparam type="url" name="since" value="#arguments.since#">
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 			<cfhttpparam type="url" name="fields" value="id,from,message,type,status_type,object_id,created_time,shares,likes">
 		</cfhttp>
@@ -169,7 +174,7 @@
 
 			<cfset feed_result = deserializeJson(cfhttp.fileContent)>
 
-			<cfif arguments.save_results and len(arguments.searchTerm)>
+			<cfif arguments.save_results and len(arguments.searchTerm) and structKeyExists(feed_result, "data")>
 				<!--- save feed results that have a message includeing the search term --->
 				<cfloop from="1" to="#arrayLen(feed_result.data)#" index="i">
 					<cfset thisFeed = structGet('feed_result.data[#i#]')>
@@ -256,6 +261,7 @@
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="postId" required="yes">
 		<cfargument name="until" required="no" default="">
+		<cfargument name="since" required="no" default="">
 		<cfargument name="limit" required="no" default=25>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
@@ -263,6 +269,7 @@
 		<cfhttp url="#variables.api_url##arguments.postId#" method="get" charset="utf-8">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
+			<cfhttpparam type="url" name="since" value="#arguments.since#">
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 			<cfhttpparam type="url" name="fields" value="id,from,message,type,status_type,object_id,created_time,shares,likes">
 		</cfhttp>
@@ -363,6 +370,7 @@
 		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="id" required="yes">
 		<cfargument name="until" required="no" default="">
+		<cfargument name="since" required="no" default="">
 		<cfargument name="limit" required="no" default=25>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
@@ -370,6 +378,7 @@
 		<cfhttp url="#variables.api_url##arguments.id#/comments" method="get" charset="utf-8">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
+			<cfhttpparam type="url" name="since" value="#arguments.since#">
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 			<cfhttpparam type="url" name="fields" value="id,from,message,created_time,like_count">
 		</cfhttp>
@@ -378,12 +387,12 @@
 
 			<cfset comment_result = deserializeJson(cfhttp.fileContent)>
 
-			<cfif arguments.save_results and len(arguments.searchTerm)>
+			<cfif arguments.save_results and structKeyExists(comment_result, "data")><!---  and len(arguments.searchTerm) --->
 				<!--- save feed results that have a message includeing the search term --->
 				<cfloop from="1" to="#arrayLen(comment_result.data)#" index="i">
 					<cfset thisComment = structGet('comment_result.data[#i#]')>
 					<cfif structKeyExists(thisComment, 'message')>
-						<cfif findNoCase(arguments.searchTerm, thisComment.message)>
+						<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, thisComment.message)>
 
 							<!--- defaults --->
 							<cfset id = "">
@@ -552,6 +561,7 @@
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="id" required="yes">
 		<cfargument name="until" required="no" default="">
+		<cfargument name="since" required="no" default="">
 		<cfargument name="limit" required="no" default=25>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
@@ -559,6 +569,7 @@
 		<cfhttp url="#variables.api_url##arguments.id#/likes" method="get" charset="utf-8">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
+			<cfhttpparam type="url" name="since" value="#arguments.since#">
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 			<cfhttpparam type="url" name="fields" value="id,name">
 		</cfhttp>
@@ -576,11 +587,12 @@
 	</cffunction>
 
 
-	<cffunction name="searchFacebook" output="yes">
+	<cffunction name="searchFacebook" output="no">
 
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="yes">
 		<cfargument name="until" required="no" default="">
+		<cfargument name="since" required="no" default="">
 		<cfargument name="limit" required="no" default=25>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
@@ -592,8 +604,9 @@
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="type" value="post">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
+			<cfhttpparam type="url" name="since" value="#arguments.since#">
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
-			<cfhttpparam type="url" name="fields" value="id,from,story,picture,link,name,caption,type,status_type,object_id,created_time">
+			<cfhttpparam type="url" name="fields" value="id,from,story,picture,link,message,name,caption,type,status_type,object_id,created_time">
 		</cfhttp>
 
 		<cftry>
@@ -615,6 +628,7 @@
 
 						<cfset link = "">
 						<cfset name = "">
+						<cfset message = "">
 						<cfset caption = "">
 						<cfset story = "">
 						<cfset picture = "">
@@ -626,6 +640,9 @@
 						</cfif>
 						<cfif structKeyExists(thisResult, "name")>
 							<cfset name = thisResult.name>
+						</cfif>
+						<cfif structKeyExists(thisResult, "message")>
+							<cfset message = thisResult.message>
 						</cfif>
 						<cfif structKeyExists(thisResult, "caption")>
 							<cfset caption = thisResult.caption>
@@ -650,6 +667,7 @@
 							id = id,
 							from_id = from_id,
 							from_name = from_name,
+							message = message,
 							story = story,
 							picture = picture,
 							link = link,
@@ -818,6 +836,7 @@
 		<cfargument name="id" default="">
 		<cfargument name="from_id" default="">
 		<cfargument name="from_name" default="">
+		<cfargument name="message" default="">
 		<cfargument name="story" default="">
 		<cfargument name="picture" default="">
 		<cfargument name="link" default="">
@@ -844,6 +863,7 @@
 					id,
 					[from.id],
 					[from.name],
+					message,
 					story,
 					picture,
 					link,
@@ -859,6 +879,7 @@
 					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.from_id#" null="#not len(arguments.from_id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.from_name#" null="#not len(arguments.from_name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.message#" null="#not len(arguments.message)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.story#" null="#not len(arguments.story)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.picture#" null="#not len(arguments.picture)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.link#" null="#not len(arguments.link)#" cfsqltype="cf_sql_varchar">,
@@ -926,6 +947,16 @@
 				)
 
 			end
+
+			else
+				begin
+
+					update FacebookPages
+					set checkins = <cfqueryparam value="#arguments.checkins#" null="#not len(arguments.checkins)#" cfsqltype="cf_sql_int">,
+					likes = <cfqueryparam value="#arguments.likes#" null="#not len(arguments.likes)#" cfsqltype="cf_sql_int">
+					where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+
+				end
 
 		</cfquery>
 
@@ -1049,6 +1080,17 @@
 				)
 
 			end
+
+			else
+
+				begin
+
+					update FacebookPosts
+					set [shares.count] = <cfqueryparam value="#arguments.shares_count#" null="#not len(arguments.shares_count)#" cfsqltype="cf_sql_int">,
+					[likes.count] = <cfqueryparam value="#arguments.likes_count#" null="#not len(arguments.likes_count)#" cfsqltype="cf_sql_int">
+					where id = <cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">
+
+				end
 
 		</cfquery>
 

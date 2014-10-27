@@ -79,10 +79,10 @@
 											<th>Start</th>
 											<th>End</th>
 											<th>Entries</th>
-											<cfif service eq "Facebook">
+											<!--- <cfif service eq "Facebook">
 												<th>Comments</th>
 												<th>Likes</th>
-											</cfif>
+											</cfif> --->
 											<th>Actions</th>
 										</tr>
 									</thead>

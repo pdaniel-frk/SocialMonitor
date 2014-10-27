@@ -4,8 +4,7 @@
 <cfset init("Schedules")>
 <cfset getSchedule = oSchedules.getSchedules (
 	service = 'Facebook',
-	scheduleId = url.scheduleId,
-	currentlyRunning = true
+	scheduleId = url.scheduleId
 )>
 
 <cfset init("Facebook")>
@@ -15,11 +14,18 @@
 	<cfloop query="getSchedule">
 
 		<!--- isnt this functionally the same as no 'until,' though? --->
-		<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', now()))>
+		<cfif dateCompare(getSchedule.endDate, now()) lt 0>
+			<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', getSchedule.endDate))>
+		<cfelse>
+			<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', now()))>
+		</cfif>
+
 		<cfset since = oFacebook.getSince(getSchedule.scheduleId)>
 
 		<!--- blind search, always --->
 		<cfif len(getSchedule.searchTerm)>
+
+			<p><cfoutput>searching for #getSchedule.searchTerm#</cfoutput></p>
 
 			<cfset EOF = false>
 			<cfset lc = 1>
@@ -38,6 +44,11 @@
 				<cfif not structKeyExists(search_result, 'data')>
 					<cfset EOF = true>
 				<cfelse>
+
+					<cfif lc eq 1>
+						<cfdump var="#search_result.data#">
+					</cfif>
+
 					<cfif not arrayLen(search_result.data)>
 						<cfset EOF = true>
 					<cfelse>
@@ -45,8 +56,11 @@
 						<cfset created_time = search_result.data[1].created_time>
 						<cfset created_date_time = oFacebook.convertCreatedTimeToString(created_time, true)>
 						<cfif dateCompare(created_date_time, getSchedule.startDate) LT 0>
+							<p><cfoutput>results earlier than #getSchedule.startDate#</cfoutput></p>
 							<cfset EOF = true>
 						</cfif>
+
+						<p><cfoutput>#lc#: #arrayLen(search_result.data)# results</cfoutput></p>
 
 						<cfif arrayLen(search_result.data) LT 25>
 							<cfset EOF = true>
@@ -73,7 +87,7 @@
 
 						<cfset lc += 1>
 
-						<cfif lc gte 100>
+						<cfif lc gte 1000>
 							<p>facebook search results exceeded page count sanity check</p>
 							<cfset EOF = true>
 						</cfif>
@@ -88,6 +102,8 @@
 
 		<!--- search page (feeds, feed -> comments) for searchTerm --->
 		<cfif len(getSchedule.searchTerm) and len(getSchedule.monitor_page_id) and not len(getSchedule.monitor_post_id)>
+
+			<p><cfoutput>searching page for #getSchedule.searchTerm#</cfoutput></p>
 
 			<!--- get the page and store its deets --->
 			<cfset page_result = oFacebook.getPage (
@@ -120,11 +136,18 @@
 
 				<cfif structKeyExists(feed_result, "data") and arrayLen(feed_result.data)>
 
+					<cfif lc eq 1>
+						<cfdump var="#feed_result.data#">
+					</cfif>
+
 					<cfloop from="1" to="#arrayLen(feed_result.data)#" index="i">
+
+						<p><cfoutput>#lc#: #arrayLen(feed_result.data)# results</cfoutput></p>
+
 						<cfset thisFeed = structGet('feed_result.data[#i#]')>
 						<cfif structKeyExists(thisFeed, 'message')>
 							<cfif findNoCase(getSchedule.searchTerm, thisFeed.message)>
-								<!--- <p><cfoutput>#getSchedule.searchTerm# found in #thisFeed.message#. Checking this object's comments</cfoutput></p> --->
+								<p><cfoutput>#getSchedule.searchTerm# found in #thisFeed.message#. Checking this object's comments</cfoutput></p><!---  --->
 								<!--- get comments for the feed --->
 								<cfset EOC = false>
 								<cfset cc = 1>
@@ -139,6 +162,12 @@
 										access_token = credentials.facebook.page_access_token,
 										save_results = true
 									)>
+
+									<cfif cc eq 1>
+										<cfdump var="#comment_result.data#">
+									</cfif>
+
+									<p><cfoutput>#cc#: #arrayLen(comment_result.data)# results</cfoutput></p>
 									<!--- <cfif arrayLen(comment_result.data)>
 										<cfdump var="#comment_result#">
 									</cfif> --->
@@ -161,7 +190,7 @@
 									</cfif>
 
 									<cfset cc += 1>
-									<cfif cc gte 100>
+									<cfif cc gte 1000>
 										<p>facebook feed -> comment exceeded page count sanity check</p>
 										<cfset EOC = true>
 									</cfif>
@@ -191,11 +220,10 @@
 
 					<cfset lc += 1>
 
-					<cfif lc gte 100>
+					<cfif lc gte 1000>
 						<p>facebook feed results exceeded page count sanity check</p>
 						<cfset EOF = true>
 					</cfif>
-
 				<cfelse>
 					<cfset EOF = true>
 				</cfif>
@@ -204,6 +232,8 @@
 
 		<!--- search a certain post for comments (if no searchTerm is provided, gather all comments) --->
 		<cfelseif len(getSchedule.monitor_post_id)>
+
+			<p><cfoutput>searching post for #getSchedule.searchTerm#</cfoutput></p>
 
 			<!--- get the post and store its deets --->
 			<cfset post_result = oFacebook.getPost (
@@ -233,6 +263,11 @@
 
 				<cfif structKeyExists(comment_result, 'data') and arrayLen(comment_result.data)>
 
+					<cfif cc eq 1>
+						<cfdump var="#comment_result.data#">
+					</cfif>
+
+					<p><cfoutput>#cc#: #arrayLen(comment_result.data)# results</cfoutput></p>
 					<!--- <cfif arrayLen(comment_result.data)>
 						<cfdump var="#comment_result#">
 					</cfif> --->
@@ -255,7 +290,7 @@
 					</cfif>
 
 					<cfset cc += 1>
-					<cfif cc gte 100>
+					<cfif cc gte 1000>
 						<p>facebook post -> comments results exceeded page count sanity check</p>
 						<cfset EOC = true>
 					</cfif>
@@ -263,7 +298,6 @@
 				<cfelse>
 					<cfset EOC = true>
 				</cfif>
-
 			</cfloop>
 
 		</cfif>
