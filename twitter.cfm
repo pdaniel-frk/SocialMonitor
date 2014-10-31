@@ -1,3 +1,57 @@
+<p>looking up friends</p>
+
+<cfset userIds = "17867975,
+393505802,
+373884343,
+8053312,
+479071774,
+379130161,
+66678618,
+61496140,
+2547035520,
+34598829,
+337223563,
+46060154,
+425905698,
+161395033,
+124208769,
+329746445">
+
+<p>get @office followers (most recent 5000)</p>
+
+<!--- <cfdump var="#application.objMonkehTweet.getUserDetails(screen_name='office')#"> --->
+<!--- 22209176 --->
+
+<!--- <cfset followers = application.objMonkehTweet.getFollowersIDs(screen_name='office')> --->
+
+<cfloop list="#userIds#" index="userId">
+
+	<p>
+	<cfoutput>#userId#</cfoutput>
+	<cfset friends = application.objMonkehTweet.getFriendsIDs(user_id=userId)>
+	<cfif structKeyExists(friends, 'ids')>
+		<cfset friendIds = arrayToList(friends.ids)>
+		<cfif listFindNoCase(friendIds, '22209176')>
+			<strong>office found in this users friends (#userId#)</strong>
+		</cfif>
+	<cfelse>
+		<cfdump var="#friends#">
+	</cfif>
+	</p>
+
+	<!--- Your credentials do not allow access to this resource (can only get this information on behalf of authenticated users) --->
+	<!--- <cfset result = application.objMonkehTweet.getFriendshipsLookup(user_id=userId)> --->
+
+	<!--- <cfdump var="#result#">
+	<cfabort> --->
+
+
+</cfloop>
+
+
+<cfabort>
+
+
 <cfparam name="form.searchTerm" default="">
 
 <h1 class="page-header">

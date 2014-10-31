@@ -115,8 +115,8 @@
 				page.name as pageName,
 				post.[message] as postMessage
 			from Schedules s
-			left join FacebookPages page on s.monitor_page_id = page.Id
-			left join FacebookPosts post on s.monitor_post_id = post.Id
+			left join FacebookPages page on s.monitor_page_id = page.Id and page.scheduleId = s.scheduleId
+			left join FacebookPosts post on s.monitor_post_id = post.Id and post.scheduleId = s.scheduleId
 			where isdate(s.deleteDate) = 0
 			<cfif len(arguments.scheduleId)>
 				and s.scheduleId in (<cfqueryparam value="#arguments.scheduleId#" list="yes" cfsqltype="cf_sql_integer">)

@@ -120,7 +120,7 @@
 			<cfreturn page_result>
 
 			<cfcatch type="any">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -248,7 +248,7 @@
 
 			<cfcatch type="any">
 				<cfdump var="#cfcatch#">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -356,7 +356,7 @@
 
 			<cfcatch type="any">
 				<cfdump var="#cfcatch#">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -450,7 +450,7 @@
 
 			<cfcatch type="any">
 				<cfdump var="#cfcatch#">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -486,6 +486,7 @@
 				<cfset locale = "">
 				<cfset middle_name = "">
 				<cfset name = "">
+				<cfset username = "">
 				<cfset timezone = "">
 
 				<cfif structKeyExists(user_result, "age_range")>
@@ -523,6 +524,9 @@
 				<cfif structKeyExists(user_result, "name")>
 					<cfset name = user_result.name>
 				</cfif>
+				<cfif structKeyExists(user_result, "username")>
+					<cfset username = user_result.username>
+				</cfif>
 				<cfif structKeyExists(user_result, "timezone")>
 					<cfset timezone = user_result.timezone>
 				</cfif>
@@ -540,6 +544,7 @@
 					locale = locale,
 					middle_name = middle_name,
 					name = name,
+					username = username,
 					timezone = timezone
 				)>
 
@@ -548,7 +553,7 @@
 			<cfreturn user_result>
 
 			<cfcatch type="any">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -579,7 +584,7 @@
 			<cfreturn deserializeJson(cfhttp.fileContent)>
 
 			<cfcatch type="any">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -620,7 +625,10 @@
 					<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
 
 						<cfset thisResult = structGet('search_result.data[#i#]')>
-						<cfset id = thisResult.id>
+
+						<cfset thisResult = parseSearchObject(thisResult)>
+
+						<!--- <cfset id = thisResult.id>
 						<cfset from_id = thisResult.from.id>
 						<cfset from_name = thisResult.from.name>
 						<cfset type = thisResult.type>
@@ -660,23 +668,11 @@
 							<cfset object_id = thisResult.object_id>
 						</cfif>
 
-						<cfset created_time = convertCreatedTimeToBigint(created_time)>
+						<cfset created_time = convertCreatedTimeToBigint(created_time)> --->
 
 						<cfset insertFacebookSearchResult (
 							scheduleId = arguments.scheduleId,
-							id = id,
-							from_id = from_id,
-							from_name = from_name,
-							message = message,
-							story = story,
-							picture = picture,
-							link = link,
-							name = name,
-							caption = caption,
-							type = type,
-							status_type = status_type,
-							object_id = object_id,
-							created_time = created_time
+							search = thisResult
 						)>
 
 						<cfset getUser (
@@ -696,7 +692,7 @@
 			<cfcatch type="any">
 				<cfdump var="#thisResult#">
 				<cfdump var="#cfcatch#">
-				<cfreturn "{'error':true}">
+				<cfreturn '{"error": true}'>
 			</cfcatch>
 
 		</cftry>
@@ -833,7 +829,8 @@
 	<cffunction name="insertFacebookSearchResult" output="no" returntype="void">
 
 		<cfargument name="scheduleId" default="">
-		<cfargument name="id" default="">
+		<cfargument name="search" required="yes" type="struct">
+		<!--- <cfargument name="id" default="">
 		<cfargument name="from_id" default="">
 		<cfargument name="from_name" default="">
 		<cfargument name="message" default="">
@@ -845,13 +842,13 @@
 		<cfargument name="type" default="">
 		<cfargument name="status_type" default="">
 		<cfargument name="object_id" default="">
-		<cfargument name="created_time" default="">
+		<cfargument name="created_time" default=""> --->
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
 				select 1
 				from FacebookSearches
-				where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+				where id = <cfqueryparam value="#arguments.search.id#" cfsqltype="cf_sql_varchar">
 				<cfif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
@@ -876,19 +873,19 @@
 				)
 				values (
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_id#" null="#not len(arguments.from_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_name#" null="#not len(arguments.from_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.message#" null="#not len(arguments.message)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.story#" null="#not len(arguments.story)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.picture#" null="#not len(arguments.picture)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.link#" null="#not len(arguments.link)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.caption#" null="#not len(arguments.caption)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.type#" null="#not len(arguments.type)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.status_type#" null="#not len(arguments.status_type)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.object_id#" null="#not len(arguments.object_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.created_time#" null="#not len(arguments.created_time)#" cfsqltype="cf_sql_bigint">
+					<cfqueryparam value="#arguments.search.id#" null="#not len(arguments.search.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.from.id#" null="#not len(arguments.search.from.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.from.name#" null="#not len(arguments.search.from.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.message#" null="#not len(arguments.search.message)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.story#" null="#not len(arguments.search.story)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.picture#" null="#not len(arguments.search.picture)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.link#" null="#not len(arguments.search.link)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.name#" null="#not len(arguments.search.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.caption#" null="#not len(arguments.search.caption)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.type#" null="#not len(arguments.search.type)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.status_type#" null="#not len(arguments.search.status_type)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.object_id#" null="#not len(arguments.search.object_id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.search.created_time#" null="#not len(arguments.search.created_time)#" cfsqltype="cf_sql_bigint">
 				)
 
 			end
@@ -1113,6 +1110,7 @@
 		<cfargument name="locale" default="">
 		<cfargument name="middle_name" default="">
 		<cfargument name="name" default="">
+		<cfargument name="username" default="">
 		<cfargument name="timezone" default="">
 
 		<cfquery datasource="#variables.dsn#">
@@ -1136,6 +1134,7 @@
 					locale,
 					middle_name,
 					name,
+					username,
 					timezone
 				)
 				values (
@@ -1151,14 +1150,89 @@
 					<cfqueryparam value="#arguments.locale#" null="#not len(arguments.locale)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.middle_name#" null="#not len(arguments.middle_name)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.username#" null="#not len(arguments.username)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.timezone#" null="#not len(arguments.timezone)#" cfsqltype="cf_sql_int">
 				)
 
 			end
 
+			else
+
+				begin
+
+					update FacebookUsers
+					set username = <cfqueryparam value="#arguments.username#" null="#not len(arguments.username)#" cfsqltype="cf_sql_varchar">
+					where id = <cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">
+
+				end
+
 		</cfquery>
 
 		<cfreturn>
+
+	</cffunction>
+
+
+	<cffunction name="parseSearchObject" output="yes" returntype="struct">
+
+		<cfargument name="search" required="yes" type="struct">
+
+		<!--- set up defaults --->
+		<cfset local.search.id = "">
+		<cfset local.search.from.id = "">
+		<cfset local.search.from.name = "">
+		<cfset local.search.message = "">
+		<cfset local.search.story = "">
+		<cfset local.search.picture = "">
+		<cfset local.search.link = "">
+		<cfset local.search.name = "">
+		<cfset local.search.caption = "">
+		<cfset local.search.type = "">
+		<cfset local.search.status_type = "">
+		<cfset local.search.object_id = "">
+		<cfset local.search.created_time = "">
+
+		<!--- check for existence in search object --->
+		<cfif structKeyExists(arguments.search, "id")>
+			<cfset local.search.id = arguments.search.id>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "from")>
+			<cfset local.search.from.id = arguments.search.from.id>
+			<cfset local.search.from.name = arguments.search.from.name>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "message")>
+			<cfset local.search.message = arguments.search.message>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "story")>
+			<cfset local.search.story = arguments.search.story>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "picture")>
+			<cfset local.search.picture = arguments.search.picture>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "link")>
+			<cfset local.search.link = arguments.search.link>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "name")>
+			<cfset local.search.name = arguments.search.name>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "caption")>
+			<cfset local.search.caption = arguments.search.caption>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "type")>
+			<cfset local.search.type = arguments.search.type>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "status_type")>
+			<cfset local.search.status_type = arguments.search.status_type>
+		</cfif>
+		<cfif structKeyExists(arguments.search, "object_id")>
+			<cfset local.search.object_id = arguments.search.object_id>
+		</cfif>
+		<cfif structKeyExists(search, "created_time")>
+			<cfset myTime = convertCreatedTimeToBigint(arguments.search.created_time)>
+			<cfset local.search.created_time = myTime>
+		</cfif>
+
+		<cfreturn local.search>
 
 	</cffunction>
 

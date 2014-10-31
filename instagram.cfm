@@ -77,6 +77,8 @@ MAX_TAG_ID	Return media after this max_tag_id. --->
 					<cfset url_to_call = "https://api.instagram.com/v1/tags/#form.searchTerm#/media/recent?client_id=#credentials.instagram.client_id#&min_tag_id=#min_tag_id#&max_tag_id=#max_tag_id#&count=50">
 					<cfhttp method="get" url="#url_to_call#"></cfhttp>
 
+					<cfdump var="#cfhttp#">
+
 					<cfset result = deserializeJson(cfhttp.fileContent)>
 
 					<cfif not structKeyExists(result, "error") and not structKeyExists(result.meta, "error_message")>

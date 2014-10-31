@@ -66,7 +66,9 @@
 	<cfset since = oFacebook.getSince()>
 
 	<cfset search_result = oFacebook.searchFacebook(searchTerm=form.searchTerm, since=since, access_token=credentials.facebook.page_access_token)>
-	<cfdump var="#search_result#">
+	<!--- <cfdump var="#search_result#"> --->
+
+	<cfdump var="#oFacebook.parseSearchObject(search_result.data[1])#">
 
 
 	<!--- <cfset page_result = oFacebook.getPage(searchTerm=form.searchTerm, since=since, access_token=credentials.facebook.page_access_token)>
