@@ -13,7 +13,7 @@
 	</span>
 </h1>
 
-<div class="table-responsive no-copy">
+<div class="table-responsive"><!---  no-copy --->
 
 	<table class="table table-striped" style="font-family:Arial;font-size:12px;">
 
@@ -52,17 +52,19 @@
 									#getEntries.entryType#</a>
 								</td>
 								<td>#getEntries.text#</td>
-								<td>#getEntries.firstName# #getEntries.lastName# (#getEntries.userName#)</td>
+								<td>
+									<cfif len(getEntries.name)>#getEntries.name#<cfelse>#getEntries.firstName# #getEntries.lastName#</cfif> (#getEntries.userName#)</td>
 								<td>#dateFormat(getEntries.entryDate, 'yyyy-mm-dd')# #timeFormat(getEntries.entryDate, 'HH:mm')#</td>
 							</tr>
 						</cfoutput>
 						<cfset lc += 1>
-						<cfif lc gte 25>
+						<!--- for future concern --->
+						<!--- <cfif lc gte 25>
 							<tr><td colspan="7" class="text-center">Results clipped. <a href="">Click here</a> to upgrade your subscription.</td></tr>
 							<cfbreak>
 							<cfset onRequestEnd(cgi.script_name)>
 							<cfabort>
-						</cfif>
+						</cfif> --->
 					</cfloop>
 				<cfelse>
 					<tr><td colspan="7" class="text-center">No entries found.</td></tr>

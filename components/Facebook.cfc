@@ -7,7 +7,8 @@
 
 		<!--- set variables scope --->
 		<cfset variables.dsn = arguments.dsn>
-		<cfset variables.api_url = "https://graph.facebook.com/v2.1/">
+		<!--- <cfset variables.api_url = "https://graph.facebook.com/v2.1/"> --->
+		<cfset variables.api_url = "https://graph.facebook.com/v2.2/">
 		<!--- note this version will be completely deprecated on or about 2015-04-01 --->
 		<cfset variables.legacy_api_url = "https://graph.facebook.com/v1.0/">
 		<cfset variables.unversioned_api_url = "https://graph.facebook.com/">
@@ -47,50 +48,11 @@
 
 				<cfif not structKeyExists(page_result, 'error')>
 
-					<cfset id = "">
-					<cfset category = "">
-					<cfset checkins = "">
-					<cfset description = "">
-					<cfset likes = "">
-					<cfset link = "">
-					<cfset name = "">
-					<cfset username = "">
-
-					<cfif structKeyExists(page_result, 'id')>
-						<cfset id = page_result.id>
-					</cfif>
-					<cfif structKeyExists(page_result, 'category')>
-						<cfset category = page_result.category>
-					</cfif>
-					<cfif structKeyExists(page_result, 'checkins')>
-						<cfset checkins = page_result.checkins>
-					</cfif>
-					<cfif structKeyExists(page_result, 'description')>
-						<cfset description = page_result.description>
-					</cfif>
-					<cfif structKeyExists(page_result, 'likes')>
-						<cfset likes = page_result.likes>
-					</cfif>
-					<cfif structKeyExists(page_result, 'link')>
-						<cfset link = page_result.link>
-					</cfif>
-					<cfif structKeyExists(page_result, 'name')>
-						<cfset name = page_result.name>
-					</cfif>
-					<cfif structKeyExists(page_result, 'username')>
-						<cfset username = page_result.username>
-					</cfif>
+					<cfset page = parsePageObject(page_result)>
 
 					<cfset insertFacebookPage (
 						scheduleId = arguments.scheduleId,
-						id = id,
-						category = category,
-						checkins = checkins,
-						description = description,
-						likes = likes,
-						link = link,
-						name = name,
-						username = username
+						page = page
 					)>
 
 				</cfif>
@@ -110,6 +72,25 @@
 			</cfhttp>
 
 			<cfset page_result = deserializeJson(cfhttp.fileContent)>
+
+			<cfif arguments.save_results>
+
+				<cfif not structKeyExists(page_result, 'error')>
+
+					<cfloop from="1" to="#arrayLen(page_result.data)#" index="i">
+
+						<cfset page = parsePageObject(page_result.data[i])>
+
+						<cfset insertFacebookPage (
+							scheduleId = arguments.scheduleId,
+							page = page
+						)>
+
+					</cfloop>
+
+				</cfif>
+
+			</cfif>
 
 		<cfelse>
 			<cfreturn "{}">
@@ -181,60 +162,16 @@
 					<cfif structKeyExists(thisFeed, 'message')>
 						<cfif findNoCase(arguments.searchTerm, thisFeed.message)>
 
-							<!--- defaults --->
-							<cfset id = "">
-							<cfset from_name = "">
-							<cfset from_id = "">
-							<cfset message = thisFeed.message>
-							<cfset type = "">
-							<cfset link = "">
-							<cfset name = "">
-							<cfset caption = "">
-							<cfset created_time = "">
-
-							<cfif structKeyExists(thisFeed, "id")>
-								<cfset id = thisFeed.id>
-							</cfif>
-							<cfif structKeyExists(thisFeed, "from")>
-								<cfif structKeyExists(thisFeed.from, "name")>
-									<cfset from_name = thisFeed.from.name>
-								</cfif>
-								<cfif structKeyExists(thisFeed.from, "id")>
-									<cfset from_id = thisFeed.from.id>
-								</cfif>
-							</cfif>
-							<cfif structKeyExists(thisFeed, "type")>
-								<cfset type = thisFeed.type>
-							</cfif>
-							<cfif structKeyExists(thisFeed, "link")>
-								<cfset link = thisFeed.link>
-							</cfif>
-							<cfif structKeyExists(thisFeed, "name")>
-								<cfset name = thisFeed.name>
-							</cfif>
-							<cfif structKeyExists(thisFeed, "caption")>
-								<cfset caption = thisFeed.caption>
-							</cfif>
-							<cfif structKeyExists(thisFeed, "created_time")>
-								<cfset created_time = convertCreatedTimeToBigint(thisFeed.created_time)>
-							</cfif>
+							<cfset feed = parsePageFeedObject(thisFeed)>
 
 							<cfset insertFacebookPageFeed (
 								scheduleId = arguments.scheduleId,
 								pageId = arguments.pageId,
-								id = id,
-								from_name = from_name,
-								from_id = from_id,
-								message = message,
-								type = type,
-								link = link,
-								name = name,
-								caption = caption,
-								created_time = created_time
+								feed = feed
 							)>
 
 							<cfset getUser (
-								id = from_id,
+								id = feed.from.id,
 								access_token = arguments.access_token,
 								save_results = arguments.save_results
 							)>
@@ -282,68 +219,24 @@
 
 				<cfif not structKeyExists(post_result, 'error')>
 
-					<p><cfoutput>saving post</cfoutput></p>
-					<cfdump var="#post_result#">
+					<cfset post = parsePostObject(post_result)>
 
-					<cfset pageId = listFirst(arguments.postId, "_")>
-					<cfset from_name = ''>
-					<cfset from_id = ''>
-					<cfset message = ''>
-					<cfset type = ''>
-					<cfset status_type = ''>
-					<cfset object_id = ''>
-					<cfset created_time = ''>
-					<cfset shares_count = ''>
-					<cfset likes_count = ''>
-
-					<cfif structKeyExists(post_result, "from")>
-						<cfif structKeyExists(post_result.from, "name")>
-							<cfset from_name = post_result.from.name>
-						</cfif>
-						<cfif structKeyExists(post_result.from, "id")>
-							<cfset from_id = post_result.from.id>
-						</cfif>
-					</cfif>
-					<cfif structKeyExists(post_result, 'message')>
-						<cfset message = post_result.message>
-					</cfif>
-					<cfif structKeyExists(post_result, 'type')>
-						<cfset type = post_result.type>
-					</cfif>
-					<cfif structKeyExists(post_result, 'status_type')>
-						<cfset status_type = post_result.status_type>
-					</cfif>
-					<cfif structKeyExists(post_result, 'object_id')>
-						<cfset object_id = post_result.object_id>
-					</cfif>
-					<cfif structKeyExists(post_result, 'created_time')>
-						<cfset created_time = convertCreatedTimeToBigint(post_result.created_time)>
-					</cfif>
-					<cfif structKeyExists(post_result, 'shares')>
-						<cfset shares_count = post_result.shares.count>
-					</cfif>
-					<cfif structKeyExists(post_result, 'likes')>
-						<cfset likes_count = arrayLen(post_result.likes.data)>
+					<!--- get likes for this post --->
+					<cfset postLikes = getLikes (
+						id = post.id,
+						access_token = arguments.access_token
+					)>
+					<cfif structKeyExists(postLikes, "summary") and structKeyExists(postLikes.summary, "total_count")>
+						<cfset post.likes.count = postLikes.summary.total_count>
 					</cfif>
 
 					<cfset insertFacebookPost (
 						scheduleId = arguments.scheduleId,
-						pageId = pageId,
-						id =  arguments.postId,
-						from_name = from_name,
-						from_id = from_id,
-						message = message,
-						type = type,
-						status_type = status_type,
-						object_id = object_id,
-						likes_count = likes_count,
-						shares_count = shares_count,
-						created_time = created_time
+						post = post
 					)>
 
-
 					<cfset getUser (
-						id = from_id,
+						id = post.from.id,
 						access_token = arguments.access_token,
 						save_results = arguments.save_results
 					)>
@@ -394,49 +287,15 @@
 					<cfif structKeyExists(thisComment, 'message')>
 						<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, thisComment.message)>
 
-							<!--- defaults --->
-							<cfset id = "">
-							<cfset from_name = "">
-							<cfset from_id = "">
-							<cfset message = thisComment.message>
-							<cfset like_count = "">
-							<cfset comment_count = "">
-							<cfset created_time = "">
-
-							<cfif structKeyExists(thisComment, "id")>
-								<cfset id = thisComment.id>
-							</cfif>
-							<cfif structKeyExists(thisComment, "from")>
-								<cfif structKeyExists(thisComment.from, "name")>
-									<cfset from_name = thisComment.from.name>
-								</cfif>
-								<cfif structKeyExists(thisComment.from, "id")>
-									<cfset from_id = thisComment.from.id>
-								</cfif>
-							</cfif>
-							<cfif structKeyExists(thisComment, "like_count")>
-								<cfset like_count = thisComment.like_count>
-							</cfif>
-							<cfif structKeyExists(thisComment, "comment_count")>
-								<cfset comment_count = thisComment.comment_count>
-							</cfif>
-							<cfif structKeyExists(thisComment, "created_time")>
-								<cfset created_time = convertCreatedTimeToBigint(thisComment.created_time)>
-							</cfif>
+							<cfset comment = parseCommentObject(thisComment)>
 
 							<cfset insertFacebookPostComment (
 								scheduleId = arguments.scheduleId,
-								id = id,
-								from_name = from_name,
-								from_id = from_id,
-								message = message,
-								like_count = like_count,
-								comment_count = comment_count,
-								created_time = created_time
+								comment = comment
 							)>
 
 							<cfset getUser (
-								id = from_id,
+								id = comment.from.id,
 								access_token = arguments.access_token,
 								save_results = arguments.save_results
 							)>
@@ -474,78 +333,10 @@
 
 			<cfif arguments.save_results>
 
-				<cfset id = arguments.Id>
-				<cfset age_range_min = "">
-				<cfset age_range_max = "">
-				<cfset birthday = "">
-				<cfset email = "">
-				<cfset first_name = "">
-				<cfset gender = "">
-				<cfset last_name = "">
-				<cfset link = "">
-				<cfset locale = "">
-				<cfset middle_name = "">
-				<cfset name = "">
-				<cfset username = "">
-				<cfset timezone = "">
-
-				<cfif structKeyExists(user_result, "age_range")>
-					<cfif structKeyExists(user_result.age_range, "min")>
-						<cfset age_range_min = user_result.age_range.min>
-					</cfif>
-					<cfif structKeyExists(user_result.age_range, "max")>
-						<cfset age_range_max = user_result.age_range.max>
-					</cfif>
-				</cfif>
-				<cfif structKeyExists(user_result, "birthday")>
-					<cfset birthday = user_result.birthday>
-				</cfif>
-				<cfif structKeyExists(user_result, "email")>
-					<cfset email = user_result.email>
-				</cfif>
-				<cfif structKeyExists(user_result, "first_name")>
-					<cfset first_name = user_result.first_name>
-				</cfif>
-				<cfif structKeyExists(user_result, "gender")>
-					<cfset gender = user_result.gender>
-				</cfif>
-				<cfif structKeyExists(user_result, "last_name")>
-					<cfset last_name = user_result.last_name>
-				</cfif>
-				<cfif structKeyExists(user_result, "link")>
-					<cfset link = user_result.link>
-				</cfif>
-				<cfif structKeyExists(user_result, "locale")>
-					<cfset locale = user_result.locale>
-				</cfif>
-				<cfif structKeyExists(user_result, "middle_name")>
-					<cfset middle_name = user_result.middle_name>
-				</cfif>
-				<cfif structKeyExists(user_result, "name")>
-					<cfset name = user_result.name>
-				</cfif>
-				<cfif structKeyExists(user_result, "username")>
-					<cfset username = user_result.username>
-				</cfif>
-				<cfif structKeyExists(user_result, "timezone")>
-					<cfset timezone = user_result.timezone>
-				</cfif>
+				<cfset user = parseUserObject(user_result)>
 
 				<cfset insertFacebookUser (
-					id = arguments.Id,
-					age_range_min = age_range_min,
-					age_range_max = age_range_max,
-					birthday = birthday,
-					email = email,
-					first_name = first_name,
-					gender = gender,
-					last_name = last_name,
-					link = link,
-					locale = locale,
-					middle_name = middle_name,
-					name = name,
-					username = username,
-					timezone = timezone
+					user = user
 				)>
 
 			</cfif>
@@ -553,6 +344,7 @@
 			<cfreturn user_result>
 
 			<cfcatch type="any">
+				<cfdump var="#cfcatch#">
 				<cfreturn '{"error": true}'>
 			</cfcatch>
 
@@ -571,11 +363,14 @@
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
 
+		<!--- their documentation for v2.2 SAYS that a total_count field will be returned, but so far, this is UNTRUE! --->
+		<!--- https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes --->
 		<cfhttp url="#variables.api_url##arguments.id#/likes" method="get" charset="utf-8">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
 			<cfhttpparam type="url" name="since" value="#arguments.since#">
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
+			<cfhttpparam type="url" name="summary" value="1">
 			<cfhttpparam type="url" name="fields" value="id,name">
 		</cfhttp>
 
@@ -592,7 +387,7 @@
 	</cffunction>
 
 
-	<cffunction name="searchFacebook" output="no">
+	<cffunction name="searchFacebook" output="yes">
 
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="yes">
@@ -628,55 +423,13 @@
 
 						<cfset thisResult = parseSearchObject(thisResult)>
 
-						<!--- <cfset id = thisResult.id>
-						<cfset from_id = thisResult.from.id>
-						<cfset from_name = thisResult.from.name>
-						<cfset type = thisResult.type>
-						<cfset created_time = thisResult.created_time><!--- sometimes this is bigint, sometimes its a string (2014-10-23T20:47:58+0000) --->
-
-						<cfset link = "">
-						<cfset name = "">
-						<cfset message = "">
-						<cfset caption = "">
-						<cfset story = "">
-						<cfset picture = "">
-						<cfset status_type = "">
-						<cfset object_id = "">
-
-						<cfif structKeyExists(thisResult, "link")>
-							<cfset link = thisResult.link>
-						</cfif>
-						<cfif structKeyExists(thisResult, "name")>
-							<cfset name = thisResult.name>
-						</cfif>
-						<cfif structKeyExists(thisResult, "message")>
-							<cfset message = thisResult.message>
-						</cfif>
-						<cfif structKeyExists(thisResult, "caption")>
-							<cfset caption = thisResult.caption>
-						</cfif>
-						<cfif structKeyExists(thisResult, "story")>
-							<cfset story = thisResult.story>
-						</cfif>
-						<cfif structKeyExists(thisResult, "picture")>
-							<cfset picture = thisResult.picture>
-						</cfif>
-						<cfif structKeyExists(thisResult, "status_type")>
-							<cfset status_type = thisResult.status_type>
-						</cfif>
-						<cfif structKeyExists(thisResult, "object_id")>
-							<cfset object_id = thisResult.object_id>
-						</cfif>
-
-						<cfset created_time = convertCreatedTimeToBigint(created_time)> --->
-
 						<cfset insertFacebookSearchResult (
 							scheduleId = arguments.scheduleId,
 							search = thisResult
 						)>
 
 						<cfset getUser (
-							id = from_id,
+							id = thisResult.from.id,
 							access_token = arguments.access_token,
 							save_results = arguments.save_results
 						)>
@@ -736,19 +489,13 @@
 	<cffunction name="insertFacebookPostComment" output="no" returntype="void">
 
 		<cfargument name="scheduleId" default="">
-		<cfargument name="id" default="">
-		<cfargument name="from_id" default="">
-		<cfargument name="from_name" default="">
-		<cfargument name="message" default="">
-		<cfargument name="created_time" default="">
-		<cfargument name="like_count" default="">
-		<cfargument name="comment_count" default="">
+		<cfargument name="comment" required="yes" type="struct">
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
 				select 1
 				from FacebookComments
-				where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+				where id = <cfqueryparam value="#arguments.comment.id#" cfsqltype="cf_sql_varchar">
 				<cfif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
@@ -767,13 +514,13 @@
 				)
 				values (
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_id#" null="#not len(arguments.from_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_name#" null="#not len(arguments.from_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.message#" null="#not len(arguments.message)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.created_time#" null="#not len(arguments.created_time)#" cfsqltype="cf_sql_bigint">,
-					<cfqueryparam value="#arguments.like_count#" null="#not len(arguments.like_count)#" cfsqltype="cf_sql_int">,
-					<cfqueryparam value="#arguments.comment_count#" null="#not len(arguments.comment_count)#" cfsqltype="cf_sql_int">
+					<cfqueryparam value="#arguments.comment.id#" null="#not len(arguments.comment.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.comment.from.id#" null="#not len(arguments.comment.from.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.comment.from.name#" null="#not len(arguments.comment.from.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.comment.message#" null="#not len(arguments.comment.message)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.comment.created_time#" null="#not len(arguments.comment.created_time)#" cfsqltype="cf_sql_bigint">,
+					<cfqueryparam value="#arguments.comment.like_count#" null="#not len(arguments.comment.like_count)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.comment.comment_count#" null="#not len(arguments.comment.comment_count)#" cfsqltype="cf_sql_int">
 				)
 
 			end
@@ -830,19 +577,6 @@
 
 		<cfargument name="scheduleId" default="">
 		<cfargument name="search" required="yes" type="struct">
-		<!--- <cfargument name="id" default="">
-		<cfargument name="from_id" default="">
-		<cfargument name="from_name" default="">
-		<cfargument name="message" default="">
-		<cfargument name="story" default="">
-		<cfargument name="picture" default="">
-		<cfargument name="link" default="">
-		<cfargument name="name" default="">
-		<cfargument name="caption" default="">
-		<cfargument name="type" default="">
-		<cfargument name="status_type" default="">
-		<cfargument name="object_id" default="">
-		<cfargument name="created_time" default=""> --->
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
@@ -900,20 +634,13 @@
 	<cffunction name="insertFacebookPage" output="no" returntype="void">
 
 		<cfargument name="scheduleId" default="">
-		<cfargument name="id" default="">
-		<cfargument name="category" default="">
-		<cfargument name="checkins" default="">
-		<cfargument name="description" default="">
-		<cfargument name="likes" default="">
-		<cfargument name="link" default="">
-		<cfargument name="name" default="">
-		<cfargument name="username" default="">
+		<cfargument name="page" required="yes" type="struct">
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
 				select 1
 				from FacebookPages
-				where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+				where id = <cfqueryparam value="#arguments.page.id#" cfsqltype="cf_sql_varchar">
 				<cfif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
@@ -933,14 +660,14 @@
 				)
 				values (
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
-					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.category#" null="#not len(arguments.category)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.checkins#" null="#not len(arguments.checkins)#" cfsqltype="cf_sql_int">,
-					<cfqueryparam value="#arguments.description#" null="#not len(arguments.description)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.likes#" null="#not len(arguments.likes)#" cfsqltype="cf_sql_int">,
-					<cfqueryparam value="#arguments.link#" null="#not len(arguments.link)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.username#" null="#not len(arguments.username)#" cfsqltype="cf_sql_varchar">
+					<cfqueryparam value="#arguments.page.id#" null="#not len(arguments.page.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.page.category#" null="#not len(arguments.page.category)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.page.checkins#" null="#not len(arguments.page.checkins)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.page.description#" null="#not len(arguments.page.description)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.page.likes#" null="#not len(arguments.page.likes)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.page.link#" null="#not len(arguments.page.link)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.page.name#" null="#not len(arguments.page.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.page.username#" null="#not len(arguments.page.username)#" cfsqltype="cf_sql_varchar">
 				)
 
 			end
@@ -949,9 +676,10 @@
 				begin
 
 					update FacebookPages
-					set checkins = <cfqueryparam value="#arguments.checkins#" null="#not len(arguments.checkins)#" cfsqltype="cf_sql_int">,
-					likes = <cfqueryparam value="#arguments.likes#" null="#not len(arguments.likes)#" cfsqltype="cf_sql_int">
-					where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+					set modifyDate = getdate(),
+					checkins = <cfqueryparam value="#arguments.page.checkins#" null="#not len(arguments.page.checkins)#" cfsqltype="cf_sql_int">,
+					likes = <cfqueryparam value="#arguments.page.likes#" null="#not len(arguments.page.likes)#" cfsqltype="cf_sql_int">
+					where id = <cfqueryparam value="#arguments.page.id#" cfsqltype="cf_sql_varchar">
 
 				end
 
@@ -966,21 +694,13 @@
 
 		<cfargument name="scheduleId" default="">
 		<cfargument name="pageId" default="">
-		<cfargument name="id" default="">
-		<cfargument name="from_name" default="">
-		<cfargument name="from_id" default="">
-		<cfargument name="message" default="">
-		<cfargument name="type" default="">
-		<cfargument name="link" default="">
-		<cfargument name="name" default="">
-		<cfargument name="caption" default="">
-		<cfargument name="created_time" default="">
+		<cfargument name="feed" required="yes" type="struct">
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
 				select 1
 				from FacebookPageFeeds
-				where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+				where id = <cfqueryparam value="#arguments.feed.id#" cfsqltype="cf_sql_varchar">
 				<cfif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
@@ -1003,15 +723,15 @@
 				values (
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.pageId#" null="#not len(arguments.pageId)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_name#" null="#not len(arguments.from_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_id#" null="#not len(arguments.from_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.message#" null="#not len(arguments.message)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.type#" null="#not len(arguments.type)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.link#" null="#not len(arguments.link)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.caption#" null="#not len(arguments.caption)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.created_time#" null="#not len(arguments.created_time)#" cfsqltype="cf_sql_bigint">
+					<cfqueryparam value="#arguments.feed.id#" null="#not len(arguments.feed.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.from.name#" null="#not len(arguments.feed.from.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.from.id#" null="#not len(arguments.feed.from.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.message#" null="#not len(arguments.feed.message)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.type#" null="#not len(arguments.feed.type)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.link#" null="#not len(arguments.feed.link)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.name#" null="#not len(arguments.feed.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.caption#" null="#not len(arguments.feed.caption)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.feed.created_time#" null="#not len(arguments.feed.created_time)#" cfsqltype="cf_sql_bigint">
 				)
 
 			end
@@ -1025,22 +745,17 @@
 
 		<cfargument name="scheduleId" default="">
 		<cfargument name="pageId" default="">
-		<cfargument name="id" default="">
-		<cfargument name="from_name" default="">
-		<cfargument name="from_id" default="">
-		<cfargument name="message" default="">
-		<cfargument name="type" default="">
-		<cfargument name="status_type" default="">
-		<cfargument name="object_id" default="">
-		<cfargument name="created_time" default="">
-		<cfargument name="shares_count" default="">
-		<cfargument name="likes_count" default="">
+		<cfargument name="post" required="yes" type="struct">
+
+		<cfif not len(arguments.pageId)>
+			<cfset arguments.pageId = getToken(arguments.post.id, 1, '_')>
+		</cfif>
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
 				select 1
 				from FacebookPosts
-				where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+				where id = <cfqueryparam value="#arguments.post.id#" cfsqltype="cf_sql_varchar">
 				<cfif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
@@ -1064,16 +779,16 @@
 				values (
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.pageId#" null="#not len(arguments.pageId)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_name#" null="#not len(arguments.from_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.from_id#" null="#not len(arguments.from_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.message#" null="#not len(arguments.message)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.type#" null="#not len(arguments.type)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.status_type#" null="#not len(arguments.status_type)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.object_id#" null="#not len(arguments.object_id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.created_time#" null="#not len(arguments.created_time)#" cfsqltype="cf_sql_bigint">,
-					<cfqueryparam value="#arguments.shares_count#" null="#not len(arguments.shares_count)#" cfsqltype="cf_sql_int">,
-					<cfqueryparam value="#arguments.likes_count#" null="#not len(arguments.likes_count)#" cfsqltype="cf_sql_int">
+					<cfqueryparam value="#arguments.post.id#" null="#not len(arguments.post.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.from.name#" null="#not len(arguments.post.from.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.from.id#" null="#not len(arguments.post.from.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.message#" null="#not len(arguments.post.message)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.type#" null="#not len(arguments.post.type)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.status_type#" null="#not len(arguments.post.status_type)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.object_id#" null="#not len(arguments.post.object_id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.post.created_time#" null="#not len(arguments.post.created_time)#" cfsqltype="cf_sql_bigint">,
+					<cfqueryparam value="#arguments.post.shares.count#" null="#not len(arguments.post.shares.count)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.post.likes.count#" null="#not len(arguments.post.likes.count)#" cfsqltype="cf_sql_int">
 				)
 
 			end
@@ -1083,9 +798,10 @@
 				begin
 
 					update FacebookPosts
-					set [shares.count] = <cfqueryparam value="#arguments.shares_count#" null="#not len(arguments.shares_count)#" cfsqltype="cf_sql_int">,
-					[likes.count] = <cfqueryparam value="#arguments.likes_count#" null="#not len(arguments.likes_count)#" cfsqltype="cf_sql_int">
-					where id = <cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">
+					set modifyDate = getdate(),
+					[shares.count] = <cfqueryparam value="#arguments.post.shares.count#" null="#not len(arguments.post.shares.count)#" cfsqltype="cf_sql_int">,
+					[likes.count] = <cfqueryparam value="#arguments.post.likes.count#" null="#not len(arguments.post.likes.count)#" cfsqltype="cf_sql_int">
+					where id = <cfqueryparam value="#arguments.post.id#" null="#not len(arguments.post.id)#" cfsqltype="cf_sql_varchar">
 
 				end
 
@@ -1098,26 +814,13 @@
 
 	<cffunction name="insertFacebookUser" output="no" returntype="void">
 
-		<cfargument name="id" required="yes">
-		<cfargument name="age_range_min" default="">
-		<cfargument name="age_range_max" default="">
-		<cfargument name="birthday" default="">
-		<cfargument name="email" default="">
-		<cfargument name="first_name" default="">
-		<cfargument name="gender" default="">
-		<cfargument name="last_name" default="">
-		<cfargument name="link" default="">
-		<cfargument name="locale" default="">
-		<cfargument name="middle_name" default="">
-		<cfargument name="name" default="">
-		<cfargument name="username" default="">
-		<cfargument name="timezone" default="">
+		<cfargument name="user" required="yes" type="struct">
 
 		<cfquery datasource="#variables.dsn#">
 			if not exists (
 				select 1
 				from FacebookUsers
-				where id = <cfqueryparam value="#arguments.id#" cfsqltype="cf_sql_varchar">
+				where id = <cfqueryparam value="#arguments.user.id#" cfsqltype="cf_sql_varchar">
 			)
 			begin
 
@@ -1134,24 +837,24 @@
 					locale,
 					middle_name,
 					name,
-					username,
-					timezone
+					timezone,
+					username
 				)
 				values (
-					<cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.age_range_min#" null="#not len(arguments.age_range_min)#" cfsqltype="cf_sql_int">,
-					<cfqueryparam value="#arguments.age_range_max#" null="#not len(arguments.age_range_max)#" cfsqltype="cf_sql_int">,
-					<cfqueryparam value="#arguments.birthday#" null="#not len(arguments.birthday)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.email#" null="#not len(arguments.email)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.first_name#" null="#not len(arguments.first_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.gender#" null="#not len(arguments.gender)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.last_name#" null="#not len(arguments.last_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.link#" null="#not len(arguments.link)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.locale#" null="#not len(arguments.locale)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.middle_name#" null="#not len(arguments.middle_name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.username#" null="#not len(arguments.username)#" cfsqltype="cf_sql_varchar">,
-					<cfqueryparam value="#arguments.timezone#" null="#not len(arguments.timezone)#" cfsqltype="cf_sql_int">
+					<cfqueryparam value="#arguments.user.id#" null="#not len(arguments.user.id)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.age_range.min#" null="#not len(arguments.user.age_range.min)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.user.age_range.max#" null="#not len(arguments.user.age_range.max)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.user.birthday#" null="#not len(arguments.user.birthday)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.email#" null="#not len(arguments.user.email)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.first_name#" null="#not len(arguments.user.first_name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.gender#" null="#not len(arguments.user.gender)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.last_name#" null="#not len(arguments.user.last_name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.link#" null="#not len(arguments.user.link)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.locale#" null="#not len(arguments.user.locale)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.middle_name#" null="#not len(arguments.user.middle_name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.name#" null="#not len(arguments.user.name)#" cfsqltype="cf_sql_varchar">,
+					<cfqueryparam value="#arguments.user.timezone#" null="#not len(arguments.user.timezone)#" cfsqltype="cf_sql_int">,
+					<cfqueryparam value="#arguments.user.username#" null="#not len(arguments.user.username)#" cfsqltype="cf_sql_varchar">
 				)
 
 			end
@@ -1161,8 +864,8 @@
 				begin
 
 					update FacebookUsers
-					set username = <cfqueryparam value="#arguments.username#" null="#not len(arguments.username)#" cfsqltype="cf_sql_varchar">
-					where id = <cfqueryparam value="#arguments.id#" null="#not len(arguments.id)#" cfsqltype="cf_sql_varchar">
+					set username = <cfqueryparam value="#arguments.user.username#" null="#not len(arguments.user.username)#" cfsqltype="cf_sql_varchar">
+					where id = <cfqueryparam value="#arguments.user.id#" cfsqltype="cf_sql_varchar">
 
 				end
 
@@ -1233,6 +936,260 @@
 		</cfif>
 
 		<cfreturn local.search>
+
+	</cffunction>
+
+
+	<cffunction name="parseUserObject" output="yes" returntype="struct">
+
+		<cfargument name="user" required="yes" type="struct">
+
+		<!--- set up defaults --->
+		<cfset local.user.id = "">
+		<cfset local.user.age_range.min = "">
+		<cfset local.user.age_range.max = "">
+		<cfset local.user.birthday = "">
+		<cfset local.user.email = "">
+		<cfset local.user.first_name = "">
+		<cfset local.user.gender = "">
+		<cfset local.user.last_name = "">
+		<cfset local.user.link = "">
+		<cfset local.user.locale = "">
+		<cfset local.user.middle_name = "">
+		<cfset local.user.name = "">
+		<cfset local.user.timezone = "">
+		<cfset local.user.username = "">
+
+		<!--- check for existence in user object --->
+		<cfif structKeyExists(arguments.user, "id")>
+			<cfset local.user.id = arguments.user.id>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "age_range") and structKeyExists(arguments.user.age_range, "min")>
+			<cfset local.user.age_range.min = arguments.user.age_range.min>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "age_range") and structKeyExists(arguments.user.age_range, "max")>
+			<cfset local.user.age_range.max = arguments.user.age_range.max>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "birthday")>
+			<cfset local.user.birthday = arguments.user.birthday>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "email")>
+			<cfset local.user.email = arguments.user.email>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "first_name")>
+			<cfset local.user.first_name = arguments.user.first_name>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "gender")>
+			<cfset local.user.gender = arguments.user.gender>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "last_name")>
+			<cfset local.user.last_name = arguments.user.last_name>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "link")>
+			<cfset local.user.link = arguments.user.link>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "locale")>
+			<cfset local.user.locale = arguments.user.locale>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "middle_name")>
+			<cfset local.user.middle_name = arguments.user.middle_name>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "name")>
+			<cfset local.user.name = arguments.user.name>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "timezone")>
+			<cfset local.user.timezone = arguments.user.timezone>
+		</cfif>
+		<cfif structKeyExists(arguments.user, "username")>
+			<cfset local.user.username = arguments.user.username>
+		</cfif>
+
+		<cfreturn local.user>
+
+	</cffunction>
+
+
+	<cffunction name="parsePostObject" output="yes" returntype="struct">
+
+		<cfargument name="post" required="yes" type="struct">
+
+		<!--- set up defaults --->
+		<cfset local.post.id = "">
+		<cfset local.post.from.name = "">
+		<cfset local.post.from.id = "">
+		<cfset local.post.message = "">
+		<cfset local.post.type = "">
+		<cfset local.post.status_type = "">
+		<cfset local.post.object_id = "">
+		<cfset local.post.created_time = "">
+		<cfset local.post.shares.count = "">
+		<cfset local.post.likes.count = "">
+
+		<!--- check for existence in post object --->
+		<cfif structKeyExists(arguments.post, "id")>
+			<cfset local.post.id = arguments.post.id>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "from")>
+			<cfset local.post.from.name = arguments.post.from.name>
+			<cfset local.post.from.id = arguments.post.from.id>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "message")>
+			<cfset local.post.message = arguments.post.message>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "type")>
+			<cfset local.post.type = arguments.post.type>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "status_type")>
+			<cfset local.post.status_type = arguments.post.status_type>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "object_id")>
+			<cfset local.post.object_id = arguments.post.object_id>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "created_time")>
+			<cfset myTime = convertCreatedTimeToBigint(arguments.post.created_time)>
+			<cfset local.post.created_time = myTime>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "shares") and structKeyExists(arguments.post.shares, "count")>
+			<cfset local.post.shares.count = arguments.post.shares.count>
+		</cfif>
+		<cfif structKeyExists(arguments.post, "likes")>
+			<cfset local.post.likes.count = arrayLen(arguments.post.likes.data)>
+		</cfif>
+
+		<cfreturn local.post>
+
+	</cffunction>
+
+
+	<cffunction name="parsePageFeedObject" output="yes" returntype="struct">
+
+		<cfargument name="pageFeed" required="yes" type="struct">
+
+		<!--- set up defaults --->
+		<cfset local.pageFeed.id = "">
+		<cfset local.pageFeed.from.name = "">
+		<cfset local.pageFeed.from.id = "">
+		<cfset local.pageFeed.message = "">
+		<cfset local.pageFeed.type = "">
+		<cfset local.pageFeed.link = "">
+		<cfset local.pageFeed.name = "">
+		<cfset local.pageFeed.caption = "">
+		<cfset local.pageFeed.created_time = "">
+
+		<!--- check for existence in pageFeed object --->
+		<cfif structKeyExists(arguments.pageFeed, "id")>
+			<cfset local.pageFeed.id = arguments.pageFeed.id>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "from")>
+			<cfset local.pageFeed.from.name = arguments.pageFeed.from.name>
+			<cfset local.pageFeed.from.id = arguments.pageFeed.from.id>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "message")>
+			<cfset local.pageFeed.message = arguments.pageFeed.message>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "type")>
+			<cfset local.pageFeed.type = arguments.pageFeed.type>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "link")>
+			<cfset local.pageFeed.link = arguments.pageFeed.link>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "name")>
+			<cfset local.pageFeed.name = arguments.pageFeed.name>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "caption")>
+			<cfset local.pageFeed.caption = arguments.pageFeed.caption>
+		</cfif>
+		<cfif structKeyExists(arguments.pageFeed, "created_time")>
+			<cfset myTime = convertCreatedTimeToBigint(arguments.pageFeed.created_time)>
+			<cfset local.pageFeed.created_time = myTime>
+		</cfif>
+
+		<cfreturn local.pageFeed>
+
+	</cffunction>
+
+
+	<cffunction name="parsePageObject" output="yes" returntype="struct">
+
+		<cfargument name="page" required="yes" type="struct">
+
+		<!--- set up defaults --->
+		<cfset local.page.id = "">
+		<cfset local.page.category = "">
+		<cfset local.page.checkins = "">
+		<cfset local.page.description = "">
+		<cfset local.page.likes = "">
+		<cfset local.page.link = "">
+		<cfset local.page.name = "">
+		<cfset local.page.username = "">
+
+		<!--- check for existence in page object --->
+		<cfif structKeyExists(arguments.page, "id")>
+			<cfset local.page.id = arguments.page.id>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "category")>
+			<cfset local.page.category = arguments.page.category>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "checkins")>
+			<cfset local.page.checkins = arguments.page.checkins>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "description")>
+			<cfset local.page.description = arguments.page.description>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "likes")>
+			<cfset local.page.likes = arguments.page.likes>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "link")>
+			<cfset local.page.link = arguments.page.link>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "name")>
+			<cfset local.page.name = arguments.page.name>
+		</cfif>
+		<cfif structKeyExists(arguments.page, "username")>
+			<cfset local.page.username = arguments.page.username>
+		</cfif>
+
+		<cfreturn local.page>
+
+	</cffunction>
+
+
+	<cffunction name="parseCommentObject" output="yes" returntype="struct">
+
+		<cfargument name="comment" required="yes" type="struct">
+
+		<!--- set up defaults --->
+		<cfset local.comment.id = "">
+		<cfset local.comment.from.id = "">
+		<cfset local.comment.from.name = "">
+		<cfset local.comment.message = "">
+		<cfset local.comment.created_time = "">
+		<cfset local.comment.like_count = "">
+		<cfset local.comment.comment_count = "">
+
+		<!--- check for existence in comment object --->
+		<cfif structKeyExists(arguments.comment, "id")>
+			<cfset local.comment.id = arguments.comment.id>
+		</cfif>
+		<cfif structKeyExists(arguments.comment, "from")>
+			<cfset local.comment.from.name = arguments.comment.from.name>
+			<cfset local.comment.from.id = arguments.comment.from.id>
+		</cfif>
+		<cfif structKeyExists(arguments.comment, "message")>
+			<cfset local.comment.message = arguments.comment.message>
+		</cfif>
+		<cfif structKeyExists(arguments.comment, "created_time")>
+			<cfset myTime = convertCreatedTimeToBigint(arguments.comment.created_time)>
+			<cfset local.comment.created_time = myTime>
+		</cfif>
+		<cfif structKeyExists(arguments.comment, "like_count")>
+			<cfset local.comment.like_count = arguments.comment.like_count>
+		</cfif>
+		<cfif structKeyExists(arguments.comment, "comment_count")>
+			<cfset local.comment.comment_count = arguments.comment.comment_count>
+		</cfif>
+
+		<cfreturn local.comment>
 
 	</cffunction>
 

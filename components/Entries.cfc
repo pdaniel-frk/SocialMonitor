@@ -33,6 +33,7 @@
 				emailAddress,
 				firstName,
 				lastName,
+				name,
 				userName,
 				entryDate,
 				entryDay,

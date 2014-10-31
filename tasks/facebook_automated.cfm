@@ -86,6 +86,9 @@
 
 		</cfif>
 
+		<!--- 'until' may be modified by the above block, so make sure its reset here, dawg! --->
+		<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', now()))>
+
 		<!--- search page (feeds, feed -> comments) for searchTerm --->
 		<cfif len(getSchedule.searchTerm) and len(getSchedule.monitor_page_id) and not len(getSchedule.monitor_post_id)>
 
@@ -116,7 +119,7 @@
 					save_results = true
 				)>
 
-				<!--- <cfdump var="#feed_result#"> --->
+				<!--- <cfdump var="#feed_result#"><cfabort> --->
 
 				<cfif structKeyExists(feed_result, "data") and arrayLen(feed_result.data)>
 
