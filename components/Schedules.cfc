@@ -15,6 +15,7 @@
 
 	<cffunction name="insertSchedule" output="no" returntype="numeric">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="name" required="yes">
 		<cfargument name="service" required="yes">
 		<cfargument name="searchTerm" required="no" default="">
@@ -29,6 +30,9 @@
 				from Schedules
 				where name = <cfqueryparam value="#arguments.name#" cfsqltype="cf_sql_varchar">
 				and service = <cfqueryparam value="#arguments.service#" cfsqltype="cf_sql_varchar">
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sq_integer">
+				</cfif>
 				<cfif len(arguments.searchTerm)>
 					and searchTerm = <cfqueryparam value="#arguments.searchTerm#" cfsqltype="cf_sql_varchar">
 				</cfif>
@@ -41,6 +45,7 @@
 			)
 			begin
 				insert into Schedules (
+					programId,
 					name,
 					service,
 					searchTerm,
@@ -50,6 +55,7 @@
 					endDate
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.name#" null="#not len(arguments.name)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.service#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.searchTerm#" null="#not len(arguments.searchTerm)#" cfsqltype="cf_sql_varchar">,
@@ -87,6 +93,7 @@
 
 	<cffunction name="getSchedules" output="no" returntype="query">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="name" required="no" default="">
 		<cfargument name="service" required="no" default="">
@@ -104,6 +111,7 @@
 
 		<cfquery name="getSchedules" datasource="#variables.dsn#">
 			select
+				s.programId,
 				s.scheduleId,
 				s.name,
 				s.[service],
@@ -118,6 +126,9 @@
 			left join FacebookPages page on s.monitor_page_id = page.Id and page.scheduleId = s.scheduleId
 			left join FacebookPosts post on s.monitor_post_id = post.Id and post.scheduleId = s.scheduleId
 			where isdate(s.deleteDate) = 0
+			<cfif len(arguments.programId)>
+				and s.programId  = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+			</cfif>
 			<cfif len(arguments.scheduleId)>
 				and s.scheduleId in (<cfqueryparam value="#arguments.scheduleId#" list="yes" cfsqltype="cf_sql_integer">)
 			</cfif>
@@ -153,6 +164,7 @@
 				and isnull(s.endDate, getdate()+1) >= getdate()
 			</cfif>
 			order by
+				s.programId,
 				s.service,
 				s.startDate,
 				s.endDate
@@ -165,6 +177,7 @@
 
 	<cffunction name="updateSchedule" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="yes">
 		<cfargument name="name" required="no" default="">
 		<cfargument name="service" required="no" default="">
@@ -177,6 +190,9 @@
 		<cfquery datasource="#variables.dsn#">
 			update Schedules
 			set modifyDate = getdate()
+			<cfif len(arguments.programId)>
+				, programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+			</cfif>
 			<cfif len(arguments.name)>
 				, name = <cfqueryparam value="#arguments.name#" cfsqltype="cf_sql_varchar">
 			</cfif>

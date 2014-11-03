@@ -15,6 +15,7 @@
 
 	<cffunction name="getEntries" output="no" returntype="query">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="service" required="no" default="">
 		<cfargument name="entryType" required="no" default="">
@@ -23,6 +24,7 @@
 
 		<cfquery name="getEntries" datasource="#variables.dsn#">
 			select
+				programId,
 				scheduleId,
 				[service],
 				entryType,
@@ -40,6 +42,9 @@
 				rowNumber
 			from uvwSelectEntries
 			where 1=1
+			<cfif len(arguments.programId)>
+				and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+			</cfif>
 			<cfif len(arguments.scheduleId)>
 				and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 			</cfif>
@@ -64,6 +69,7 @@
 
 	<cffunction name="getFacebookEntries" output="no" returntype="query">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="entryType" required="no" default="">
 		<cfargument name="userId" required="no" default="">
@@ -78,6 +84,7 @@
 
 	<cffunction name="getTwitterEntries" output="no" returntype="query">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="entryType" required="no" default="">
 		<cfargument name="userId" required="no" default="">
@@ -92,6 +99,7 @@
 
 	<cffunction name="getInstagramEntries" output="no" returntype="query">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="entryType" required="no" default="">
 		<cfargument name="userId" required="no" default="">
@@ -106,6 +114,7 @@
 
 	<cffunction name="getVineEntries" output="no" returntype="query">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="entryType" required="no" default="">
 		<cfargument name="userId" required="no" default="">
@@ -113,6 +122,21 @@
 
 		<cfreturn getEntries (
 			service = 'Vine',
+			argumentcollection = arguments
+		)>
+	</cffunction>
+
+
+	<cffunction name="getGPlusEntries" output="no" returntype="query">
+
+		<cfargument name="programId" required="no" default="">
+		<cfargument name="scheduleId" required="no" default="">
+		<cfargument name="entryType" required="no" default="">
+		<cfargument name="userId" required="no" default="">
+		<cfargument name="entryDay" required="no" default="">
+
+		<cfreturn getEntries (
+			service = 'GPlus',
 			argumentcollection = arguments
 		)>
 	</cffunction>

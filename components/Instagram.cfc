@@ -15,6 +15,7 @@
 
 	<cffunction name="getSinceId" output="no" returntype="numeric">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
 
@@ -40,6 +41,7 @@
 
 	<cffunction name="insertInstagramEntry" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="Id" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
@@ -67,12 +69,15 @@
 				select 1
 				from InstagramEntries
 				where Id = <cfqueryparam value="#arguments.id#">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 				insert into InstagramEntries (
+					programId,
 					[scheduleId],
 					[Id],
 					[SearchTerm],
@@ -96,6 +101,7 @@
 					[user.id]
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.Id#" null="#not len(arguments.Id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.searchTerm#" null="#not len(arguments.searchTerm)#" cfsqltype="cf_sql_varchar">,

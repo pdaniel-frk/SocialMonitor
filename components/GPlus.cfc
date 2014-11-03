@@ -21,6 +21,7 @@
 	<!--- https://developers.google.com/+/api/latest/people#resource --->
 	<cffunction name="getPeople" output="no">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="userId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
@@ -73,6 +74,7 @@
 	<!--- https://developers.google.com/+/api/latest/activities#resource --->
 	<cffunction name="getActivities" output="yes">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="activityId" required="no" default="">
@@ -140,16 +142,14 @@
 										<cfset activity = parseActivityObject(activity_result.items[i])>
 
 										<cfset insertActivity (
+											programId = arguments.programId,
 											scheduleId = arguments.scheduleId,
 											activity = activity
 										)>
 
 										<cfset user = getPeople(userId=activity.actor.id, api_key=arguments.api_key)>
 										<cfset user = parseUserObject(user)>
-										<cfset insertUser (
-											scheduleId = arguments.scheduleId,
-											user = user
-										)>
+										<cfset insertUser(user=user)>
 
 									</cfif>
 
@@ -180,10 +180,13 @@
 
 	</cffunction>
 
+
 	<!--- https://developers.google.com/+/api/latest/comments#resource --->
 	<cffunction name="getComments" output="no">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
+		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="commentId" required="no" default="">
 		<cfargument name="activityId" required="no" default="">
 		<cfargument name="api_key" required="no" default="">
@@ -203,7 +206,28 @@
 
 				<cfset comment_result = deserializeJson(cfhttp.fileContent)>
 
-				<cfif arguments.save_results></cfif>
+				<cfif arguments.save_results>
+
+					<cfset comment = parseCommentObject(comment_result)>
+
+					<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, comment.object.content)>
+
+						<cfset insertGoogleComment (
+							programId = arguments.programId,
+							scheduleId = arguments.scheduleId,
+							comment = comment
+						)>
+
+						<!--- get this comments author --->
+						<cfset getPeople (
+							userId = comment.actor.id,
+							api_key = credentials.gplus.api_key,
+							save_results = arguments.save_results
+						)>
+
+					</cfif>
+
+				</cfif>
 
 			<cfelseif len(arguments.activityId)>
 
@@ -218,7 +242,32 @@
 
 				<cfset comment_result = deserializeJson(cfhttp.fileContent)>
 
-				<cfif arguments.save_results></cfif>
+				<cfif arguments.save_results>
+
+					<cfloop from="1" to="#arrayLen(comment_result.items)#" index="ci">
+
+						<cfset comment = parseCommentObject(comment_result.items[ci])>
+
+						<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, comment.object.content)>
+
+							<cfset insertGoogleComment (
+								programId = arguments.programId,
+								scheduleId = arguments.scheduleId,
+								comment = comment
+							)>
+
+							<!--- get this comments author --->
+							<cfset getPeople (
+								userId = comment.actor.id,
+								api_key = credentials.gplus.api_key,
+								save_results = arguments.save_results
+							)>
+
+						</cfif>
+
+					</cfloop>
+
+				</cfif>
 
 			</cfif>
 
@@ -235,6 +284,7 @@
 
 	<cffunction name="getMoments" output="no">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="userId" required="no" default="">
 		<cfargument name="api_key" required="no" default="">
@@ -274,9 +324,9 @@
 
 	<cffunction name="insertActivity" output="yes" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="activity" required="yes" type="struct">
-		<!--- <cfset arguments.activity = parseActivityObject(arguments.activity)> --->
 
 		<cfquery datasource="#variables.dsn#">
 
@@ -284,13 +334,16 @@
 				select 1
 				from GoogleActivities
 				where id = <cfqueryparam value="#arguments.activity.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into GoogleActivities (
+					programId,
 					scheduleId,
 					id,
 					kind,
@@ -308,6 +361,7 @@
 					published
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.activity.id#" null="#not len(arguments.activity.id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.activity.kind#" null="#not len(arguments.activity.kind)#" cfsqltype="cf_sql_varchar">,
@@ -336,9 +390,7 @@
 
 	<cffunction name="insertUser" output="yes" returntype="void">
 
-		<cfargument name="scheduleId" default="">
 		<cfargument name="user" required="yes" type="struct">
-		<!--- <cfset arguments.activity = parseActivityObject(arguments.activity)> --->
 
 		<cfquery datasource="#variables.dsn#">
 
@@ -381,6 +433,7 @@
 
 	<cffunction name="insertComment" output="yes" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="comment" required="yes" type="struct">
 
@@ -390,13 +443,16 @@
 				select 1
 				from GoogleComments
 				where id = <cfqueryparam value="#arguments.comment.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into GoogleComments (
+					programId,
 					scheduleId,
 					id,
 					kind,
@@ -410,6 +466,7 @@
 					published
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.comment.id#" null="#not len(arguments.comment.id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.comment.kind#" null="#not len(arguments.comment.kind)#" cfsqltype="cf_sql_varchar">,

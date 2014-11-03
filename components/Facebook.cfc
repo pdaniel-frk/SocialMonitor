@@ -23,6 +23,7 @@
 
 	<cffunction name="getPage" output="no">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="pageId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
@@ -51,6 +52,7 @@
 					<cfset page = parsePageObject(page_result)>
 
 					<cfset insertFacebookPage (
+						programId = arguments.programId,
 						scheduleId = arguments.scheduleId,
 						page = page
 					)>
@@ -82,6 +84,7 @@
 						<cfset page = parsePageObject(page_result.data[i])>
 
 						<cfset insertFacebookPage (
+							programId = arguments.programId,
 							scheduleId = arguments.scheduleId,
 							page = page
 						)>
@@ -134,6 +137,7 @@
 
 	<cffunction name="getPageFeed" output="yes">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="pageId" required="yes">
 		<cfargument name="searchTerm" required="no" default="">
@@ -165,6 +169,7 @@
 							<cfset feed = parsePageFeedObject(thisFeed)>
 
 							<cfset insertFacebookPageFeed (
+								programId = arguments.programId,
 								scheduleId = arguments.scheduleId,
 								pageId = arguments.pageId,
 								feed = feed
@@ -195,6 +200,7 @@
 
 	<cffunction name="getPost" output="yes">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="postId" required="yes">
 		<cfargument name="until" required="no" default="">
@@ -231,6 +237,7 @@
 					</cfif>
 
 					<cfset insertFacebookPost (
+						programId = arguments.programId,
 						scheduleId = arguments.scheduleId,
 						post = post
 					)>
@@ -259,6 +266,7 @@
 
 	<cffunction name="getComments" output="yes">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="id" required="yes">
@@ -290,6 +298,7 @@
 							<cfset comment = parseCommentObject(thisComment)>
 
 							<cfset insertFacebookPostComment (
+								programId = arguments.programId,
 								scheduleId = arguments.scheduleId,
 								comment = comment
 							)>
@@ -355,6 +364,7 @@
 
 	<cffunction name="getLikes" output="no">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="id" required="yes">
 		<cfargument name="until" required="no" default="">
@@ -389,6 +399,7 @@
 
 	<cffunction name="searchFacebook" output="yes">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="yes">
 		<cfargument name="until" required="no" default="">
@@ -424,6 +435,7 @@
 						<cfset thisResult = parseSearchObject(thisResult)>
 
 						<cfset insertFacebookSearchResult (
+							programId = arguments.programId,
 							scheduleId = arguments.scheduleId,
 							search = thisResult
 						)>
@@ -455,20 +467,27 @@
 
 	<cffunction name="getSince" output="no" returntype="numeric">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
 
 		<cfquery name="getSince" datasource="#variables.dsn#">
 			select coalesce(
 				datediff(s, '1970-01-01', max(entryDate)),
-				<cfif len(arguments.scheduleId)>
-				(
-					select datediff(s, '1970-01-01', startDate)
-					from Schedules
-					where scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-				)
+				<cfif len(arguments.programId)>
+					(
+						select datediff(s, '1970-01-01', startDate)
+						from Programs
+						where Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+					)
+				<cfelseif len(arguments.scheduleId)>
+					(
+						select datediff(s, '1970-01-01', startDate)
+						from Schedules
+						where scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+					)
 				<cfelse>
-				0
+					0
 				</cfif>
 			) as since
 			from uvwSelectFacebookEntries
@@ -488,6 +507,7 @@
 
 	<cffunction name="insertFacebookPostComment" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="comment" required="yes" type="struct">
 
@@ -496,13 +516,16 @@
 				select 1
 				from FacebookComments
 				where id = <cfqueryparam value="#arguments.comment.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into FacebookComments (
+					programId,
 					scheduleId,
 					id,
 					[from.id],
@@ -513,6 +536,7 @@
 					comment_count
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.comment.id#" null="#not len(arguments.comment.id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.comment.from.id#" null="#not len(arguments.comment.from.id)#" cfsqltype="cf_sql_varchar">,
@@ -534,6 +558,7 @@
 
 	<cffunction name="insertFacebookLike" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="pageId" default="#getToken(arguments.postId, 1, '_')#">
 		<cfargument name="postId" default="">
@@ -546,12 +571,15 @@
 				from FacebookLikes
 				where post_id = <cfqueryparam value="#arguments.postId#" cfsqltype="cf_sql_varchar">
 				and user_id = <cfqueryparam value="#arguments.user_id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 				insert into FacebookLikes (
+					programId,
 					scheduleId,
 					pageId,
 					postId,
@@ -559,6 +587,7 @@
 					name
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.pageId#" null="#not len(arguments.pageId)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.postId#" null="#not len(arguments.postId)#" cfsqltype="cf_sql_varchar">,
@@ -575,6 +604,7 @@
 
 	<cffunction name="insertFacebookSearchResult" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="search" required="yes" type="struct">
 
@@ -583,13 +613,16 @@
 				select 1
 				from FacebookSearches
 				where id = <cfqueryparam value="#arguments.search.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into FacebookSearches (
+					programId,
 					scheduleId,
 					id,
 					[from.id],
@@ -606,6 +639,7 @@
 					created_time
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.search.id#" null="#not len(arguments.search.id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.search.from.id#" null="#not len(arguments.search.from.id)#" cfsqltype="cf_sql_varchar">,
@@ -633,6 +667,7 @@
 
 	<cffunction name="insertFacebookPage" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="page" required="yes" type="struct">
 
@@ -641,13 +676,16 @@
 				select 1
 				from FacebookPages
 				where id = <cfqueryparam value="#arguments.page.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into FacebookPages (
+					programId,
 					scheduleId,
 					id,
 					category,
@@ -659,6 +697,7 @@
 					username
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.page.id#" null="#not len(arguments.page.id)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.page.category#" null="#not len(arguments.page.category)#" cfsqltype="cf_sql_varchar">,
@@ -692,6 +731,7 @@
 
 	<cffunction name="insertFacebookPageFeed" output="no" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="pageId" default="">
 		<cfargument name="feed" required="yes" type="struct">
@@ -701,13 +741,16 @@
 				select 1
 				from FacebookPageFeeds
 				where id = <cfqueryparam value="#arguments.feed.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into FacebookPageFeeds (
+					programId,
 					scheduleId,
 					pageId,
 					id,
@@ -721,6 +764,7 @@
 					created_time
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.pageId#" null="#not len(arguments.pageId)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.feed.id#" null="#not len(arguments.feed.id)#" cfsqltype="cf_sql_varchar">,
@@ -743,6 +787,7 @@
 
 	<cffunction name="insertFacebookPost" output="yes" returntype="void">
 
+		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" default="">
 		<cfargument name="pageId" default="">
 		<cfargument name="post" required="yes" type="struct">
@@ -756,13 +801,16 @@
 				select 1
 				from FacebookPosts
 				where id = <cfqueryparam value="#arguments.post.id#" cfsqltype="cf_sql_varchar">
-				<cfif len(arguments.scheduleId)>
+				<cfif len(arguments.programId)>
+					and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				<cfelseif len(arguments.scheduleId)>
 					and scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 				</cfif>
 			)
 			begin
 
 				insert into FacebookPosts (
+					programId,
 					scheduleId,
 					pageId,
 					id,
@@ -777,6 +825,7 @@
 					[likes.count]
 				)
 				values (
+					<cfqueryparam value="#arguments.programId#" null="#not len(arguments.programId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.scheduleId#" null="#not len(arguments.scheduleId)#" cfsqltype="cf_sql_integer">,
 					<cfqueryparam value="#arguments.pageId#" null="#not len(arguments.pageId)#" cfsqltype="cf_sql_varchar">,
 					<cfqueryparam value="#arguments.post.id#" null="#not len(arguments.post.id)#" cfsqltype="cf_sql_varchar">,
