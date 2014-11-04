@@ -1,6 +1,7 @@
+<cfparam name="url.programId" default="">
 <cfparam name="url.service" default="">
 <cfset init("Schedules")>
-<cfset getSchedules = oSchedules.getSchedules(service=url.service)>
+<cfset getSchedules = oSchedules.getSchedules(programId=url.programId, service=url.service)>
 
 <h1 class="page-header">
 	Schedules
@@ -15,12 +16,12 @@
 			</button>
 			<ul class="dropdown-menu dropdown-menu-right" role="menu">
 				<li><a href="facebook.cfm">Facebook</a></li>
+				<li><a href="gplus.cfm">Google+</a></li>
 				<li><a href="instagram.cfm">Instagram</a></li>
 				<li><a href="twitter.cfm">Twitter</a></li>
 				<li><a href="vine.cfm">Vine</a></li>
 				<li class="divider"></li>
 				<li class="disabled"><a href="foursquare.cfm">Foursquare</a></li>
-				<li class="disabled"><a href="gplus.cfm">Google+</a></li>
 				<li class="disabled"><a href="linkedin.cfm">LinkedIn</a></li>
 				<li class="disabled"><a href="pinterest.cfm">Pinterest</a></li>
 				<li class="disabled"><a href="tumblr.cfm">Tumblr</a></li>
@@ -51,6 +52,9 @@
 					from Schedules
 					where isdate(deleteDate) = 0
 					and service = <cfqueryparam value="#service#" cfsqltype="cf_sql_varchar">
+					<cfif len(url.programId)>
+						and programId = <cfqueryparam value="#url.programId#" cfsqltype="cf_sql_integer">
+					</cfif>
 				</cfquery>
 
 				<div class="panel panel-primary">

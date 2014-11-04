@@ -36,6 +36,8 @@
 		<cfinclude template="vine_scripts.cfm">
 	</cfif>
 
+	<script src="<cfoutput>#request.webRoot#</cfoutput>scripts/buttons.js"></script>
+
 	<script>
 		$(function(){
 			<!--- this works on dynamically-added elements, yo (such as the ajax-y populated modal form) --->
@@ -61,7 +63,7 @@
 			    	<!--- append the autocomplete to the modal, otherwise results aint be displayered --->
 					appendTo: "#myModal",
 			    	select : function(event, ui){
-			    		console.log(ui.item.value);
+			    		//console.log(ui.item.value);
 			    	}
 			    });
 

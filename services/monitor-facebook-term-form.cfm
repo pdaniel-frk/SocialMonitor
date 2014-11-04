@@ -33,7 +33,7 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="form-group">
-					<label>Name of Program, Schedule, etc.</label>
+					<label>Name of Schedule</label>
 					<input type="text" id="name" name="name" value="<cfif isDefined('getScheduleInfo')>#HTMLEditFormat(getScheduleInfo.name)#</cfif>" maxlength="100" class="form-control">
 				</div>
 			</div>

@@ -73,7 +73,7 @@
 						searchTerm = form.searchTerm,
 						api_key = credentials.gplus.api_key,
 						nextPageToken = nextPageToken,
-						save_results = true
+						save_results = false
 					)>
 
 					<cfif structKeyExists(activities, "items")>

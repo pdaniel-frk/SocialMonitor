@@ -33,6 +33,8 @@
 		<cfset session.uname = "">
 		<cfset session.emailaddress = "">
 		<cfset session.accesslevel = "">
+		<cfset session.customerId = "">
+		<cfset session.userId = "">
 		<cfset session.stamp = hash(getTickCount(), "sha-1")>
 
 	</cffunction>

@@ -164,8 +164,8 @@
 				and isnull(s.endDate, getdate()+1) >= getdate()
 			</cfif>
 			order by
-				s.programId,
 				s.service,
+				s.programId,
 				s.startDate,
 				s.endDate
 		</cfquery>

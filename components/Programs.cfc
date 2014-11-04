@@ -85,7 +85,7 @@
 	</cffunction>
 
 
-	<cffunction name="getProgram" output="no">
+	<cffunction name="getPrograms" output="no">
 
 		<cfargument name="programId" required="no" default="">
 		<cfargument name="customerId" required="no" default="">
@@ -109,7 +109,7 @@
 				archiveDate,
 				dateArchived
 			from Programs
-			where isdate(deletDate) = 0
+			where isdate(deleteDate) = 0
 			<cfif len(arguments.programId)>
 				and Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 			</cfif>

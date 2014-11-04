@@ -1,75 +1,10 @@
 <cfparam name="scheduleId" default="">
 <cfif len(trim(scheduleId))>
 	<cfset init("Schedules")>
+	<cfset init("Entries")>
 	<cfset scheduleDetails = oSchedules.getSchedules(scheduleId=scheduleId)>
 	<cfif scheduleDetails.recordCount>
 		<cfoutput query="scheduleDetails">
-			<cfquery name="getEntryCount" datasource="#this.dsn#">
-				<cfif service eq "Facebook">
-
-					select count(1) as cnt
-					from uvwSelectFacebookEntries
-					where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-
-
-					<!--- <cfif len(searchTerm) and not len(monitor_page_id) and not len(monitor_post_id)>
-						select
-							count(1) as cnt,
-							null as comment_count,
-							null as like_count
-						from FacebookSearches
-						where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					<cfelseif len(monitor_page_id)>
-						select
-							null as cnt,
-							count(1) as comment_count,
-							(
-								select count(1)
-								from FacebookPostLikes
-								where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
-								and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-							) as like_count
-						from FacebookPostComments
-						where page_id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
-						and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					<cfelseif len(monitor_post_id)>
-						select
-							null as cnt,
-							count(1) as comment_count,
-							(
-								select count(1)
-								from FacebookPostLikes
-								where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
-								and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-							) as like_count
-						from FacebookPostComments
-						where post_id = <cfqueryparam value="#monitor_post_id#" cfsqltype="cf_sql_varchar">
-						and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					</cfif> --->
-				</cfif>
-
-				<cfif service eq "Instagram">
-					select count(1) as cnt
-					from InstagramEntries
-					where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					and searchTerm = <cfqueryparam value="#searchTerm#" cfsqltype="cf_sql_varchar">
-				</cfif>
-
-				<cfif service eq "Twitter">
-					select count(1) as cnt
-					from TwitterEntries
-					where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					and searchTerm = <cfqueryparam value="#searchTerm#" cfsqltype="cf_sql_varchar">
-				</cfif>
-
-				<cfif service eq "Vine">
-					select count(1) as cnt
-					from VineEntries
-					where scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer">
-					and searchTerm = <cfqueryparam value="#searchTerm#" cfsqltype="cf_sql_varchar">
-				</cfif>
-			</cfquery>
-
 			<tr class="<cfif len(endDate) and dateCompare(endDate, now()) lt 0>finished warning</cfif>">
 				<td>#lc#</td>
 				<td>#name#</td>
@@ -100,7 +35,7 @@
 				<td>#searchTerm#</td>
 				<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
 				<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
-				<td>#numberFormat(getEntryCount.cnt, ",")#</td>
+				<td>#numberFormat(oEntries.getEntryCount(scheduleId=scheduleId, service=service))#</td>
 				<!--- <cfif service eq "Facebook">
 					<td>#numberFormat(getEntryCount.comment_count, ",")#</td>
 					<td>#numberFormat(getEntryCount.like_count, ",")#</td>
@@ -117,8 +52,8 @@
 							</button>
 						<cfelse>
 							<button class="btn btn-warning btn-xs monitor-facebook-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
-							<span class="glyphicon glyphicon-edit"></span>
-						</button>
+								<span class="glyphicon glyphicon-edit"></span>
+							</button>
 						</cfif>
 					</cfif>
 					<cfif service eq "Instagram">

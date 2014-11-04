@@ -4,6 +4,7 @@
 	<cfabort>
 </cfif>
 
+<cfparam name="form.programId" default="">
 <cfparam name="form.scheduleId" default="">
 <cfparam name="form.name" default="">
 <cfparam name="form.pageId" default="">
@@ -24,6 +25,7 @@
 <cfif not len(form.scheduleId) and len(form.pageId)>
 
 	<cfset scheduleId = oSchedules.insertSchedule (
+		programId = form.programId,
 		name = form.name,
 		service = 'Facebook',
 		searchTerm = form.searchTerm,
@@ -35,6 +37,7 @@
 <cfelseif len(form.scheduleId)>
 
 	<cfset oSchedules.updateSchedule (
+		programId = form.programId,
 		scheduleId = form.scheduleId,
 		name = form.name,
 		searchTerm = form.searchTerm,

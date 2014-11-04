@@ -1,9 +1,11 @@
 <cfsetting requesttimeout="9999">
 
+<cfparam name="url.programId" default="">
 <cfparam name="url.scheduleId" default="">
 <cfset init("Schedules")>
 <cfset getSchedule = oSchedules.getSchedules (
 	service = 'GPlus',
+	programId = url.programId,
 	scheduleId = url.scheduleId,
 	currentlyRunning = true
 )>
@@ -58,8 +60,8 @@
 							<cfloop condition="NOT EOC">
 
 								<cfset comments = oGPlus.getComments (
-									activityId=activity.id,
-									api_key=credentials.gplus.api_key,
+									activityId = activity.id,
+									api_key = credentials.gplus.api_key,
 									maxResults = maxResults,
 									pageToken = nextCommentPageToken
 								)>

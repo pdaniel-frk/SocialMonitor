@@ -1,10 +1,16 @@
 <cfprocessingdirective suppressWhitespace="true">
 <cfsetting enablecfoutputonly="true">
+<cfparam name="url.programId" default="">
 <cfparam name="url.scheduleId" default="">
 <cfparam name="url.searchTerm" default="">
 <cfparam name="startDate" default="">
 <cfparam name="endDate" default="">
 <cfset formTitle = 'New Twitter Search Term Monitor'>
+<cfif len(url.programId)>
+	<cfset init("Programs")>
+	<cfset programName = oPrograms.getPrograms(programId=url.programId).name>
+	<cfset formTitle &= ' for #programName#'>
+</cfif>
 <cfif len(url.searchTerm)>
 	<cfset formTitle &= ' - #url.searchTerm#'>
 </cfif>
@@ -34,7 +40,7 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="form-group">
-					<label>Name of Program, Schedule, etc.</label>
+					<label>Name of Schedule</label>
 					<input type="text" id="name" name="name" value="<cfif isDefined('getScheduleInfo')>#HTMLEditFormat(getScheduleInfo.name)#</cfif>" maxlength="100" class="form-control">
 				</div>
 			</div>
@@ -72,7 +78,7 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="text-center">
-					<button type="button" class="btn btn-danger btn-stop-term-monitor">STOP MONITORING THIS SEARCH TERM <span class="glyphicon glyphicon-eye-close"></span></button>
+					<button type="button" class="btn btn-danger btn-stop-twitter-term-monitor">STOP MONITORING THIS SEARCH TERM <span class="glyphicon glyphicon-eye-close"></span></button>
 				</div>
 			</div>
 		</div>
@@ -80,6 +86,7 @@
 	<div class="modal-footer">
 		<button type="button" class="btn btn-sm btn-link" data-dismiss="modal"><span class="text-danger">Close</span></button>
 		<button type="button" class="btn btn-primary btn-save-twitter-term-monitor">Save changes</button>
+		<input type="hidden" name="programId" value="#url.programId#">
 		<input type="hidden" name="scheduleId" value="#url.scheduleId#">
 		<input type="hidden" name="stopMonitor" value="">
 		<!--- csrf --->

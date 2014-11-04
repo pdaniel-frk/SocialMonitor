@@ -8,6 +8,10 @@
 		</ul> --->
 		<ul class="nav nav-sidebar">
 
+			<li class="<cfif findNoCase('programs', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#programs.cfm</cfoutput>">Programs</a></li>
+
+			<li class="nav-divider"></li>
+
 			<li class="<cfif findNoCase('schedules', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#schedules.cfm</cfoutput>">Schedules</a></li>
 
 			<li class="nav-divider"></li>
@@ -17,6 +21,7 @@
 			<li class="nav-divider"></li>
 
 			<li class="<cfif findNoCase('facebook', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#facebook.cfm</cfoutput>">Facebook</a></li>
+			<li class="<cfif findNoCase('gplus', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#gplus.cfm</cfoutput>">Google+</a></li>
 			<li class="<cfif findNoCase('instagram', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#instagram.cfm</cfoutput>">Instagram</a></li>
 			<li class="<cfif findNoCase('twitter', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#twitter.cfm</cfoutput>">Twitter</a></li>
 			<li class="<cfif findNoCase('vine', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#vine.cfm</cfoutput>">Vine</a></li>
@@ -24,7 +29,6 @@
 			<li class="nav-divider"></li>
 
 			<li class="disabled<cfif findNoCase('foursquare', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#foursquare.cfm</cfoutput>">Foursquare</a></li>
-			<li class="disabled<cfif findNoCase('gplus', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#gplus.cfm</cfoutput>">Google+</a></li>
 			<li class="disabled<cfif findNoCase('linkedin', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#linkedin.cfm</cfoutput>">LinkedIn</a></li>
 			<li class="disabled<cfif findNoCase('pinterest', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#pinterest.cfm</cfoutput>">Pinterest</a></li>
 			<li class="disabled<cfif findNoCase('tumblr', cgi.script_name)> active</cfif>"><a href="<cfoutput>#request.webRoot#tumblr.cfm</cfoutput>">Tumblr</a></li>

@@ -1,9 +1,11 @@
 <cfsetting requesttimeout="9999">
 
+<cfparam name="url.programId" default="">
 <cfparam name="url.scheduleId" default="">
 <cfset init("Schedules")>
 <cfset getSchedule = oSchedules.getSchedules (
 	service = 'Facebook',
+	programId = url.programId,
 	scheduleId = url.scheduleId,
 	currentlyRunning = true
 )>
@@ -27,6 +29,7 @@
 			<cfloop condition="NOT EOF">
 
 				<cfset search_result = oFacebook.searchFacebook (
+					programId = getSchedule.programId,
 					scheduleId = getSchedule.scheduleId,
 					searchTerm = getSchedule.searchTerm,
 					until = until,
@@ -94,6 +97,7 @@
 
 			<!--- get the page and store its deets --->
 			<cfset page_result = oFacebook.getPage (
+				programId = getSchedule.programId,
 				scheduleId = getSchedule.scheduleId,
 				pageId = getSchedule.monitor_page_id,
 				searchTerm = getSchedule.searchTerm,
@@ -110,6 +114,7 @@
 			<cfloop condition="NOT EOF">
 
 				<cfset feed_result = oFacebook.getPageFeed (
+					programId = getSchedule.programId,
 					scheduleId = getSchedule.scheduleId,
 					pageId = getSchedule.monitor_page_id,
 					searchTerm = getSchedule.searchTerm,
@@ -134,6 +139,7 @@
 								<cfset comment_until = until>
 								<cfloop condition="NOT EOC">
 									<cfset comment_result = oFacebook.getComments(
+										programId = getSchedule.programId,
 										scheduleId = getSchedule.scheduleId,
 										id = thisFeed.id,
 										searchTerm = getSchedule.searchTerm,
@@ -210,6 +216,7 @@
 
 			<!--- get the post and store its deets --->
 			<cfset post_result = oFacebook.getPost (
+				programId = getSchedule.programId,
 				scheduleId = getSchedule.scheduleId,
 				postId = getSchedule.monitor_post_id,
 				searchTerm = getSchedule.searchTerm,
@@ -225,6 +232,7 @@
 			<cfset comment_until = until>
 			<cfloop condition="NOT EOC">
 				<cfset comment_result = oFacebook.getComments(
+					programId = getSchedule.programId,
 					scheduleId = getSchedule.scheduleId,
 					id = getSchedule.monitor_post_id,
 					searchTerm = getSchedule.searchTerm,

@@ -1,9 +1,11 @@
 <cfsetting requesttimeout="999">
 
+<cfparam name="url.programId" default="">
 <cfparam name="url.scheduleId" default="">
 <cfset init("Schedules")>
 <cfset getSchedule = oSchedules.getSchedules (
 	service = 'Twitter',
+	programId = url.programId,
 	scheduleId = url.scheduleId,
 	currentlyRunning = false
 )>

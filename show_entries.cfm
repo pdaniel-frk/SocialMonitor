@@ -1,13 +1,16 @@
+<cfset init("Programs")>
 <cfset init("Schedules")>
 <cfset init("Entries")>
 
+<cfparam name="url.programId" default="">
 <cfparam name="url.scheduleId" default="">
-<cfset getSchedules = oSchedules.getSchedules(scheduleId=url.scheduleId)>
+<cfset getPrograms = oPrograms.getPrograms(programId=url.programId)>
+<cfset getSchedules = oSchedules.getSchedules(programId=url.programId, scheduleId=url.scheduleId)>
 
 <h1 class="page-header">
-	Collected Entries<cfif len(url.scheduleId)> for <cfoutput>#getSchedules.name#</cfoutput></cfif>
+	Collected Entries<cfif len(url.programId)> for <cfoutput>#getPrograms.name#</cfoutput></cfif>
 	<span class="pull-right">
-		<button class="btn btn-default btn-sm download-entries" data-scheduleid="<cfoutput>#url.scheduleId#</cfoutput>" data-service="" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+		<button class="btn btn-default btn-sm download-entries" data-programid="<cfoutput>#url.programId#</cfoutput>" data-scheduleid="<cfoutput>#url.scheduleId#</cfoutput>" data-service="" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
 			<span class="glyphicon glyphicon-download-alt"></span>
 		</button>
 	</span>
@@ -20,7 +23,8 @@
 		<thead>
 			<tr>
 				<th>#</th>
-				<th>Schedule</th>
+				<th>Program</th>
+				<!--- <th>Schedule</th> --->
 				<th>Service</th>
 				<th>Entry Type</th>
 				<th>Text</th>
@@ -34,16 +38,19 @@
 			<cfset lc = 1>
 			<cfloop query="getSchedules">
 				<cfset getEntries = oEntries.getEntries (
-					scheduleId=getSchedules.scheduleId,
-					service=getSchedules.service
+					scheduleId = getSchedules.scheduleId,
+					service = getSchedules.service
 				)>
+
+				<cfset programName = oPrograms.getPrograms(programId=getSchedules.programId).name>
 
 				<cfif getEntries.recordCount>
 					<cfloop query="getEntries">
 						<cfoutput>
 							<tr>
 								<td>#lc#</td>
-								<td>#getSchedules.name#</td>
+								<td>#programName#</td>
+								<!--- <td>#getSchedules.name#</td> --->
 								<td>#getSchedules.service#</td>
 								<td>
 									<cfif len(getEntries.link)>
@@ -53,7 +60,8 @@
 								</td>
 								<td>#getEntries.text#</td>
 								<td>
-									<cfif len(getEntries.name)>#getEntries.name#<cfelse>#getEntries.firstName# #getEntries.lastName#</cfif> (#getEntries.userName#)</td>
+									<cfif len(getEntries.name)>#getEntries.name#<cfelse>#getEntries.firstName# #getEntries.lastName#</cfif> (#getEntries.userName#)
+								</td>
 								<td>#dateFormat(getEntries.entryDate, 'yyyy-mm-dd')# #timeFormat(getEntries.entryDate, 'HH:mm')#</td>
 							</tr>
 						</cfoutput>
