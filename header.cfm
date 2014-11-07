@@ -33,6 +33,7 @@
 		    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 		<!--<![endif]-->
 		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+		<script src="<cfoutput>#request.webRoot#</cfoutput>scripts/jquery.sparkline.min.js"></script>
 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/start/jquery-ui.min.css" />
 
 	</head>

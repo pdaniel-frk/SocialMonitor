@@ -13,11 +13,24 @@
 
 <cfif not listLen(errorFields)>
 	<cfset init("Programs")>
-	<cfset programId = oPrograms.getPrograms(name=form.name, customerId=session.customerId).Id>
-	<cfif len(programId)>
-		<cfset errorFields = listAppend(errorFields, "alreadyExists")>
+	<cfif not structKeyExists(form, "programId")>
+		<cfset programId = oPrograms.getPrograms(name=form.name, customerId=session.customerId).Id>
+		<cfif len(programId)>
+			<cfset errorFields = listAppend(errorFields, "alreadyExists")>
+		<cfelse>
+			<cfset programId = oPrograms.insertProgram (
+				customerId = session.customerId,
+				userId = session.userId,
+				name = form.name,
+				description = form.description,
+				startDate = form.startDate,
+				endDate = form.endDate
+			)>
+			<cflocation url="add-program-schedule.cfm?programId=#programId#" addtoken="no">
+		</cfif>
 	<cfelse>
-		<cfset programId = oPrograms.insertProgram (
+		<cfset oPrograms.updateProgram (
+			programId = form.programId,
 			customerId = session.customerId,
 			userId = session.userId,
 			name = form.name,
@@ -25,7 +38,7 @@
 			startDate = form.startDate,
 			endDate = form.endDate
 		)>
-		<cflocation url="add-program-schedule.cfm?programId=#programId#" addtoken="no">
+		<cflocation url="index.cfm" addtoken="no">
 	</cfif>
 </cfif>
 

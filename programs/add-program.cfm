@@ -60,11 +60,12 @@
 								<b class="glyphicon glyphicon-calendar"></b>
 							</span>
 						</div>
+							<span class="help-block">Hint: Leave blank to allow this program to run forever (within reason).</span>
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="submit" class="btn btn-primary">Add Program</button>
+				<button type="submit" class="btn btn-primary">Next</button>
 				<!--- csrf --->
 				<input type="hidden" name="__token" id="__token" value="<cfoutput>#session.stamp#</cfoutput>">
 			</div>

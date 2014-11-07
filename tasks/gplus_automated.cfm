@@ -25,7 +25,8 @@
 		<cfloop condition="NOT EOF">
 
 			<cfset activities = oGPlus.getActivities(
-				scheduleId=getSchedule.scheduleId,
+				programId = getSchedule.programId,
+				scheduleId = getSchedule.scheduleId,
 				searchTerm = form.searchTerm,
 				api_key = credentials.gplus.api_key,
 				nextPageToken = nextPageToken,
@@ -46,8 +47,8 @@
 
 							<cfset activity = oGPlus.parseActivityObject(activity)>
 							<cfset user = oGPlus.getPeople (
-								userId=activity.actor.id,
-								api_key=credentials.gplus.api_key,
+								userId = activity.actor.id,
+								api_key = credentials.gplus.api_key,
 								save_results = true
 							)>
 
@@ -73,7 +74,11 @@
 										<cfif structKeyExists(comments.items[ci], "object") and findNoCase(form.searchTerm, comments.items[ci].object.content)>
 
 											<cfset comment = oGPlus.parseCommentObject(comments.items[ci])>
-											<cfset oGPlus.insertComment(scheduleId=getSchedule.scheduleId, comment=comment)>
+											<cfset oGPlus.insertComment (
+												programId = getSchedule.programId,
+												scheduleId = getSchedule.scheduleId,
+												comment = comment
+											)>
 
 											<!--- get this comments author --->
 											<cfset user = oGPlus.getPeople (

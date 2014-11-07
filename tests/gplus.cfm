@@ -41,7 +41,7 @@
 	<cfset lc = 1>
 	<cfset nextPageToken = "">
 	<cfset minDate = "2014-10-15">
-	<cfset sanityCheck = 50>
+	<cfset sanityCheck = 10>
 
 	<div class="table-responsive">
 
@@ -69,7 +69,7 @@
 
 				<cfloop condition="NOT EOF">
 
-					<cfset activities = oGPlus.getActivities(
+					<cfset activities = oGPlus.getActivities (
 						searchTerm = form.searchTerm,
 						api_key = credentials.gplus.api_key,
 						nextPageToken = nextPageToken,
@@ -92,20 +92,12 @@
 									<cfset user = oGPlus.getPeople(userId=activity.actor.id, api_key=credentials.gplus.api_key)>
 									<cfset user = oGPlus.parseUserObject(user)>
 
-									<cfset comments = oGPlus.getComments(activityId=activity.id, api_key=credentials.gplus.api_key)>
-									<cfif structKeyExists(comments, "items") and arrayLen(comments.items)>
-										<!--- <cfset comment = oGPlus.parseCommentObject(comments.items[1])>
-										<cfdump var="#comment#">
-										<cfabort> --->
-										<!--- check for comments matcing search term --->
-										<cfloop from="1" to="#arrayLen(comments.items)#" index="ci">
-											<cfif structKeyExists(comments.items[ci], "object") and findNoCase(form.searchTerm, comments.items[ci].object.content)>
-												<cfset comment = oGPlus.parseCommentObject(comments.items[ci])>
-												<cfdump var="#comment#">
-												<cfabort>
-											</cfif>
-										</cfloop>
-									</cfif>
+									<cfset comments = oGPlus.getComments (
+										activityId = activity.id,
+										searchTerm = form.searchTerm,
+										api_key = credentials.gplus.api_key,
+										save_results = true
+									)>
 
 									<!--- same, just for one object (probably used internally) --->
 									<!--- <cfset activity_details = oGPlus.getActivities (activityId = activity.id, api_key=credentials.gplus.api_key)>
@@ -119,9 +111,22 @@
 											<td>#activity.id#</td>
 											<td>#activity.kind#</td>
 											<td>#activity.verb#</td>
-											<td><img src="#user.image.url#"></td>
+											<td><img src="#user.image.url#" style="width: 38px;height: 38px;border-radius: 50%;"></td>
 											<td>#activity.title#</td>
-											<td>#activity.object.content#</td>
+											<td>
+												#activity.object.content#
+												<cfif structKeyExists(comments, "items") and arrayLen(comments.items)>
+													<cfloop from="1" to="#arrayLen(comments.items)#" index="ci">
+														<cfset comment = structGet('comments.items[#ci#]')>
+														<cfset comment = oGPlus.parseCommentObject(comment)>
+														<!--- check for comments matching search term --->
+														<br>&bull;#comment.object.content#
+														<cfif findNoCase(form.searchTerm, comment.object.content)>
+															FILK
+														</cfif>
+													</cfloop>
+												</cfif>
+											</td>
 											<td>#activity.placeName#</td>
 											<td>#activity.published# (#dateCompare(activity.published, minDate)#)</td><!--- RFC3339 (eg 2014-10-29T10:25:31.279Z) --->
 											<!--- <td>#created_date_time#</td> ---><!--- converted to local datetime --->

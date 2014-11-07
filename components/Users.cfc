@@ -73,6 +73,22 @@
 	</cffunction>
 
 
+	<cffunction name="getGoogleUsers" output="no" returntype="query">
+
+		<cfargument name="userId" required="no" default="">
+		<cfargument name="emailAddress" required="no" default="">
+		<cfargument name="firstName" required="no" default="">
+		<cfargument name="lastName" required="no" default="">
+		<cfargument name="userName" required="no" default="">
+
+		<cfreturn getUsers (
+			service = 'GPlus',
+			argumentcollection = arguments
+		)>
+
+	</cffunction>
+
+
 	<cffunction name="getInstagramUsers" output="no" returntype="query">
 
 		<cfargument name="userId" required="no" default="">
@@ -249,6 +265,16 @@
 			end
 		</cfquery>
 
+		<cfreturn>
+	</cffunction>
+
+
+	<cffunction name="insertVineUser" output="no" returntype="void">
+		<cfreturn>
+	</cffunction>
+
+
+	<cffunction name="insertGoogleUser" output="no" returntype="void">
 		<cfreturn>
 	</cffunction>
 

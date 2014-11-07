@@ -66,15 +66,17 @@
 								<td>#numberFormat(getScheduleCount.cnt, ",")#</td>
 								<td>#numberFormat(oEntries.getEntryCount(programId=Id), ",")#</td>
 								<td>
-									<button class="btn btn-warning btn-xs edit-program-button" data-programid="#Id#" data-toggle="tooltip" data-placement="bottom" title="Edit Program">
-										<span class="glyphicon glyphicon-edit"></span>
-									</button>
-									<a href="#request.webRoot#schedules.cfm?programId=#id#"><!---
+									<a href="edit-program.cfm?programId=#id#"><!---
+										 ---><button class="btn btn-warning btn-xs edit-program-button" data-programid="#Id#" data-toggle="tooltip" data-placement="bottom" title="Edit Program">
+											<span class="glyphicon glyphicon-edit"></span>
+										</button>
+									</a>
+									<a href="#request.webRoot#schedules/?programId=#id#"><!---
 										 ---><button class="btn btn-primary btn-xs view-schedules" data-programid="#Id#" data-toggle="tooltip" data-placement="bottom" title="View Schedules">
 											<span class="glyphicon glyphicon-eye-open"></span>
 										</button>
 									</a>
-									<a href="#request.webRoot#show_entries.cfm?programId=#Id#"><!---
+									<a href="#request.webRoot#entries/view.cfm?programId=#Id#"><!---
 										 ---><button class="btn btn-primary btn-xs view-entries" data-programid="#Id#" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
 											<span class="glyphicon glyphicon-eye-open"></span>
 										</button>

@@ -1,3 +1,54 @@
+<!--- <p>looking up friends</p>
+
+<cfset userIds = "8648864,
+1200737832,
+581647615">
+
+<cfloop list="#userIds#" index="userId">
+
+	<p>
+	<cfoutput>#userId#: </cfoutput>
+	<cfhttp method="get" url="https://api.instagram.com/v1/users/#userId#/follows">
+		<cfhttpparam type="url" name="client_id" value="#credentials.instagram.client_id#">
+		<cfhttpparam type="url" name="count" value="100">
+	</cfhttp>
+
+	<cftry>
+
+		<cfset follows = deserializeJson(cfhttp.fileContent)>
+		<cfoutput><strong>#arrayLen(follows.data)#</strong> 'follows' found</cfoutput>
+
+		<cfloop from="1" to="#arrayLen(follows.data)#" index="i">
+			<cfset user = structGet('follows.data[#i#]')>
+			<!--- <cfdump var="#user#"> --->
+			<cfif compareNoCase(user.full_name, "office") eq 0 or compareNoCase(user.username, "office") eq 0>
+				<strong>office found in this users friends</strong>
+				<cfbreak>
+			</cfif>
+		</cfloop>
+
+
+
+		<cfcatch type="any">
+			<cfdump var="#cfhttp#">
+		</cfcatch>
+
+	</cftry>
+
+
+	</p>
+
+	<!--- Your credentials do not allow access to this resource (can only get this information on behalf of authenticated users) --->
+	<!--- <cfset result = application.objMonkehTweet.getFriendshipsLookup(user_id=userId)> --->
+
+	<!--- <cfdump var="#result#">
+	<cfabort> --->
+
+
+</cfloop>
+
+<cfabort> --->
+
 <cfprocessingdirective pageencoding="utf-8">
 <cfparam name="form.searchTerm" default="">
 
@@ -77,7 +128,7 @@ MAX_TAG_ID	Return media after this max_tag_id. --->
 					<cfset url_to_call = "https://api.instagram.com/v1/tags/#form.searchTerm#/media/recent?client_id=#credentials.instagram.client_id#&min_tag_id=#min_tag_id#&max_tag_id=#max_tag_id#&count=50">
 					<cfhttp method="get" url="#url_to_call#"></cfhttp>
 
-					<cfdump var="#cfhttp#">
+					<!--- <cfdump var="#cfhttp#"> --->
 
 					<cfset result = deserializeJson(cfhttp.fileContent)>
 
@@ -87,9 +138,12 @@ MAX_TAG_ID	Return media after this max_tag_id. --->
 
 							<cfloop from="1" to="#arrayLen(result.data)#" index="ndx">
 
+								<cfset thisResult = structGet("result.data[#ndx#]")>
+								<cfset instagram = oInstagram.parseInstagramObject(instagram=thisResult)>
+
 								<cftry>
 
-									<cfset createdTime = dateAdd('s', result.data[ndx].created_time, createDateTime(1970, 1, 1, 0, 0, 0))>
+									<cfset createdTime = dateAdd('s', instagram.created_time, createDateTime(1970, 1, 1, 0, 0, 0))>
 
 									<cfoutput>
 										<tr>
@@ -97,25 +151,22 @@ MAX_TAG_ID	Return media after this max_tag_id. --->
 											<td style="white-space:nowrap;">
 												#dateFormat(createdTime, 'yyyy-mm-dd')#<br>#timeFormat(createdTime, 'hh:mm:ss TT')#
 											</td>
-											<td>#result.data[ndx].user.full_name#</td>
+											<td>#instagram.user.full_name#</td>
 											<td>
-												<a href="#result.data[ndx].link#" target='_blank'><!---
-													 ---><img src="#result.data[ndx].images.thumbnail.url#" style="width:100px;height:100px;border-radius:25%;">
+												<a href="#instagram.link#" target='_blank'><!---
+													 ---><img src="#instagram.images.thumbnail.url#" style="width:100px;height:100px;border-radius:25%;">
 												</a>
 											</td>
 											<td>
-												<cfif isStruct(result.data[ndx].caption)>
-													#result.data[ndx].caption.text#
-												<cfelseif isArray(result.data[ndx].tags)>
-													#arrayToList(result.data[ndx].tags)#
-												</cfif>
+												#instagram.caption.text#<br>
+												#instagram.tags#
 											</td>
 										</tr>
 									</cfoutput>
 
 									<cfcatch type="any">
 										<cfdump var="#cfcatch#">
-										<cfdump var="#result.data[ndx]#">
+										<cfdump var="#instagram#">
 										<cfabort>
 									</cfcatch>
 

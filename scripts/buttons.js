@@ -5,7 +5,7 @@ $(function(){
 		var scheduleId = $(this).data('scheduleid');
 		var searchTerm = $(this).data('searchterm');
 		$('#myModal .modal-dialog .modal-content').empty();
-		$.get('services/monitor-facebook-term-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&searchTerm='+encodeURIComponent(searchTerm), function(data){
+		$.get('../services/monitor-facebook-term-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&searchTerm='+encodeURIComponent(searchTerm), function(data){
 			$('#myModal .modal-dialog .modal-content').html(data);
 			$('#myModal').modal();
 		});
@@ -36,7 +36,7 @@ $(function(){
 		var pageId = $(this).data('pageid');
 		var pageName = $(this).data('pagename');
 		$('#myModal .modal-dialog .modal-content').empty();
-		$.get('services/monitor-page-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&pageId='+pageId+'&pageName='+pageName, function(data){
+		$.get('../services/monitor-page-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&pageId='+pageId+'&pageName='+pageName, function(data){
 			$('#myModal .modal-dialog .modal-content').html(data);
 			$('#myModal').modal();
 		});
@@ -66,7 +66,7 @@ $(function(){
 		var postId = $(this).data('postid');
 		var postMessage = $(this).data('postmessage');
 		$('#myModal .modal-dialog .modal-content').empty();
-		$.get('services/monitor-post-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&postId='+postId+'&postMessage='+postMessage, function(data){
+		$.get('../services/monitor-post-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&postId='+postId+'&postMessage='+postMessage, function(data){
 			$('#myModal .modal-dialog .modal-content').html(data);
 			$('#myModal').modal();
 		});
@@ -95,7 +95,7 @@ $(function(){
 		var scheduleId = $(this).data('scheduleid');//js converts these to lowercase (from scheduleId) so watch out!
 		var searchTerm = $(this).data('searchterm');//js converts these to lowercase (from searchTerm) so watch out!
 		$('#myModal .modal-dialog .modal-content').empty();
-		$.get('services/monitor-instagram-term-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&searchTerm='+searchTerm, function(data){
+		$.get('../services/monitor-instagram-term-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&searchTerm='+searchTerm, function(data){
 			$('#myModal .modal-dialog .modal-content').html(data);
 			$('#myModal').modal();
 		});
@@ -125,7 +125,7 @@ $(function(){
 		var scheduleId = $(this).data('scheduleid');
 		var searchTerm = $(this).data('searchterm');
 		$('#myModal .modal-dialog .modal-content').empty();
-		$.get('services/monitor-twitter-term-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&searchTerm='+encodeURIComponent(searchTerm), function(data){
+		$.get('../services/monitor-twitter-term-form.cfm?programId='+programId+'&scheduleId='+scheduleId+'&searchTerm='+encodeURIComponent(searchTerm), function(data){
 			$('#myModal .modal-dialog .modal-content').html(data);
 			$('#myModal').modal();
 		});
@@ -147,5 +147,59 @@ $(function(){
 		e.preventDefault();
 		$('input[name=stopMonitor]').val('true');
 		$('.btn-save-twitter-term-monitor').click();
+	});
+
+	$(document).on('click', '.monitor-vine-term-button', function(e){
+		e.preventDefault();
+		var scheduleId = $(this).data('scheduleid');//js converts these to lowercase (from scheduleId) so watch out!
+		var searchTerm = $(this).data('searchterm');//js converts these to lowercase (from searchTerm) so watch out!
+		$('#myModal .modal-dialog .modal-content').empty();
+		$.get('../services/monitor-vine-term-form.cfm?scheduleId='+scheduleId+'&searchTerm='+searchTerm, function(data){
+			$('#myModal .modal-dialog .modal-content').html(data);
+			$('#myModal').modal();
+		});
+	});
+
+	$(document).on('click', '.btn-save-vine-term-monitor', function(e){
+		e.preventDefault();
+		$.post('services/monitor-vine-term.cfm', $('form[name=monitorForm]').serialize(), function(response){
+		})
+		.done(function(){
+			$('#myModal').modal('hide');
+			location.reload();
+		})
+		.fail(function(){})
+		.always(function(){});
+	});
+
+	$(document).on('click', '.btn-stop-vine-term-monitor', function(e){
+		e.preventDefault();
+		$('input[name=stopMonitor]').val('true');
+		$('.btn-save-vine-term-monitor').click();
+	});
+	
+	$(document).on('click', '.add-page-monitor, .change-page-monitor', function(e){
+		e.preventDefault();
+		//console.log('something-page-monitor');
+		$('#myModal .modal-dialog .modal-content').empty();
+		$.get('../services/add-page-form.cfm', function(data){
+			$('#myModal .modal-dialog .modal-content').html(data);
+			$('#myModal').modal();
+		});
+	});
+	
+	$(document).on('click', '.remove-page-monitor', function(e){
+		e.preventDefault();
+		$('input[name=removePageMonitor]').val('true');
+	});
+	
+	$(document).on('click', '.add-post-monitor, .change-post-monitor', function(e){
+		e.preventDefault();
+		console.log('something-post-monitor');
+	});
+	
+	$(document).on('click', '.remove-post-monitor', function(e){
+		e.preventDefault();
+		$('input[name=removePostMonitor]').val('true');
 	});
 });

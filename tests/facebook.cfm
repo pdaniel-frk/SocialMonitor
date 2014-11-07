@@ -45,7 +45,7 @@
 
 
 	<!--- get page --->
-	<!--- get page feed (this may actually be the endpoint i want, as posts is basically a filtered version of this) --->
+	<!--- get page feed (this may actually be the endpoint i want, as 'posts' is basically a filtered version of this) --->
 	<!--- get page posts --->
 	<!--- get post comments --->
 	<!--- get page likes --->
@@ -65,7 +65,11 @@
 	<cfset init("Facebook")>
 	<cfset since = oFacebook.getSince()>
 
-	<cfset search_result = oFacebook.searchFacebook(searchTerm=form.searchTerm, since=since, access_token=credentials.facebook.page_access_token)>
+	<cfset search_result = oFacebook.searchFacebook (
+		searchTerm = form.searchTerm,
+		since = since,
+		access_token = credentials.facebook.page_access_token
+	)>
 	<!--- <cfdump var="#search_result#"> --->
 
 	<cfdump var="#oFacebook.parseSearchObject(search_result.data[1])#">

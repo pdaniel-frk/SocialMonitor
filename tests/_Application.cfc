@@ -35,13 +35,6 @@
 
 		</cfif>
 
-		<!--- probably not the best place for this, but i want to clean up the output a bit on some pages --->
-		<script type="text/javascript">
-			$(function(){
-
-			});
-		</script>
-
 	</cffunction>
 
 

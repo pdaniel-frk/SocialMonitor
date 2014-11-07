@@ -24,18 +24,8 @@
 	</div>
 
 	<cfif findNoCase("facebook", cgi.script_name) or findNoCase("schedules", cgi.script_name)>
-		<cfinclude template="facebook_scripts.cfm">
+		<cfinclude template="scripts/facebook.cfm">
 	</cfif>
-	<cfif findNoCase("instagram", cgi.script_name) or findNoCase("schedules", cgi.script_name)>
-		<cfinclude template="instagram_scripts.cfm">
-	</cfif>
-	<cfif findNoCase("twitter", cgi.script_name) or findNoCase("schedules", cgi.script_name)>
-		<cfinclude template="twitter_scripts.cfm">
-	</cfif>
-	<cfif findNoCase("vine", cgi.script_name) or findNoCase("schedules", cgi.script_name)>
-		<cfinclude template="vine_scripts.cfm">
-	</cfif>
-
 	<script src="<cfoutput>#request.webRoot#</cfoutput>scripts/buttons.js"></script>
 
 	<script>
@@ -53,6 +43,10 @@
 			$(document).tooltip({
 				selector: '[data-toggle=tooltip]'
 			});
+
+			<!--- sparklines (http://omnipotent.net/jquery.sparkline/#s-docs) --->
+			//$('.sparklines').sparkline('html');
+			$('.sparkline-pie').sparkline('html', {type: 'pie', width: '100%', height: '100%'});
 
 			<!--- this works on dynamically-added elements, yo (such as the ajax-y populated modal form) --->
 			$(document).on('keyup', '#name', function(){
@@ -90,10 +84,11 @@
 
 			$(document).on('click', '.download-entries', function(e){
 
-				var scheduleid = $(this).data('scheduleid');
+				var scheduleid = $(this).data('scheduleid') === undefined ? '' : $(this).data('scheduleid');
+				var programid = $(this).data('programid') === undefined ? '' : $(this).data('programid');
 				var service = $(this).data('service');
 
-				window.open('<cfoutput>#request.webRoot#</cfoutput>tasks/export_entries.cfm?scheduleId=' + scheduleid);
+				window.open('<cfoutput>#request.webRoot#</cfoutput>tasks/export_entries.cfm?scheduleId=' + scheduleid + '&programId=' + programid);
 
 			});
 		});

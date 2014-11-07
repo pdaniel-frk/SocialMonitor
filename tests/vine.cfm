@@ -41,24 +41,13 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 	<cfset q = URLEncodedFormat(form.searchTerm)>
 	<cfset since_id = "">
+	<cfset init("Vine")>
 
 	<cftry>
 
 		<div class="alert alert-warning">Note: This works on localhost and mk02, but fails on production server.</div>
 
-		<!--- none of these headers has made a difference --->
-		<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#" charset="utf-8" resolveurl="yes">
-		    <!--- <cfhttpparam type="header" name="User-Agent" value="Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36">
-			<cfhttpparam type="Header" name="Accept-Encoding" value="no-compression">
-			<cfhttpparam type="Header" name="TE" value="deflate;q=0"> --->
-			<cfhttpparam type="header" name="user-agent" value="com.vine.iphone/1.0.3 (unknown, iPhone OS 6.1.0, iPhone, Scale/2.000000)">
-			<!--- <cfhttpparam type="header" name="vine-session-id" value="mardenkane-1231ed86-80a0-4f07-9389-b03199690f73"> ---><!--- this might, but i need to figure out how to create a valid vine-session-id --->
-			<cfhttpparam type="header" name="accept-language" value="en, sv, fr, de, ja, nl, it, es, pt, pt-PT, da, fi, nb, ko, zh-Hans, zh-Hant, ru, pl, tr, uk, ar, hr, cs, el, he, ro, sk, th, id, ms, en-GB, ca, hu, vi, en-us;q=0.8">
-			<cfhttpparam type="header" name="accept" value="*/*">
-			<cfhttpparam type="header" name="accept-encoding" value="gzip">
-		</cfhttp>
-
-		<cfset searchResult = deserializeJson(cfhttp.fileContent)>
+		<cfset searchResult = oVine.searchVine(searchTerm=form.searchTerm)>
 
 		<!---
 		avatarUrl
@@ -110,8 +99,7 @@ https://github.com/starlock/vino/wiki/API-Reference
 
 					<cfloop from="1" to="#pages#" index="page">
 
-						<cfhttp method="get" url="https://api.vineapp.com/timelines/tags/#form.searchTerm#?page=#page#" charset="utf-8"></cfhttp>
-						<cfset pageResult = deserializeJson(cfhttp.fileContent)>
+						<cfset pageResult = oVine.searchVine(searchTerm=form.searchTerm, page=page)>
 						<cfset pageCount = arrayLen(pageResult.data.records)>
 
 						<cfloop from="1" to="#pageCount#" index="ndx">
@@ -119,27 +107,29 @@ https://github.com/starlock/vino/wiki/API-Reference
 							<cftry>
 
 								<cfset thisResult = structGet('pageResult.data.records[#ndx#]')>
+								<cfset obj = oVine.parseVineObject(vine=thisResult)>
+								<cfset user = oVine.parseUserObject(oVine.getVineUser(userId=obj.userId))>
 
 								<cfoutput>
 
-									<tr <cfif thisResult.explicitContent>class="danger"</cfif>>
+									<tr <cfif obj.explicitContent>class="danger"</cfif>>
 										<td>#ndx + ((page-1)*20)#</td>
-										<cfif not structIsEmpty(thisResult)>
+										<cfif not structIsEmpty(obj)>
 											<!--- <td><video preload="auto" src="#thisResult.videoUrl#" width="535" height="535"></video></td> --->
-											<td><img src="#thisResult.avatarUrl#" alt="#thisResult.username#" style="width: 38px;height: 38px;border-radius: 50%;"></td>
-											<td>#convertNum(thisResult.userId)#</td>
-											<td>#getToken(thisResult.created, 1, 'T')#</td><!--- eg 2014-07-03T01:50:52.000000 --->
-											<td>#thisResult.description#</td>
-											<td><a href="#thisResult.permalinkUrl#" target="_blank"><img src="#thisResult.thumbnailUrl#" style="width:50px;height:50px;"></a></td>
+											<td><img src="#user.avatarUrl#" alt="#user.username#" style="width: 38px;height: 38px;border-radius: 50%;"></td>
+											<td>#obj.userId#</td>
+											<td>#obj.created#</td>
+											<td>#obj.description#</td>
+											<td><a href="#obj.permalinkUrl#" target="_blank"><img src="#obj.thumbnailUrl#" style="width:50px;height:50px;"></a></td>
 										</cfif>
-										<!--- <td class="view-raw"><div style="display:none;"><cfdump var="#thisResult#"></div></td> --->
 									</tr>
 
 								</cfoutput>
 
 								<cfcatch type="any">
 									<cfdump var="#cfcatch#">
-									<cfdump var="#thisResult#">
+									<cfdump var="#obj#">
+									<cfdump var="#user#">
 									<cfabort>
 								</cfcatch>
 
@@ -172,17 +162,3 @@ https://github.com/starlock/vino/wiki/API-Reference
 		});
 	});
 </script>
-
-<!--- convert the scientific notation number of the long user/post/whatever ids to the actual value --->
-<cffunction name="convertNum" returntype="string">
-	<cfargument name="num" required="yes">
-	<cfset bigD = createObject('java', 'java.math.BigDecimal')>
-	<cfreturn bigD.init(arguments.num)>
-</cffunction>
-
-
-<cffunction name="getVineUser" returntype="struct">
-	<cfargument name="userId" required="yes"><!--- userId should first be passed to the convertNum function when calling this function --->
-	<cfhttp method="get" url="https://api.vineapp.com/users/profiles/#arguments.userId#"></cfhttp>
-	<cfreturn deserializeJson(cfhttp.fileContent).data>
-</cffunction>

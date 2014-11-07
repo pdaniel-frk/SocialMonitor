@@ -10,7 +10,12 @@
 	</cfif>
 	<span class="pull-right">
 		<button class="btn btn-sm show-finished">Show finished</button>
-		<div class="btn-group">
+		<a href="add-schedule.cfm"><!---
+			 ---><button class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="Add new schedule">
+				<span class="glyphicon glyphicon-plus"></span>
+			</button>
+		</a>
+		<!--- <div class="btn-group">
 			<button class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" title="Schedule new monitor">
 				<span class="glyphicon glyphicon-plus"></span> <span class="caret"></span>
 			</button>
@@ -26,7 +31,7 @@
 				<li class="disabled"><a href="pinterest.cfm">Pinterest</a></li>
 				<li class="disabled"><a href="tumblr.cfm">Tumblr</a></li>
 			</ul>
-		</div>
+		</div> --->
 	</span>
 </h1>
 
@@ -93,7 +98,7 @@
 									<tbody>
 										<cfoutput>
 											<cfset lc = currentRow>
-											<cfinclude template="partials\show-schedule-row.cfm">
+											<cfinclude template="#request.webRoot#partials\show-schedule-row.cfm">
 										</cfoutput>
 									</tbody>
 								</table>

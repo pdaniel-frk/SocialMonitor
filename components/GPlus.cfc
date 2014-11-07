@@ -182,7 +182,7 @@
 
 
 	<!--- https://developers.google.com/+/api/latest/comments#resource --->
-	<cffunction name="getComments" output="no">
+	<cffunction name="getComments" output="yes">
 
 		<cfargument name="programId" required="no" default="">
 		<cfargument name="scheduleId" required="no" default="">
@@ -212,7 +212,7 @@
 
 					<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, comment.object.content)>
 
-						<cfset insertGoogleComment (
+						<cfset insertComment (
 							programId = arguments.programId,
 							scheduleId = arguments.scheduleId,
 							comment = comment
@@ -221,7 +221,7 @@
 						<!--- get this comments author --->
 						<cfset getPeople (
 							userId = comment.actor.id,
-							api_key = credentials.gplus.api_key,
+							api_key = arguments.api_key,
 							save_results = arguments.save_results
 						)>
 
@@ -250,7 +250,7 @@
 
 						<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, comment.object.content)>
 
-							<cfset insertGoogleComment (
+							<cfset insertComment (
 								programId = arguments.programId,
 								scheduleId = arguments.scheduleId,
 								comment = comment
@@ -259,7 +259,7 @@
 							<!--- get this comments author --->
 							<cfset getPeople (
 								userId = comment.actor.id,
-								api_key = credentials.gplus.api_key,
+								api_key = arguments.api_key,
 								save_results = arguments.save_results
 							)>
 
@@ -272,6 +272,7 @@
 			</cfif>
 
 			<cfcatch type="any">
+				<cfdump var="#cfcatch#">
 				<cfset comment_result = '{"error": true}'>
 			</cfcatch>
 

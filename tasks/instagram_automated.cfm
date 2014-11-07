@@ -47,73 +47,22 @@
 						<cftry>
 
 							<cfset thisResult = structGet("result.data[#ndx#]")>
+							<cfset instagram = oInstagram.parseInstagramObject(instagram=thisResult)>
 
-							<!--- set up some defaults for keys that might not exist or have value --->
-							<cfset caption_created_time = "">
-							<cfset from_full_name = "">
-							<cfset from_id = "">
-							<cfset from_profile_picture = "">
-							<cfset from_username = "">
-							<cfset caption_id = "">
-							<cfset caption_text = "">
-							<cfset latitude = "">
-							<cfset longitude = "">
-							<cfset location_id = "">
-							<cfset tags = "">
-							<cfif isStruct(thisResult.caption)>
-								<cfset caption_created_time = thisResult.caption.created_time>
-								<cfset from_full_name = thisResult.caption.from.full_name>
-								<cfset from_id = thisResult.caption.from.id>
-								<cfset from_profile_picture = thisResult.caption.from.profile_picture>
-								<cfset from_username = thisResult.caption.from.username>
-								<cfset caption_id = thisResult.caption.id>
-								<cfset caption_text = thisResult.caption.text>
-							</cfif>
-							<cfif isStruct(thisResult.location)>
-								<cfif structKeyExists(thisResult.location, "id")>
-									<cfset location_id = thisResult.location.id>
-								<cfelse>
-									<cfset latitude = thisResult.location.latitude>
-									<cfset longitude = thisResult.location.longitude>
-								</cfif>
-							</cfif>
-							<cfif isArray(thisResult.tags)>
-								<cfset tags = arrayToList(thisResult.tags)>
-							</cfif>
-
-							<cfset init("Instagram")>
 							<cfset oInstagram.insertInstagramEntry (
+								programId = getSchedule.programId,
 								scheduleId = getSchedule.scheduleId,
-								Id = thisResult.id,
-								searchTerm = getSchedule.searchTerm,
-								caption_created_time = caption_created_time,
-								from_full_name = from_full_name,
-								from_id = from_id,
-								from_profile_picture = from_profile_picture,
-								from_username = from_username,
-								caption_id = caption_id,
-								caption_text = caption_text,
-								created_time = thisResult.created_time,
-								low_resolution_url = thisResult.images.low_resolution.url,
-								standard_resolution_url = thisResult.images.standard_resolution.url,
-								thumbnail_url = thisResult.images.thumbnail.url,
-								link = thisResult.link,
-								latitude = latitude,
-								longitude = longitude,
-								location_id = location_id,
-								tags = tags,
-								type = thisResult.type,
-								user_id = thisResult.user.id
+								instagram = instagram
 							)>
 
 							<cfset init("Users")>
 							<cfset oUsers.insertInstagramUser (
-								user_id = result.data[ndx].user.id,
-								bio = result.data[ndx].user.bio,
-								full_name = result.data[ndx].user.full_name,
-								profile_picture = result.data[ndx].user.profile_picture,
-								username = result.data[ndx].user.username,
-								website = result.data[ndx].user.website
+								user_id = instagram.user.id,
+								bio = instagram.user.bio,
+								full_name = instagram.user.full_name,
+								profile_picture = instagram.user.profile_picture,
+								username = instagram.user.username,
+								website = instagram.user.website
 							)>
 
 							<cfcatch type="any">

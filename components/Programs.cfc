@@ -88,6 +88,7 @@
 	<cffunction name="getPrograms" output="no">
 
 		<cfargument name="programId" required="no" default="">
+		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="customerId" required="no" default="">
 		<cfargument name="userId" required="no" default="">
 		<cfargument name="name" required="no" default="">
@@ -110,6 +111,14 @@
 				dateArchived
 			from Programs
 			where isdate(deleteDate) = 0
+			<cfif len(arguments.scheduleId)>
+				and exists (
+					select 1
+					from Schedules
+					where scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+					and programId = Programs.Id
+				)
+			</cfif>
 			<cfif len(arguments.programId)>
 				and Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 			</cfif>

@@ -13,9 +13,10 @@
 
 <div class="row">
 	<div class="col-xs-12">
-		<cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="red">
+		<!--- <cfchart format="png" pieslicestyle="sliced" tipstyle="mousedown" style="red">
 			<cfchartseries type="pie" datalabelstyle="none" query="getScheduleServices" itemcolumn="service" valuecolumn="cnt"/>
-		</cfchart>
+		</cfchart> --->
+		<div style="width:200px;height:200px;" class="sparklines sparkline-pie"><cfoutput>#valueList(getScheduleServices.cnt)#</cfoutput></div>
 	</div>
 </div>
 

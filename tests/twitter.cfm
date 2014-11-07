@@ -1,8 +1,8 @@
 <!--- <p>looking up friends</p>
 
-<cfset userIds = "2852238350,329746445">
+<cfset userIds = "581647615">
 
-<p>get @office followers (most recent 5000)</p>
+<!--- <p>get @office followers (most recent 5000)</p> --->
 
 <!--- <cfdump var="#application.objMonkehTweet.getUserDetails(screen_name='office')#"> --->
 <!--- 22209176 --->
@@ -12,12 +12,14 @@
 <cfloop list="#userIds#" index="userId">
 
 	<p>
-	<cfoutput>#userId#</cfoutput>
+	<cfoutput>#userId#: </cfoutput>
 	<cfset friends = application.objMonkehTweet.getFriendsIDs(user_id=userId)>
 	<cfif structKeyExists(friends, 'ids')>
+		<!--- do we maybe need to page here? should return up to 5000 results, so ... maybe ? --->
+		<cfoutput><strong>#arrayLen(friends.ids)#</strong> friends found</cfoutput>
 		<cfset friendIds = arrayToList(friends.ids)>
 		<cfif listFindNoCase(friendIds, '22209176')>
-			<strong>office found in this users friends (#userId#)</strong>
+			<strong>office found in this users friends</strong>
 		</cfif>
 	<cfelse>
 		<cfdump var="#friends#">
@@ -74,6 +76,8 @@
 
 <cfif len(form.searchTerm)>
 
+	<cfset init("Twitter")>
+
 	<cfset form.searchTerm = replace(form.searchTerm, ' ', '+AND+', 'ALL')>
 
 	<cfset q = URLEncodedFormat(form.searchTerm)>
@@ -105,26 +109,23 @@
 					<cfloop from="1" to="#arrayLen(searchResult.statuses)#" index="ndx">
 
 						<cfset thisResult = structGet("searchResult.statuses[#ndx#]")>
-
-						<cfif isStruct(thisResult.place)>
-							<cfdump var="#thisResult.place#">
-						</cfif>
+						<cfset tweet = oTwitter.parseTweetObject(tweet=thisResult)>
 
 						<cfoutput>
 
 							<tr>
 								<td>#ndx#</td>
-								<td>#thisResult.created_at#</td>
-								<td>#thisResult.user.screen_name#</td>
-								<td>#thisResult.text#</td>
+								<td>#tweet.created_at#</td>
+								<td>#tweet.user.screen_name#</td>
+								<td>#tweet.text#</td>
 								<td>
-									<cfif structKeyExists(thisResult.entities, "media")>
-										<a href="#thisResult.entities.media[1].media_url_https#" target="_blank"><!---
-											 ---><img src="#thisResult.entities.media[1].media_url_https#" style="width:50px;height:50px;border-radius:25%;">
+									<cfif len(tweet.media.media_url_https)>
+										<a href="#tweet.media.media_url_https#" target="_blank"><!---
+											 ---><img src="#tweet.media.media_url_https#" style="width:50px;height:50px;border-radius:25%;">
 										</a>
 									</cfif>
 								</td>
-								<!--- <td class="view-raw"><div style="display:none;"><cfdump var="#thisResult#"></div></td> --->
+								<!--- <td class="view-raw"><div style="display:none;"><cfdump var="#tweet#"></div></td> --->
 							</tr>
 
 						</cfoutput>
