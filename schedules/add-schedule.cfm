@@ -1,3 +1,6 @@
+<cfset init("Programs")>
+<cfset programs = oPrograms.getPrograms(customerId=session.customerId, userId=session.userId)>
+
 <cfparam name="url.programId" default="">
 <cfparam name="form.programId" default="#url.programId#">
 <cfparam name="form.name" default="">
@@ -6,8 +9,6 @@
 <cfparam name="form.endDate" default="">
 <cfparam name="form.service" default="">
 <cfparam name="errorFields" default="">
-<cfset init("Programs")>
-<cfset programs = oPrograms.getPrograms(customerId=session.customerId, userId=session.userId)>
 
 <h1 class="page-header">
 	Schedules &raquo; Add
@@ -19,6 +20,9 @@
 
 <div class="alert alert-danger form-errors" <cfif not listLen(errorFields)>style="display:none;"</cfif>>
 	<button type="button" class="close" data-dismiss="alert">&times;</button>
+	<div class="schedule-exists form-error" style="display:none;">
+		The schedule you entered already exists.
+	</div>
 	<div class="invalid-fields form-error">
 		All highlighted fields below need to be completed.
 	</div>
@@ -28,7 +32,7 @@
 
 	<div class="panel-body">
 
-		<form name="scheduleForm" method="post" action=""><!--- id seems a bit odd, but its so the autocomplete can target the element --->
+		<form name="scheduleForm" method="post" action="add-schedule.cfm">
 			<div class="row">
 				<div class="col-xs-12">
 					<div class="form-group <cfif findNoCase('programId', errorFields)>has-error</cfif>">
@@ -53,16 +57,12 @@
 			<div class="row">
 				<div class="col-xs-6">
 					<div class="form-group <cfif findNoCase('name', errorFields)>has-error</cfif>">
-						<label>Search Term</label>
-						<!--- <div class="input-group"> --->
-							<input type="text" id="searchTerm" name="searchTerm" value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" maxlength="100" class="form-control">
-							<!--- <span class="input-group-addon">
-								<b class="glyphicon glyphicon-plus add-search-term"></b>
-							</span>
-						</div> --->
-						<span class="help-block">Enter your #hashtag here. Some services will ignore the #.</span>
-						<span class="help-block">Most services allow multiple search terms (eg. #promotions @mardenkane).</span>
+						<label>Search Term(s)</label>
+						<input type="text" id="searchTerm" name="searchTerm" value="<cfoutput>#HTMLEditFormat(form.searchTerm)#</cfoutput>" maxlength="100" class="form-control">
 					</div>
+					<span class="help-block">Enter your #hashtag here. Some services will ignore the #.</span>
+					<span class="help-block">Most services allow multiple search terms (eg. #promotions @mardenkane).</span>
+					<span class="help-block">For best results, put the most restrictive term first (eg. #SomeUniqueHashTag #promo @client).</span>
 				</div>
 			</div>
 			<div class="row">
@@ -169,6 +169,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
+				<a href="index.cfm" class="btn btn-link"><span class="text-warning">Cancel</span></a>
 				<button type="submit" class="btn btn-primary">Next</button>
 				<!--- csrf --->
 				<input type="hidden" name="__token" id="__token" value="<cfoutput>#session.stamp#</cfoutput>">
@@ -178,14 +179,3 @@
 	</div>
 
 </div>
-
-<script>
-	$(function(){
-		$('.add-search-term').css('cursor', 'pointer');
-		$(document).on('click', '.add-search-term', function(){
-
-		});
-	});
-</script>
-
-

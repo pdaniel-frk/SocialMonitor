@@ -1,12 +1,7 @@
 <cfparam name="url.programId" default="">
 <cfparam name="form.programId" default="#url.programId#">
-<cfif not len(form.programId)>
-	<cflocation url="index.cfm" addtoken="no">
-</cfif>
-<cfset init("Programs")>
-<cfset program = oPrograms.getPrograms(programId=form.programId)>
-<cfif not program.recordCount>
-	<cflocation url="index.cfm" addtoken="no">
+<cfif not isDefined("program") or not program.recordCount>
+	<cfset reRoute(destination="index.cfm", message="The program you requested was either not found, or you do not have the correct permissions.")>
 </cfif>
 <cfparam name="form.name" default="#program.name#">
 <cfparam name="form.description" default="#program.description#">
@@ -15,7 +10,7 @@
 <cfparam name="errorFields" default="">
 
 <h1 class="page-header">
-	Programs &raquo; Edit <cfoutput>#program.name#</cfoutput>
+	Programs &raquo; Edit <small><cfoutput>#program.name#</cfoutput></small>
 </h1>
 
 <cfif structKeyExists(form, "__token")>

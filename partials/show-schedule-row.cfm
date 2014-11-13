@@ -4,9 +4,12 @@
 	<cfset init("Entries")>
 	<cfset scheduleDetails = oSchedules.getSchedules(scheduleId=scheduleId)>
 	<cfif scheduleDetails.recordCount>
+		<cfset init("Programs")>
+		<cfset programName = oPrograms.getPrograms(programId=scheduleDetails.programId).name>
 		<cfoutput query="scheduleDetails">
 			<tr class="<cfif len(endDate) and dateCompare(endDate, now()) lt 0>finished warning</cfif>">
 				<td>#lc#</td>
+				<td><a href="#request.webRoot#schedules/?programId=#scheduleDetails.programId#">#programName#</a></td>
 				<td>#name#</td>
 				<cfif service eq "Facebook">
 					<td>
@@ -71,22 +74,25 @@
 							<span class="glyphicon glyphicon-edit"></span>
 						</button>
 					</cfif> --->
-					<a href="#request.webRoot#schedules/edit-schedule.cfm?scheduleId=#scheduleId#"><!---
-						 ---><button class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit schedule">
-							<span class="glyphicon glyphicon-edit"></span>
-						</button>
+					<a href="#request.webRoot#schedules/edit-schedule.cfm?scheduleId=#scheduleId#" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit schedule">
+						<span class="glyphicon glyphicon-edit"></span>
 					</a>
-					<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
-						<span class="glyphicon glyphicon-play-circle"></span>
-					</button>
-					<a href="#request.webRoot#entries/view.cfm?scheduleId=#scheduleId#"><!---
-						 ---><button class="btn btn-primary btn-xs view-entries" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
-							<span class="glyphicon glyphicon-eye-open"></span>
+					<cfif not len(endDate) or dateCompare(endDate, now()) gte 0>
+						<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
+							<span class="glyphicon glyphicon-play-circle"></span>
 						</button>
+					</cfif>
+					<a href="#request.webRoot#entries/view.cfm?scheduleId=#scheduleId#" class="btn btn-primary btn-xs" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+						<span class="glyphicon glyphicon-eye-open"></span>
 					</a>
 					<button class="btn btn-default btn-xs download-entries" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
 						<span class="glyphicon glyphicon-download-alt"></span>
 					</button>
+					<cfif not len(endDate) or dateCompare(endDate, now()) gte 0>
+						<a href="#request.webRoot#schedules/cancel-schedule.cfm?scheduleId=#scheduleId#" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Cancel Schedule">
+							<span class="glyphicon glyphicon-trash"></span>
+						</a>
+					</cfif>
 				</td>
 			</tr>
 		</cfoutput>

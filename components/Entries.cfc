@@ -39,7 +39,8 @@
 				userName,
 				entryDate,
 				entryDay,
-				rowNumber
+				rowNumber,
+				rowNumberDay
 			from uvwSelectEntries
 			where 1=1
 			and rowNumber = 1

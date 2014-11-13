@@ -10,8 +10,8 @@
 <cfif schedule.recordCount>
 
 	<cfset init("POIUtility", "oReader", "BaseComponents")>
-	<cfset reportColumns = "Program,Schedule,Service,EntryType,Link,Text,User,Date">
-	<cfset reportColumnTypes = "varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar">
+	<cfset reportColumns = "Program,Schedule,Service,EntryType,Link,Text,User,Date,DailyEntries,TotalEntries">
+	<cfset reportColumnTypes = "varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,int,int">
 	<cfset reportColumnNames = reportColumns>
 	<cfset arrSheets = arrayNew(1)>
 
@@ -41,6 +41,8 @@
 				<cfset QuerySetCell(entriesQry, "Text", entry.text)>
 				<cfset QuerySetCell(entriesQry, "User", "#entry.firstName# #entry.lastName# (#entry.userName#)")>
 				<cfset QuerySetCell(entriesQry, "Date", "#dateFormat(entry.entryDate, 'yyyy-mm-dd')# #timeFormat(entry.entryDate, 'HH:mm')#")>
+				<cfset QuerySetCell(entriesQry, "DailyEntries", entry.rowNumberDay)>
+				<cfset QuerySetCell(entriesQry, "TotalEntries", entry.rowNumber)>
 			</cfloop>
 
 		</cfoutput>

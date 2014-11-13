@@ -1,6 +1,19 @@
-<!--- <p>looking up friends</p>
+<p>looking up friends</p>
 
-<cfset userIds = "581647615">
+<cfset userIds = "68333366,
+2889310867,
+111051457,
+826749217,
+14736138,
+2490004538,
+95078122,
+2497438824,
+90317262,
+376704149,
+402569428,
+573628056,
+363415807,
+19928553">
 
 <!--- <p>get @office followers (most recent 5000)</p> --->
 
@@ -36,7 +49,7 @@
 </cfloop>
 
 
-<cfabort> --->
+<cfabort>
 
 
 <cfparam name="form.searchTerm" default="">

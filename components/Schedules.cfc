@@ -123,9 +123,11 @@
 				page.name as pageName,
 				post.[message] as postMessage
 			from Schedules s
+			inner join Programs p on s.programId = p.Id
 			left join FacebookPages page on s.monitor_page_id = page.Id and page.scheduleId = s.scheduleId
 			left join FacebookPosts post on s.monitor_post_id = post.Id and post.scheduleId = s.scheduleId
 			where isdate(s.deleteDate) = 0
+			and isdate(p.deleteDate) = 0
 			<cfif len(arguments.programId)>
 				and s.programId  = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 			</cfif>
@@ -203,10 +205,10 @@
 				, searchTerm = <cfqueryparam value="#arguments.searchTerm#" cfsqltype="cf_sql_varchar">
 			</cfif>
 			<cfif len(arguments.monitor_page_id)>
-				, monitor_page_id = <cfqueryparam value="#arguments.monitor_page_id#" cfsqltype="cf_sql_varchar">
+				, monitor_page_id = <cfqueryparam value="#arguments.monitor_page_id#" null="#arguments.monitor_page_id eq -1#" cfsqltype="cf_sql_varchar">
 			</cfif>
 			<cfif len(arguments.monitor_post_id)>
-				, monitor_post_id = <cfqueryparam value="#arguments.monitor_post_id#" cfsqltype="cf_sql_varchar">
+				, monitor_post_id = <cfqueryparam value="#arguments.monitor_post_id#" null="#arguments.monitor_post_id eq -1#" cfsqltype="cf_sql_varchar">
 			</cfif>
 			<cfif len(arguments.startDate)>
 				, startDate = <cfqueryparam value="#arguments.startDate#" cfsqltype="cf_sql_timestamp">
@@ -214,6 +216,21 @@
 			<cfif len(arguments.endDate)>
 				, endDate = <cfqueryparam value="#arguments.endDate#" cfsqltype="cf_sql_timestamp">
 			</cfif>
+			where scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
+		</cfquery>
+
+		<cfreturn>
+
+	</cffunction>
+
+
+	<cffunction name="deleteSchedule" output="no" returntype="void">
+
+		<cfargument name="scheduleId" required="yes">
+
+		<cfquery datasource="#variables.dsn#">
+			update Schedules
+			set deleteDate = getdate()
 			where scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
 		</cfquery>
 

@@ -208,4 +208,19 @@
 
 	</cffunction>
 
+
+	<cffunction name="deleteProgram" output="no" returntype="void">
+
+		<cfargument name="programId" required="yes">
+
+		<cfquery datasource="#variables.dsn#">
+			update Programs
+			set deleteDate = getdate()
+			where Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+		</cfquery>
+
+		<cfreturn>
+
+	</cffunction>
+
 </cfcomponent>

@@ -17,6 +17,24 @@
 <cfparam name="form.postId" default="#schedule.monitor_post_id#">
 <cfparam name="form.pageName" default="#schedule.pageName#">
 
+<h1 class="page-header">
+	Schedules &raquo; Edit <small><cfoutput>#schedule.name#</cfoutput></small><br>
+	<small>
+		<cfswitch expression="#form.type#">
+			<cfcase value="add-page">Add Facebook Page</cfcase>
+			<cfcase value="edit-page">Change Facebook Page</cfcase>
+			<cfcase value="remove-page">Remove Facebook Page</cfcase>
+
+			<cfcase value="add-post">Add Facebook Post</cfcase>
+			<cfcase value="edit-post">Change Facebook Post</cfcase>
+			<cfcase value="remove-post">Remove Facebook Post</cfcase>
+		</cfswitch>
+		<cfif not findNoCase("remove", form.type)>
+			<a href="edit-schedule.cfm?scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-sm btn-warning">Cancel</a>
+		</cfif>
+	</small>
+</h1>
+
 <cfif not findNoCase("remove", form.type)>
 
 	<cfif findNoCase("page", form.type) and len(form.pageName)>
@@ -51,7 +69,8 @@
 				access_token = credentials.facebook.page_access_token,
 				save_results = true
 			)>
-			<cflocation url="edit-schedule.cfm?scheduleId=#form.scheduleId#">
+			<!--- <cflocation url="edit-schedule.cfm?scheduleId=#form.scheduleId#" addtoken="no"> --->
+			<cfset reRoute(destination="edit-schedule.cfm?scheduleId=#form.scheduleId#", message="Your monitored page has been updated.")>
 		</cfif>
 
 		<cfif findNoCase("post", form.type)>
@@ -66,31 +85,11 @@
 				access_token = credentials.facebook.page_access_token,
 				save_results = true
 			)>
-			<cflocation url="edit-schedule.cfm?scheduleId=#form.scheduleId#">
+			<!--- <cflocation url="edit-schedule.cfm?scheduleId=#form.scheduleId#" addtoken="no"> --->
+			<cfset reRoute(destination="edit-schedule.cfm?scheduleId=#form.scheduleId#", message="Your monitored post has been updated.")>
 		</cfif>
 
 	</cfif>
-
-</cfif>
-
-
-
-<h1 class="page-header">
-	Schedules &raquo; Edit <cfoutput>#schedule.name#</cfoutput><br>
-	<small>
-		<cfswitch expression="#form.type#">
-			<cfcase value="add-page">Add Facebook Page</cfcase>
-			<cfcase value="edit-page">Change Facebook Page</cfcase>
-			<cfcase value="remove-page">Remove Facebook Page</cfcase>
-
-			<cfcase value="add-post">Add Facebook Post</cfcase>
-			<cfcase value="edit-post">Change Facebook Post</cfcase>
-			<cfcase value="remove-post">Remove Facebook Post</cfcase>
-		</cfswitch>
-	</small>
-</h1>
-
-<cfif not findNoCase("remove", form.type)>
 
 	<div class="panel panel-primary">
 
@@ -99,7 +98,7 @@
 		</div>
 
 		<div class="panel-body">
-			<form name="pageForm" action="" method="post">
+			<form name="pageForm" action="edit-page.cfm" method="post">
 				<div class="form-group">
 					<label for="pageName">Page name</label>
 					<div class="input-group">
@@ -204,6 +203,60 @@
 		</div>
 
 	</div>
+
+<cfelse>
+
+	<cfif form.type eq "remove-page">
+
+		<h2><cfoutput>#schedule.pageName#</cfoutput></h2>
+
+		<button class="btn btn-sm btn-danger delete-confirm">Yes, I want to stop monitoring this page.</button>
+		<a href="edit-schedule.cfm?scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-lg btn-info">No way! Get me out of here!</a>
+
+		<script>
+			$(function(){
+				$(document).on('click', '.delete-confirm', function(e){
+					e.preventDefault();
+					$.post('<cfoutput>#request.webRoot#</cfoutput>services/cancel-page.cfm', {
+						scheduleid: '<cfoutput>#form.scheduleId#</cfoutput>',
+						__token: '<cfoutput>#session.stamp#</cfoutput>'
+					}, function(response){
+					})
+					.done(function(){
+						window.location = 'index.cfm';
+					})
+					.fail(function(){})
+					.always(function(){});
+				});
+			});
+		</script>
+
+	<cfelseif form.type eq "remove-post">
+
+		<p><cfoutput>#schedule.postMessage#</cfoutput></p>
+
+		<button class="btn btn-sm btn-danger delete-confirm">Yes, I want to stop monitoring this post.</button>
+		<a href="edit-schedule.cfm?scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-lg btn-info">No way! Get me out of here!</a>
+
+		<script>
+			$(function(){
+				$(document).on('click', '.delete-confirm', function(e){
+					e.preventDefault();
+					$.post('<cfoutput>#request.webRoot#</cfoutput>services/cancel-post.cfm', {
+						scheduleid: '<cfoutput>#form.scheduleId#</cfoutput>',
+						__token: '<cfoutput>#session.stamp#</cfoutput>'
+					}, function(response){
+					})
+					.done(function(){
+						window.location = 'index.cfm';
+					})
+					.fail(function(){})
+					.always(function(){});
+				});
+			});
+		</script>
+
+	</cfif>
 
 </cfif>
 

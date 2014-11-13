@@ -78,6 +78,25 @@
 
 		<cfinclude template="credentials.cfm">
 
+		<!--- tring something a little differnet... --->
+		<cfif structKeyExists(url, "programId") and len(url.programId) and isNumeric(url.programId)>
+			<cfset init("Programs")>
+			<cfset program = oPrograms.getPrograms (
+				userId = session.userId,
+				customerId = session.customerId,
+				programId = url.programId
+			)>
+		</cfif>
+		<cfif structKeyExists(url, "scheduleId") and len(url.scheduleId) and isNumeric(url.scheduleId)>
+			<cfset init("Schedules")>
+			<cfset schedule = oSchedules.getSchedules (
+				userId = session.userId,
+				customerId = session.customerId,
+				scheduleId = url.scheduleId
+			)>
+		</cfif>
+
+
 		<cfif not findNoCase(".cfc", arguments.template)
 			and not findNoCase("chromeless", arguments.template)
 			and not findNoCase("services", arguments.template)
@@ -238,6 +257,31 @@
 		<cfif not isDefined("#arguments.objName#")>
 			<cfset "#arguments.objName#" = createObject("component", "#arguments.componentPath#.#arguments.component#").init(arguments.dsn)>
 		</cfif>
+	</cffunction>
+
+
+	<cffunction name="reRoute">
+		<cfargument name="destination" required="yes">
+		<cfargument name="message" required="no" default="">
+
+		<cfif len(arguments.message)>
+			<div class="alert alert-success">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<cfoutput>#arguments.message#</cfoutput>
+			</div>
+		</cfif>
+
+		<!--- show progress bar --->
+		<div class="progress progress-striped progress-info active">
+			<div class="progress-bar" style="width: 100%;"></div>
+		</div>
+
+		<script type="text/javascript">
+			window.setTimeout( function() {  location='<cfoutput>#arguments.destination#</cfoutput>' }, 3000 );
+		</script>
+
+		<cfset onRequestEnd(cgi.script_name)>
+		<cfabort>
 	</cffunction>
 
 </cfcomponent>

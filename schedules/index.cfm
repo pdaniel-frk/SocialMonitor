@@ -7,13 +7,16 @@
 	Schedules
 	<cfif len(trim(url.service)) and getSchedules.recordCount>
 		&raquo; <cfoutput>#HTMLEditFormat(url.service)#</cfoutput>
+	<cfelse>
+		&raquo; List
+		<cfif isDefined("program")>
+			<small><cfoutput>#program.name#</cfoutput></small>
+		</cfif>
 	</cfif>
 	<span class="pull-right">
 		<button class="btn btn-sm show-finished">Show finished</button>
-		<a href="add-schedule.cfm"><!---
-			 ---><button class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="Add new schedule">
-				<span class="glyphicon glyphicon-plus"></span>
-			</button>
+		<a href="add-schedule.cfm<cfif len(url.programId)>?programId=<cfoutput>#url.programId#</cfoutput></cfif>" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="Add new schedule">
+			<span class="glyphicon glyphicon-plus"></span>
 		</a>
 		<!--- <div class="btn-group">
 			<button class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" title="Schedule new monitor">
@@ -79,7 +82,8 @@
 									<thead>
 										<tr>
 											<th>##</th>
-											<th nowrap>Name of Program, Schedule, etc.</th>
+											<th nowrap>Program</th>
+											<th nowrap>Schedule</th>
 											<cfif service eq "Facebook">
 												<th>Page</th>
 												<th>Post</th>

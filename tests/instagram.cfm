@@ -1,8 +1,7 @@
-<!--- <p>looking up friends</p>
+<p>looking up friends</p>
 
-<cfset userIds = "8648864,
-1200737832,
-581647615">
+<cfset userIds = "249422808,
+823063352">
 
 <cfloop list="#userIds#" index="userId">
 
@@ -47,7 +46,7 @@
 
 </cfloop>
 
-<cfabort> --->
+<cfabort>
 
 <cfprocessingdirective pageencoding="utf-8">
 <cfparam name="form.searchTerm" default="">

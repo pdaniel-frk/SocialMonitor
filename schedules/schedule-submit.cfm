@@ -26,16 +26,11 @@
 
 		<!--- see if this schedule already exists --->
 		<cfset init("Schedules")>
-		<cfset schedule = oSchedules.getSchedules (
-			programId = form.programId,
-			name = form.name,
-			service = service
-		)>
-		<cfif schedule.recordCount>
-			<!--- alert submitter? --->
-		<cfelse>
-			<!--- create the schedule --->
-			<cfset oSchedules.insertSchedule (
+
+		<cfif structKeyExists(form, "scheduleId") and len(form.scheduleId)>
+
+			<cfset oSchedules.updateSchedule (
+				scheduleId = form.scheduleId,
 				programId = form.programId,
 				name = form.name,
 				searchTerm = form.searchTerm,
@@ -43,26 +38,31 @@
 				endDate = form.endDate,
 				service = service
 			)>
+
+		<cfelse>
+
+			<cfset schedule = oSchedules.getSchedules (
+				programId = form.programId,
+				name = form.name,
+				service = service
+			)>
+			<cfif schedule.recordCount>
+				<cfset errorFields = listAppend(errorFields, "alreadyExists")>
+			<cfelse>
+				<!--- create the schedule --->
+				<cfset scheduleId = oSchedules.insertSchedule (
+					programId = form.programId,
+					name = form.name,
+					searchTerm = form.searchTerm,
+					startDate = form.startDate,
+					endDate = form.endDate,
+					service = service
+				)>
+			</cfif>
+
 		</cfif>
 
 	</cfloop>
-
-	<div class="alert alert-success">
-		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		Your schedule(s) have been created.
-	</div>
-
-	<!--- show progress bar --->
-	<div class="progress progress-striped progress-success active">
-		<div class="progress-bar" style="width: 100%;"></div>
-	</div>
-
-	<script type="text/javascript">
-		window.setTimeout( function() {  location='index.cfm?programId=<cfoutput>#form.programId#</cfoutput>' }, 3000 );
-	</script>
-
-	<cfset onRequestEnd(cgi.script_name)>
-	<cfabort>
 
 </cfif>
 
@@ -70,8 +70,21 @@
 
 	<script>
 		$(function(){
+			<cfif listFindNoCase(errorFields, "alreadyExists")>
+				$('.schedule-exists').show();
+			</cfif>
 			$('.form-errors').fadeIn('slow');
 		});
 	</script>
+
+<cfelse>
+
+	<cfif structKeyExists(form, "scheduleId") and len(form.scheduleId)>
+		<cfset message = "Your schedule has been updated.">
+	<cfelse>
+		<cfset message = "Your schedule(s) have been created.">
+	</cfif>
+
+	<cfset reRoute(destination="index.cfm?programId=#form.programId#", message=message)>
 
 </cfif>

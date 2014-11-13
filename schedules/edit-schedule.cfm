@@ -1,12 +1,7 @@
 <cfparam name="url.scheduleId" default="">
 <cfparam name="form.scheduleId" default="#url.scheduleId#">
-<cfif not len(form.scheduleId)>
-	<cflocation url="index.cfm" addtoken="no">
-</cfif>
-<cfset init("Schedules")>
-<cfset schedule = oSchedules.getSchedules(scheduleId=form.scheduleId)>
-<cfif not schedule.recordCount>
-	<cflocation url="index.cfm" addtoken="no">
+<cfif not isDefined("schedule") or not schedule.recordCount>
+	<cfset reRoute(destination="index.cfm", message="The schedule you requested was either not found, or you do not have the correct permissions.")>
 </cfif>
 <cfparam name="form.programId" default="#schedule.programId#">
 <cfparam name="form.name" default="#schedule.name#">
@@ -22,7 +17,7 @@
 <cfset program = oPrograms.getPrograms(scheduleId=form.scheduleId)>
 
 <h1 class="page-header">
-	Schedules &raquo; Edit <cfoutput>#schedule.name#</cfoutput>
+	Schedules &raquo; Edit <small><cfoutput>#schedule.name#</cfoutput></small>
 </h1>
 
 <cfif structKeyExists(form, "__token")>
@@ -40,7 +35,7 @@
 
 	<div class="panel-body">
 
-		<form name="scheduleForm" method="post" action=""><!--- id seems a bit odd, but its so the autocomplete can target the element --->
+		<form name="scheduleForm" method="post" action="">
 			<div class="row">
 				<div class="col-xs-12">
 					<div class="form-group">
@@ -133,6 +128,7 @@
 									<table class="table table-condensed">
 										<thead>
 											<tr>
+												<th>#</th>
 												<th>Name</th>
 												<th>Category</th>
 												<th>Likes</th>
@@ -141,7 +137,8 @@
 										</thead>
 										<tbody>
 											<tr>
-												<td><cfoutput>#getPage.name#</cfoutput></td>
+												<td>1</td>
+												<td><cfoutput><a href="#getPage.link#" target="_blank">#getPage.name#</a></cfoutput></td>
 												<td><cfoutput>#getPage.category#</cfoutput></td>
 												<td><cfoutput>#numberFormat(getPage.likes, ",")#</cfoutput></td>
 												<td nowrap>
@@ -149,7 +146,7 @@
 														<span class="glyphicon glyphicon-edit"></span>
 													</a>
 													<a href="edit-page.cfm?type=remove-page&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Remove monitored page">
-														<span class="glyphicon glyphicon-ban-circle"></span>
+														<span class="glyphicon glyphicon-trash"></span>
 													</a>
 												</td>
 											</tr>
@@ -171,6 +168,7 @@
 						<div class="form-group">
 							<label>Monitoring Post</label>
 							<cfif len(schedule.monitor_post_id)>
+								<cfset init("Facebook")>
 								<cfquery name="getPost" datasource="#this.dsn#">
 									select
 										pageId,
@@ -193,6 +191,7 @@
 									<table class="table table-condensed">
 										<thead>
 											<tr>
+												<th>Date</th>
 												<th>From</th>
 												<th>Message</th>
 												<th>Likes</th>
@@ -202,6 +201,7 @@
 										</thead>
 										<tbody>
 											<tr>
+												<td><cfoutput>#oFacebook.convertCreatedTimeToString(getPost.created_time)#</cfoutput></td>
 												<td><cfoutput>#getPost.from.name#</cfoutput></td>
 												<td><cfoutput>#getPost.message#</cfoutput></td>
 												<td><cfoutput>#numberFormat(getPost.likes.count, ",")#</cfoutput></td>
@@ -211,7 +211,7 @@
 														<span class="glyphicon glyphicon-edit"></span>
 													</a>
 													<a href="edit-page.cfm?type=remove-post&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Remove monitored post">
-														<span class="glyphicon glyphicon-ban-circle"></span>
+														<span class="glyphicon glyphicon-trash"></span>
 													</a>
 												</td>
 											</tr>
@@ -230,12 +230,11 @@
 			</cfif>
 
 			<div class="modal-footer">
+				<a href="index.cfm" class="btn btn-link"><span class="text-warning">Cancel</span></a>
 				<button type="submit" class="btn btn-primary">Save Changes</button>
 				<!--- csrf --->
 				<input type="hidden" name="__token" id="__token" value="<cfoutput>#session.stamp#</cfoutput>">
 				<input type="hidden" name="scheduleId" id="scheduleId" value="<cfoutput>#form.scheduleId#</cfoutput>">
-				<input type="hidden" name="removePageMonitor" value="">
-				<input type="hidden" name="removePostMonitor" value="">
 			</div>
 		</form>
 
