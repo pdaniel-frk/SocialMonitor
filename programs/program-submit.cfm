@@ -26,7 +26,7 @@
 				startDate = form.startDate,
 				endDate = form.endDate
 			)>
-			<cflocation url="add-program-schedule.cfm?programId=#programId#" addtoken="no">
+			<cflocation url="#request.webRoot#schedules/add-schedule.cfm?programId=#programId#" addtoken="no">
 		</cfif>
 	<cfelse>
 		<cfset oPrograms.updateProgram (

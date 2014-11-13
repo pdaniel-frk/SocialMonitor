@@ -8,6 +8,7 @@
 <cfif not schedule.recordCount>
 	<cflocation url="index.cfm" addtoken="no">
 </cfif>
+<cfparam name="form.programId" default="#schedule.programId#">
 <cfparam name="form.name" default="#schedule.name#">
 <cfparam name="form.searchTerm" default="#schedule.searchTerm#">
 <cfparam name="form.startDate" default="#schedule.startDate#">
@@ -99,8 +100,7 @@
 			<div class="row">
 				<div class="col-xs-12">
 					<div class="form-group <cfif findNoCase('service', errorFields)>has-error</cfif>">
-						<label>Monitoring Service</label>
-						<input type="text" value="<cfoutput>#HTMLEditFormat(form.service)#</cfoutput>" class="form-control" disabled>
+						<label>Monitoring Service</label> <cfoutput>#HTMLEditFormat(form.service)#</cfoutput>
 					</div>
 				</div>
 			</div>
@@ -145,12 +145,12 @@
 												<td><cfoutput>#getPage.category#</cfoutput></td>
 												<td><cfoutput>#numberFormat(getPage.likes, ",")#</cfoutput></td>
 												<td nowrap>
-													<button class="btn btn-warning btn-xs change-page-monitor" data-scheduleid="<cfoutput>#form.scheduleId#</cfoutput>" data-toggle="tooltip" data-placement="bottom" title="Change monitored page">
+													<a href="edit-page.cfm?type=edit-page&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Change monitored page">
 														<span class="glyphicon glyphicon-edit"></span>
-													</button>
-													<button class="btn btn-danger btn-xs remove-page-monitor" data-scheduleid="<cfoutput>#form.scheduleId#</cfoutput>" data-toggle="tooltip" data-placement="bottom" title="Remove monitored page">
+													</a>
+													<a href="edit-page.cfm?type=remove-page&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Remove monitored page">
 														<span class="glyphicon glyphicon-ban-circle"></span>
-													</button>
+													</a>
 												</td>
 											</tr>
 										</tbody>
@@ -158,9 +158,9 @@
 								</div>
 
 							<cfelse>
-								<button class="btn btn-warning btn-xs add-page-monitor" data-scheduleid="<cfoutput>#form.scheduleId#</cfoutput>" data-toggle="tooltip" data-placement="bottom" title="Add monitored page">
+								<a href="edit-page.cfm?type=add-page&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Add monitored page">
 									Add a page to monitor
-								</button>
+								</a>
 							</cfif>
 						</div>
 					</div>
@@ -207,21 +207,21 @@
 												<td><cfoutput>#numberFormat(getPost.likes.count, ",")#</cfoutput></td>
 												<td><cfoutput>#numberFormat(getPost.shares.count, ",")#</cfoutput></td>
 												<td nowrap>
-													<button class="btn btn-warning btn-xs change-post-monitor" data-scheduleid="<cfoutput>#form.scheduleId#</cfoutput>" data-toggle="tooltip" data-placement="bottom" title="Change monitored post">
+													<a href="edit-page.cfm?type=edit-post&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Change monitored post">
 														<span class="glyphicon glyphicon-edit"></span>
-													</button>
-													<button class="btn btn-danger btn-xs remove-post-monitor" data-scheduleid="<cfoutput>#form.scheduleId#</cfoutput>" data-toggle="tooltip" data-placement="bottom" title="Remove monitored post">
+													</a>
+													<a href="edit-page.cfm?type=remove-post&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Remove monitored post">
 														<span class="glyphicon glyphicon-ban-circle"></span>
-													</button>
+													</a>
 												</td>
 											</tr>
 										</tbody>
 									</table>
 								</div>
 							<cfelse>
-								<button class="btn btn-warning btn-xs add-post-monitor" data-scheduleid="<cfoutput>#form.scheduleId#</cfoutput>" data-toggle="tooltip" data-placement="bottom" title="Add monitored post">
+								<a href="edit-page.cfm?type=add-post&scheduleId=<cfoutput>#form.scheduleId#</cfoutput>" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Add monitored post">
 									Add a post to monitor
-								</button>
+								</a>
 							</cfif>
 						</div>
 					</div>

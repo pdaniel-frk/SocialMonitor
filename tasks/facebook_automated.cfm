@@ -19,6 +19,7 @@
 		<!--- isnt this functionally the same as no 'until,' though? --->
 		<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', now()))>
 		<cfset since = oFacebook.getSince(getSchedule.scheduleId)>
+		<cfset sanityCheck = 100>
 
 		<!--- blind search, always --->
 		<cfif len(getSchedule.searchTerm)>
@@ -37,6 +38,8 @@
 					access_token = credentials.facebook.page_access_token,
 					save_results = true
 				)>
+
+				<!--- <p><cfoutput>search #lc#</cfoutput></p> --->
 
 				<cfif not structKeyExists(search_result, 'data')>
 					<cfset EOF = true>
@@ -76,7 +79,7 @@
 
 						<cfset lc += 1>
 
-						<cfif lc gte 100>
+						<cfif lc gte sanityCheck>
 							<p>facebook search results exceeded page count sanity check</p>
 							<cfset EOF = true>
 						</cfif>
@@ -93,7 +96,7 @@
 		<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', now()))>
 
 		<!--- search page (feeds, feed -> comments) for searchTerm --->
-		<cfif len(getSchedule.searchTerm) and len(getSchedule.monitor_page_id) and not len(getSchedule.monitor_post_id)>
+		<cfif len(getSchedule.searchTerm) and len(getSchedule.monitor_page_id)><!--- and not len(getSchedule.monitor_post_id) --->
 
 			<!--- get the page and store its deets --->
 			<cfset page_result = oFacebook.getPage (
@@ -112,6 +115,8 @@
 			<cfset lc = 1>
 
 			<cfloop condition="NOT EOF">
+
+				<!--- <p><cfoutput>feed #lc#</cfoutput></p> --->
 
 				<cfset feed_result = oFacebook.getPageFeed (
 					programId = getSchedule.programId,
@@ -138,6 +143,9 @@
 								<cfset cc = 1>
 								<cfset comment_until = until>
 								<cfloop condition="NOT EOC">
+
+									<!--- <p><cfoutput>feed comment #cc#</cfoutput></p> --->
+
 									<cfset comment_result = oFacebook.getComments(
 										programId = getSchedule.programId,
 										scheduleId = getSchedule.scheduleId,
@@ -170,7 +178,7 @@
 									</cfif>
 
 									<cfset cc += 1>
-									<cfif cc gte 100>
+									<cfif cc gte sanityCheck>
 										<p>facebook feed -> comment exceeded page count sanity check</p>
 										<cfset EOC = true>
 									</cfif>
@@ -200,7 +208,7 @@
 
 					<cfset lc += 1>
 
-					<cfif lc gte 100>
+					<cfif lc gte sanityCheck>
 						<p>facebook feed results exceeded page count sanity check</p>
 						<cfset EOF = true>
 					</cfif>
@@ -211,8 +219,10 @@
 
 			</cfloop>
 
+		</cfif>
+
 		<!--- search a certain post for comments (if no searchTerm is provided, gather all comments) --->
-		<cfelseif len(getSchedule.monitor_post_id)>
+		<cfif len(getSchedule.monitor_post_id)>
 
 			<!--- get the post and store its deets --->
 			<cfset post_result = oFacebook.getPost (
@@ -231,6 +241,9 @@
 			<cfset cc = 1>
 			<cfset comment_until = until>
 			<cfloop condition="NOT EOC">
+
+				<!--- <p><cfoutput>comment #cc#</cfoutput></p> --->
+
 				<cfset comment_result = oFacebook.getComments(
 					programId = getSchedule.programId,
 					scheduleId = getSchedule.scheduleId,
@@ -266,7 +279,7 @@
 					</cfif>
 
 					<cfset cc += 1>
-					<cfif cc gte 100>
+					<cfif cc gte sanityCheck>
 						<p>facebook post -> comments results exceeded page count sanity check</p>
 						<cfset EOC = true>
 					</cfif>

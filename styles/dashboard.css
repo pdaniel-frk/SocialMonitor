@@ -2,7 +2,7 @@
  * Base structure
  */
  
-*{font-family:Arial, sans-serif;line-height:1.2;}
+*{font-family:Arial,sans-serif;line-height:1.2;}
 .ui-datepicker{ z-index: 9999 !important;}
 .ui-datepicker-month,.ui-datepicker-year{color:#444444 !important;}
 

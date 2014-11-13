@@ -162,27 +162,38 @@
 			<cfif arguments.save_results and len(arguments.searchTerm) and structKeyExists(feed_result, "data")>
 				<!--- save feed results that have a message includeing the search term --->
 				<cfloop from="1" to="#arrayLen(feed_result.data)#" index="i">
+
 					<cfset thisFeed = structGet('feed_result.data[#i#]')>
-					<cfif structKeyExists(thisFeed, 'message')>
-						<cfif findNoCase(arguments.searchTerm, thisFeed.message)>
+					<cfset feed = parsePageFeedObject(thisFeed)>
 
-							<cfset feed = parsePageFeedObject(thisFeed)>
-
-							<cfset insertFacebookPageFeed (
-								programId = arguments.programId,
-								scheduleId = arguments.scheduleId,
-								pageId = arguments.pageId,
-								feed = feed
-							)>
-
-							<cfset getUser (
-								id = feed.from.id,
-								access_token = arguments.access_token,
-								save_results = arguments.save_results
-							)>
-
+					<cfset termsFound = true>
+					<cfloop list="#arguments.searchTerm#" index="term" delimiters=" ">
+						<cfif not findNoCase(term, feed.message)>
+							<cfset termsFound = false>
+							<cfbreak>
 						</cfif>
+					</cfloop>
+
+					<cfif termsFound>
+
+						<!--- <p><cfoutput>all terms found in feed</cfoutput></p>
+						<cfdump var="#feed#"> --->
+
+						<cfset insertFacebookPageFeed (
+							programId = arguments.programId,
+							scheduleId = arguments.scheduleId,
+							pageId = arguments.pageId,
+							feed = feed
+						)>
+
+						<cfset getUser (
+							id = feed.from.id,
+							access_token = arguments.access_token,
+							save_results = arguments.save_results
+						)>
+
 					</cfif>
+
 				</cfloop>
 			</cfif>
 
@@ -291,26 +302,39 @@
 			<cfif arguments.save_results and structKeyExists(comment_result, "data")><!---  and len(arguments.searchTerm) --->
 				<!--- save feed results that have a message includeing the search term --->
 				<cfloop from="1" to="#arrayLen(comment_result.data)#" index="i">
+
 					<cfset thisComment = structGet('comment_result.data[#i#]')>
-					<cfif structKeyExists(thisComment, 'message')>
-						<cfif not len(arguments.searchTerm) or findNoCase(arguments.searchTerm, thisComment.message)>
+					<cfset comment = parseCommentObject(thisComment)>
 
-							<cfset comment = parseCommentObject(thisComment)>
-
-							<cfset insertFacebookPostComment (
-								programId = arguments.programId,
-								scheduleId = arguments.scheduleId,
-								comment = comment
-							)>
-
-							<cfset getUser (
-								id = comment.from.id,
-								access_token = arguments.access_token,
-								save_results = arguments.save_results
-							)>
-
-						</cfif>
+					<cfset termsFound = true>
+					<cfif len(arguments.searchTerm)>
+						<cfloop list="#arguments.searchTerm#" index="term" delimiters=" ">
+							<cfif not findNoCase(term, comment.message)>
+								<cfset termsFound = false>
+								<cfbreak>
+							</cfif>
+						</cfloop>
 					</cfif>
+
+					<cfif not len(arguments.searchTerm) or termsFound>
+
+						<!--- <p><cfoutput>all terms found in comment</cfoutput></p>
+						<cfdump var="#comment#"> --->
+
+						<cfset insertFacebookPostComment (
+							programId = arguments.programId,
+							scheduleId = arguments.scheduleId,
+							comment = comment
+						)>
+
+						<cfset getUser (
+							id = comment.from.id,
+							access_token = arguments.access_token,
+							save_results = arguments.save_results
+						)>
+
+					</cfif>
+
 				</cfloop>
 			</cfif>
 
@@ -408,10 +432,14 @@
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
 
+		<!--- in the case of multiple search terms, the MOST restrictive should appear first in the list (incredouble before citibank, for example) --->
+		<!--- we will search for the FIRST TERM only, then inspect the results to see if they contain ALL the terms --->
+		<!--- this can be tricky, because there can be several user-defined text fields (story, message, name, caption) --->
+
 		<!--- note this uses a different api version, as current versions return (#11) Post search has been deprecated --->
 		<!--- https://graph.facebook.com/ --->
 		<cfhttp method="get" url="#variables.unversioned_api_url#search">
-			<cfhttpparam type="url" name="q" value="#arguments.searchTerm#">
+			<cfhttpparam type="url" name="q" value="#replace(listFirst(arguments.searchTerm, ' '), '##', '')#">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
 			<cfhttpparam type="url" name="type" value="post">
 			<cfhttpparam type="url" name="until" value="#arguments.until#">
@@ -431,20 +459,38 @@
 					<cfloop from="1" to="#arrayLen(search_result.data)#" index="i">
 
 						<cfset thisResult = structGet('search_result.data[#i#]')>
-
 						<cfset thisResult = parseSearchObject(thisResult)>
 
-						<cfset insertFacebookSearchResult (
-							programId = arguments.programId,
-							scheduleId = arguments.scheduleId,
-							search = thisResult
-						)>
+						<cfset termsFound = true>
+						<cfloop list="#arguments.searchTerm#" index="term" delimiters=" ">
+							<!--- check all possible text fields --->
+							<cfif not findNoCase(term, thisResult.story)
+								and not findNoCase(term, thisResult.message)
+								and not findNoCase(term, thisResult.name)
+								and not findNoCase(term, thisResult.caption)>
+								<cfset termsFound = false>
+								<cfbreak>
+							</cfif>
+						</cfloop>
 
-						<cfset getUser (
-							id = thisResult.from.id,
-							access_token = arguments.access_token,
-							save_results = arguments.save_results
-						)>
+						<cfif termsFound>
+
+							<!--- <p><cfoutput>all terms found in search</cfoutput></p>
+							<cfdump var="#thisResult#"> --->
+
+							<cfset insertFacebookSearchResult (
+								programId = arguments.programId,
+								scheduleId = arguments.scheduleId,
+								search = thisResult
+							)>
+
+							<cfset getUser (
+								id = thisResult.from.id,
+								access_token = arguments.access_token,
+								save_results = arguments.save_results
+							)>
+
+						</cfif>
 
 					</cfloop>
 

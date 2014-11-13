@@ -73,7 +73,7 @@
 									</a>
 									<a href="#request.webRoot#schedules/?programId=#id#"><!---
 										 ---><button class="btn btn-primary btn-xs view-schedules" data-programid="#Id#" data-toggle="tooltip" data-placement="bottom" title="View Schedules">
-											<span class="glyphicon glyphicon-eye-open"></span>
+											<span class="glyphicon glyphicon-list"></span>
 										</button>
 									</a>
 									<a href="#request.webRoot#entries/view.cfm?programId=#Id#"><!---

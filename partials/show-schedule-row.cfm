@@ -41,7 +41,7 @@
 					<td>#numberFormat(getEntryCount.like_count, ",")#</td>
 				</cfif> --->
 				<td nowrap>
-					<cfif service eq "Facebook">
+					<!--- <cfif service eq "Facebook">
 						<cfif len(monitor_page_id)>
 							<button class="btn btn-warning btn-xs monitor-page-button" data-scheduleid="#scheduleId#" data-pageid="#monitor_page_id#" data-pagename="#getPage.name#" data-toggle="tooltip" data-placement="bottom" title="Edit Page Monitor">
 								<span class="glyphicon glyphicon-edit"></span>
@@ -70,7 +70,12 @@
 						<button class="btn btn-warning btn-xs monitor-vine-term-button" data-scheduleid="#scheduleId#" data-searchterm="#searchTerm#" data-toggle="tooltip" data-placement="bottom" title="Edit Term Monitor">
 							<span class="glyphicon glyphicon-edit"></span>
 						</button>
-					</cfif>
+					</cfif> --->
+					<a href="#request.webRoot#schedules/edit-schedule.cfm?scheduleId=#scheduleId#"><!---
+						 ---><button class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit schedule">
+							<span class="glyphicon glyphicon-edit"></span>
+						</button>
+					</a>
 					<button class="btn btn-info btn-xs run-schedule" data-scheduleid="#scheduleId#" data-service="#lcase(service)#" data-toggle="tooltip" data-placement="bottom" title="Run this task">
 						<span class="glyphicon glyphicon-play-circle"></span>
 					</button>

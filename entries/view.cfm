@@ -49,7 +49,7 @@
 						<cfoutput>
 							<tr>
 								<td>#lc#</td>
-								<td>#programName#</td>
+								<td><a href="#request.webRoot#schedules/?programId=#programId#">#programName#</a></td>
 								<!--- <td>#getSchedules.name#</td> --->
 								<td>#getSchedules.service#</td>
 								<td>
