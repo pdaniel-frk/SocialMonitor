@@ -20,7 +20,7 @@
 								where id = <cfqueryparam value="#monitor_page_id#" cfsqltype="cf_sql_varchar">
 								<!--- and scheduleId = <cfqueryparam value="#scheduleId#" cfsqltype="cf_sql_integer"> --->
 							</cfquery>
-							#getPage.name#
+							<a href="http://facebook.com/#getPage.Id#" target="_blank">#getPage.name#</a>
 						</cfif>
 					</td>
 					<td>

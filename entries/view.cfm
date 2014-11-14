@@ -8,7 +8,7 @@
 <cfset getSchedules = oSchedules.getSchedules(programId=url.programId, scheduleId=url.scheduleId)>
 
 <h1 class="page-header">
-	Collected Entries<cfif len(url.programId)> for <cfoutput>#getPrograms.name#</cfoutput></cfif>
+	Collected Entries <small><cfif len(url.programId)>for Program <cfoutput><strong>#getPrograms.name#</strong></cfoutput></cfif><cfif len(url.scheduleId)>for Schedule <cfoutput><strong>#getSchedules.name#</strong></cfoutput></cfif></small>
 	<span class="pull-right">
 		<button class="btn btn-default btn-sm download-entries" data-programid="<cfoutput>#url.programId#</cfoutput>" data-scheduleid="<cfoutput>#url.scheduleId#</cfoutput>" data-service="" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
 			<span class="glyphicon glyphicon-download-alt"></span>
