@@ -5,8 +5,17 @@
 <cfparam name="form.programId" default="#url.programId#">
 <cfparam name="form.name" default="">
 <cfparam name="form.searchTerm" default="">
-<cfparam name="form.startDate" default="">
-<cfparam name="form.endDate" default="">
+<cfif len(form.programId)>
+	<cfset program = oPrograms.getPrograms(programId=form.programId)>
+	<cfif program.recordCount>
+		<cfparam name="form.startDate" default="#program.startDate#">
+		<cfparam name="form.endDate" default="#program.endDate#">
+	</cfif>
+</cfif>
+<cfif not len(form.programId) or not isDefined("program") or not program.recordCount>
+	<cfparam name="form.startDate" default="#createDateTime(year(now()), month(now()), day(now()), 0, 0, 0)#">
+	<cfparam name="form.endDate" default="#createDateTime(year(now()), month(now()), day(now()), 23, 59, 59)#">
+</cfif>
 <cfparam name="form.service" default="">
 <cfparam name="errorFields" default="">
 
@@ -68,9 +77,9 @@
 			<div class="row">
 				<div class="col-xs-6">
 					<div class="form-group <cfif findNoCase('startDate', errorFields)>has-error</cfif>">
-						<label>Start (at 00:00:00)</label>
+						<label>Start</label>
 						<div class="input-group">
-							<input type="text" id="startDate" name="startDate" value="<cfoutput>#HTMLEditFormat(form.startDate)#</cfoutput>" placeholder="mm/dd/yyyy" class="form-control datepicker">
+							<input type="text" id="startDate" name="startDate" value="<cfoutput>#dateFormat(form.startDate, this.formats.date)# #timeFormat(form.startDate, this.formats.time)#</cfoutput>" placeholder="<cfoutput>#this.formats.date# #this.formats.time#</cfoutput>" class="form-control datepicker">
 							<span class="input-group-addon">
 								<b class="glyphicon glyphicon-calendar"></b>
 							</span>
@@ -79,9 +88,9 @@
 				</div>
 				<div class="col-xs-6">
 					<div class="form-group <cfif findNoCase('endDate', errorFields)>has-error</cfif>">
-						<label>End (at 23:59:59)</label>
+						<label>End</label>
 						<div class="input-group">
-							<input type="text" id="endDate" name="endDate" value="<cfoutput>#HTMLEditFormat(form.endDate)#</cfoutput>" placeholder="mm/dd/yyyy" class="form-control datepicker">
+							<input type="text" id="endDate" name="endDate" value="<cfoutput>#dateFormat(form.endDate, this.formats.date)# #timeFormat(form.endDate, this.formats.time)#</cfoutput>" placeholder="<cfoutput>#this.formats.date# #this.formats.time#</cfoutput>" class="form-control datepicker">
 							<span class="input-group-addon">
 								<b class="glyphicon glyphicon-calendar"></b>
 							</span>
@@ -165,7 +174,7 @@
 							</div>
 						</div>
 					</div>
-					<span class="help-block">Hint: Each selected service will create a separate schedule. These may be edited separately.</span>
+					<span class="help-block">Hint: Each selected service will create a separate schedule. These may be edited separately. <span class="facebook-help-block" style="display:none;">If you choose to monitor Facebook, you will be brought to another screen where you can add a page and/or post to watch.</span></span>
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -179,3 +188,11 @@
 	</div>
 
 </div>
+
+<script>
+	$(function(){
+		$(document).on('click', 'input[value=Facebook]', function(){
+			$('.facebook-help-block').toggle();
+		});
+	});
+</script>

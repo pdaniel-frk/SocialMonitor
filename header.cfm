@@ -16,6 +16,7 @@
 
 		<!--- Site-specific CSS --->
 		<link href="<cfoutput>#request.webRoot#</cfoutput>styles/dashboard.css" rel="stylesheet">
+		<link href="<cfoutput>#request.webRoot#</cfoutput>styles/jquery-ui-timepicker-addon.css" rel="stylesheet">
 
 		<!--- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries --->
 		<!--[if lt IE 9]>
@@ -33,6 +34,7 @@
 		    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 		<!--<![endif]-->
 		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+		<script src="<cfoutput>#request.webRoot#</cfoutput>scripts/jquery-ui-timepicker-addon.js"></script>
 		<script src="<cfoutput>#request.webRoot#</cfoutput>scripts/jquery.sparkline.min.js"></script>
 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/start/jquery-ui.min.css" />
 

@@ -64,7 +64,7 @@
 								<td>
 									<cfif len(getEntries.name)>#getEntries.name#<cfelse>#getEntries.firstName# #getEntries.lastName#</cfif> (#getEntries.userName#)
 								</td>
-								<td>#dateFormat(getEntries.entryDate, 'yyyy-mm-dd')# #timeFormat(getEntries.entryDate, 'HH:mm')#</td>
+								<td>#dateFormat(getEntries.entryDate, this.formats.date)# #timeFormat(getEntries.entryDate, this.formats.time)#</td>
 								<td>#numberFormat(getEntries.rowNumberDay, ",")#</td>
 								<td>#numberFormat(getEntries.rowNumber, ",")#</td>
 							</tr>

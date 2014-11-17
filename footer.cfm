@@ -32,11 +32,12 @@
 		$(function(){
 			<!--- this works on dynamically-added elements, yo (such as the ajax-y populated modal form) --->
 			$('body').on('focus', '.datepicker', function(){
-				$(this).datepicker({
+				$(this).datetimepicker({
 					changeMonth: true,
 					changeYear: true,
 					showAnim: 'slideDown',
-					dateFormat: 'mm/dd/yy'
+					dateFormat: '<cfoutput>#replace(this.formats.date, 'yyyy', 'yy')#</cfoutput>',
+					timeFormat: '<cfoutput>#this.formats.time#</cfoutput>',
 				});
 			});
 			<!--- tooltips --->

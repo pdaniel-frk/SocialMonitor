@@ -9,6 +9,8 @@
 	<cfset this.sessionTimeout = createTimeSpan(0,0,20,0)>
 	<cfset this.dsn = "SocialMonitor">
 	<cfset this.cfcPath = "SocialMonitor.components">
+	<cfset this.formats.date = "mm/dd/yyyy">
+	<cfset this.formats.time = "hh:mm:ss TT">
 
 	<cfset this.uid = 1348978015>
 	<cfset init("Helpers","oHelpers","BaseComponents")>

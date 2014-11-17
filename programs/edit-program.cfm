@@ -47,9 +47,9 @@
 				</div>
 				<div class="col-xs-6">
 					<div class="form-group <cfif findNoCase('startDate', errorFields)>has-error</cfif>">
-						<label>Start (at 00:00:00)</label>
+						<label>Start</label>
 						<div class="input-group">
-							<input type="text" id="startDate" name="startDate" value="<cfoutput>#HTMLEditFormat(form.startDate)#</cfoutput>" placeholder="mm/dd/yyyy" class="form-control datepicker">
+							<input type="text" id="startDate" name="startDate" value="<cfoutput>#dateFormat(form.startDate, this.formats.date)# #timeFormat(form.startDate, this.formats.time)#</cfoutput>" placeholder="<cfoutput>#this.formats.date# #this.formats.time#</cfoutput>" class="form-control datepicker">
 							<span class="input-group-addon">
 								<b class="glyphicon glyphicon-calendar"></b>
 							</span>
@@ -58,9 +58,9 @@
 				</div>
 				<div class="col-xs-6">
 					<div class="form-group <cfif findNoCase('endDate', errorFields)>has-error</cfif>">
-						<label>End (at 23:59:59)</label>
+						<label>End</label>
 						<div class="input-group">
-							<input type="text" id="endDate" name="endDate" value="<cfoutput>#HTMLEditFormat(form.endDate)#</cfoutput>" placeholder="mm/dd/yyyy" class="form-control datepicker">
+							<input type="text" id="endDate" name="endDate" value="<cfoutput>#dateFormat(form.endDate, this.formats.date)# #timeFormat(form.endDate, this.formats.time)#</cfoutput>" placeholder="<cfoutput>#this.formats.date# #this.formats.time#</cfoutput>" class="form-control datepicker">
 							<span class="input-group-addon">
 								<b class="glyphicon glyphicon-calendar"></b>
 							</span>

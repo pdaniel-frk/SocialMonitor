@@ -21,6 +21,8 @@
 		<cfargument name="entryType" required="no" default="">
 		<cfargument name="userId" required="no" default="">
 		<cfargument name="entryDay" required="no" default="">
+		<cfargument name="noDailyDupes" required="no" default=false>
+		<cfargument name="noDupes" required="no" default=false>
 
 		<cfquery name="getEntries" datasource="#variables.dsn#">
 			select
@@ -43,7 +45,12 @@
 				rowNumberDay
 			from uvwSelectEntries
 			where 1=1
-			and rowNumber = 1
+			<cfif arguments.noDailyDupes>
+				and rowNumberDay = 1
+			</cfif>
+			<cfif arguments.noDupes>
+				and rowNumber = 1
+			</cfif>
 			<cfif len(arguments.programId)>
 				and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 			</cfif>

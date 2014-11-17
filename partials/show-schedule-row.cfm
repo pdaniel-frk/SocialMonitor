@@ -36,8 +36,8 @@
 					</td>
 				</cfif>
 				<td>#searchTerm#</td>
-				<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
-				<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
+				<td>#dateFormat(startDate, this.formats.date)# #timeFormat(startDate, this.formats.time)#</td>
+				<td>#dateFormat(endDate, this.formats.date)# #timeFormat(endDate, this.formats.time)#</td>
 				<td>#numberFormat(oEntries.getEntryCount(scheduleId=scheduleId, service=service))#</td>
 				<!--- <cfif service eq "Facebook">
 					<td>#numberFormat(getEntryCount.comment_count, ",")#</td>

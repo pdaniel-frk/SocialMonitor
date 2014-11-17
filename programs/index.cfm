@@ -59,8 +59,8 @@
 								<td>#currentRow#</td>
 								<td>#name#</td>
 								<td>#description#</td>
-								<td>#dateFormat(startDate, 'mm/dd/yyyy')# #timeFormat(startDate, 'h:mm TT')#</td>
-								<td>#dateFormat(endDate, 'mm/dd/yyyy')# #timeFormat(endDate, 'h:mm TT')#</td>
+								<td>#dateFormat(startDate, this.formats.date)# #timeFormat(startDate, this.formats.time)#</td>
+								<td>#dateFormat(endDate, this.formats.date)# #timeFormat(endDate, this.formats.time)#</td>
 								<td>#numberFormat(getScheduleCount.cnt, ",")#</td>
 								<td>#numberFormat(oEntries.getEntryCount(programId=Id), ",")#</td>
 								<td>

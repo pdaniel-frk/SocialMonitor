@@ -22,6 +22,8 @@
 
 <cfif not listLen(errorFields)>
 
+	<cfset facebookScheduleAdded = false>
+
 	<cfloop list="#form.service#" index="service">
 
 		<!--- see if this schedule already exists --->
@@ -46,9 +48,11 @@
 				name = form.name,
 				service = service
 			)>
+
 			<cfif schedule.recordCount>
 				<cfset errorFields = listAppend(errorFields, "alreadyExists")>
 			<cfelse>
+
 				<!--- create the schedule --->
 				<cfset scheduleId = oSchedules.insertSchedule (
 					programId = form.programId,
@@ -58,6 +62,11 @@
 					endDate = form.endDate,
 					service = service
 				)>
+
+				<cfif service eq "Facebook">
+					<cfset facebookScheduleAdded = true>
+					<cfset facebookScheduleId = scheduleId>
+				</cfif>
 			</cfif>
 
 		</cfif>
@@ -85,6 +94,13 @@
 		<cfset message = "Your schedule(s) have been created.">
 	</cfif>
 
-	<cfset reRoute(destination="index.cfm?programId=#form.programId#", message=message)>
+	<cfif facebookScheduleAdded>
+		<cfset message &= "<br>You have added a Facebook schedule, so you will be taken to its edit page to select a page and/or post to monitor.">
+		<cfset reRoute(destination="edit-schedule.cfm?scheduleId=#facebookScheduleId#&facebookScheduleAdded=true", message=message)>
+	<cfelse>
+		<cfset reRoute(destination="index.cfm?programId=#form.programId#", message=message)>
+	</cfif>
+
+
 
 </cfif>
