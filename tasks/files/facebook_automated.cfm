@@ -535,8 +535,8 @@
 	<cfargument name="userId" default="#this.uid#">
 	<cfif len(arguments.user_id) and len(arguments.userId)>
 
-		<cfset init("Users")>
-		<cfset oUsers.insertFacebookUser(
+		<cfset init("Entrants")>
+		<cfset oEntrants.insertFacebookUser(
 			argumentCollection = arguments
 		)>
 

@@ -60,23 +60,23 @@
 				)
 			end
 
-			select Id = scope_identity()
+			select programId = scope_identity()
 		</cfquery>
 
 		<!--- catch in case scope_identity doesnt work --->
 		<cftry>
 
-			<cfreturn insertProgram.Id>
+			<cfreturn insertProgram.programId>
 
 			<cfcatch type="any">
 
 				<cfquery name="programSelect" datasource="#variables.dsn#">
-					select max(Id) as Id
+					select max(programId) as programId
 					from Programs
 					where isdate(deleteDate) = 0
 				</cfquery>
 
-				<cfreturn programSelect.Id>
+				<cfreturn programSelect.programId>
 
 			</cfcatch>
 
@@ -100,7 +100,7 @@
 
 		<cfquery name="programSelect" datasource="#variables.dsn#">
 			select
-				Id,
+				programId,
 				customerId,
 				userId,
 				name,
@@ -116,11 +116,11 @@
 					select 1
 					from Schedules
 					where scheduleId = <cfqueryparam value="#arguments.scheduleId#" cfsqltype="cf_sql_integer">
-					and programId = Programs.Id
+					and programId = Programs.programId
 				)
 			</cfif>
 			<cfif len(arguments.programId)>
-				and Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+				and programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 			</cfif>
 			<cfif len(arguments.customerId)>
 				and customerId = <cfqueryparam value="#arguments.customerId#" cfsqltype="cf_sql_integer">
@@ -192,7 +192,7 @@
 			<cfif len(arguments.dateArchived)>
 				, dateArchived = <cfqueryparam value="#arguments.dateArchived#" cfsqltype="cf_sql_timestamp">
 			</cfif>
-			where Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+			where programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 		</cfquery>
 
 	</cffunction>
@@ -216,7 +216,7 @@
 		<cfquery datasource="#variables.dsn#">
 			update Programs
 			set deleteDate = getdate()
-			where Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+			where programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 		</cfquery>
 
 		<cfreturn>

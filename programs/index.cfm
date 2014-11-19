@@ -1,6 +1,6 @@
 <cfset init("Programs")>
 <cfset init("Entries")>
-<cfset getPrograms = oPrograms.getPrograms(customerId=session.customerId, userId=session.userId)>
+<cfset getPrograms = oPrograms.getPrograms(customerId=session.customerId)>
 
 <h1 class="page-header">
 	Programs &raquo; List
@@ -51,7 +51,7 @@
 								select count(1) as cnt
 								from Schedules
 								where isdate(deleteDate) = 0
-								and programId = <cfqueryparam value="#getPrograms.Id#" cfsqltype="cf_sql_integer">
+								and programId = <cfqueryparam value="#getPrograms.programId#" cfsqltype="cf_sql_integer">
 							</cfquery>
 
 							<tr class="<cfif len(endDate) and dateCompare(endDate, now()) lt 0>finished warning</cfif>">
@@ -62,21 +62,21 @@
 								<td>#dateFormat(startDate, this.formats.date)# #timeFormat(startDate, this.formats.time)#</td>
 								<td>#dateFormat(endDate, this.formats.date)# #timeFormat(endDate, this.formats.time)#</td>
 								<td>#numberFormat(getScheduleCount.cnt, ",")#</td>
-								<td>#numberFormat(oEntries.getEntryCount(programId=Id), ",")#</td>
+								<td>#numberFormat(oEntries.getEntryCount(programId=programId), ",")#</td>
 								<td>
-									<a href="edit-program.cfm?programId=#id#" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit Program">
+									<a href="edit-program.cfm?programId=#programId#" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="bottom" title="Edit Program">
 										<span class="glyphicon glyphicon-edit"></span>
 									</a>
-									<a href="#request.webRoot#schedules/?programId=#id#" class="btn btn-primary btn-xs" data-toggle="tooltip" data-placement="bottom" title="View Schedules">
+									<a href="#request.webRoot#schedules/?programId=#programId#" class="btn btn-primary btn-xs" data-toggle="tooltip" data-placement="bottom" title="View Schedules">
 										<span class="glyphicon glyphicon-list"></span>
 									</a>
-									<a href="#request.webRoot#entries/view.cfm?programId=#Id#" class="btn btn-primary btn-xs" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
+									<a href="#request.webRoot#entries/view.cfm?programId=#programId#" class="btn btn-primary btn-xs" data-toggle="tooltip" data-placement="bottom" title="View collected entries">
 										<span class="glyphicon glyphicon-eye-open"></span>
 									</a>
-									<button class="btn btn-default btn-xs download-entries" data-programid="#Id#" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
+									<button class="btn btn-default btn-xs download-entries" data-programid="#programId#" data-toggle="tooltip" data-placement="bottom" title="Download collected entries">
 										<span class="glyphicon glyphicon-download-alt"></span>
 									</button>
-									<a href="cancel-program.cfm?programId=#id#" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Cancel Program">
+									<a href="cancel-program.cfm?programId=#programId#" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Cancel Program">
 										<span class="glyphicon glyphicon-trash"></span>
 									</a>
 								</td>

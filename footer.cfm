@@ -14,7 +14,7 @@
 	<script src="<cfoutput>#request.webRoot#scripts/docs.min.js</cfoutput>"></script>
 
 
-	<!--- modals for setting/editing monitoring durations --->
+	<!--- modal container for various purposes --->
 	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">

@@ -49,7 +49,7 @@
 						<select name="programId" id="programId" class="form-control">
 							<option value="">Select&hellip;</option>
 							<cfoutput query="programs">
-								<option value="#Id#" <cfif Id eq form.programId>selected="selected"</cfif>>#name#</option>
+								<option value="#programId#" <cfif programId eq form.programId>selected="selected"</cfif>>#name#</option>
 							</cfoutput>
 						</select>
 					</div>

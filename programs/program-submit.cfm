@@ -14,7 +14,7 @@
 <cfif not listLen(errorFields)>
 	<cfset init("Programs")>
 	<cfif not structKeyExists(form, "programId")>
-		<cfset programId = oPrograms.getPrograms(name=form.name, customerId=session.customerId).Id>
+		<cfset programId = oPrograms.getPrograms(name=form.name, customerId=session.customerId).programId>
 		<cfif len(programId)>
 			<cfset errorFields = listAppend(errorFields, "alreadyExists")>
 		<cfelse>

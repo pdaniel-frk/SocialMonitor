@@ -59,23 +59,23 @@
 				)
 			end
 
-			select Id = scope_identity()
+			select customerId = scope_identity()
 		</cfquery>
 
 		<!--- catch in case scope_identity doesnt work --->
 		<cftry>
 
-			<cfreturn insertCustomer.Id>
+			<cfreturn insertCustomer.customerId>
 
 			<cfcatch type="any">
 
 				<cfquery name="customerSelect" datasource="#variables.dsn#">
-					select max(Id) as Id
+					select max(customerId) as customerId
 					from Customers
 					where isdate(deleteDate) = 0
 				</cfquery>
 
-				<cfreturn customerSelect.Id>
+				<cfreturn customerSelect.customerId>
 
 			</cfcatch>
 
@@ -100,7 +100,7 @@
 
 		<cfquery name="customerSelect" datasource="#variables.dsn#">
 			select
-				Id,
+				customerId,
 				name,
 				industry,
 				address1,
@@ -200,7 +200,7 @@
 			<cfif len(arguments.phoneNumber)>
 				, phoneNumber = <cfqueryparam value="#arguments.phoneNumber#" cfsqltype="cf_sql_varchar">
 			</cfif>
-			where Id = <cfqueryparam value="#arguments.customerId#" cfsqltype="cf_sql_integer">
+			where customerId = <cfqueryparam value="#arguments.customerId#" cfsqltype="cf_sql_integer">
 		</cfquery>
 
 	</cffunction>
@@ -213,7 +213,7 @@
 		<cfquery datasource="#this.dsn#">
 			update Customers
 			set deleteDate = getdate()
-			where Id = <cfqueryparam value="#arguments.customerId#" cfsqltype="cf_sql_integer">
+			where customerId = <cfqueryparam value="#arguments.customerId#" cfsqltype="cf_sql_integer">
 		</cfquery>
 
 		<cfreturn>

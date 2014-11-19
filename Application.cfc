@@ -29,14 +29,12 @@
 
 	<cffunction name="onSessionStart">
 
-        <cfset session.loginTrackingID = "">
-		<cfset session.loggedin = false>
-		<cfset session.loginID = "">
-		<cfset session.uname = "">
-		<cfset session.emailaddress = "">
-		<cfset session.accesslevel = "">
+		<cfset session.loggedIn = false>
 		<cfset session.customerId = "">
 		<cfset session.userId = "">
+		<cfset session.uName = "">
+		<cfset session.emailAddress = "">
+		<cfset session.accessLevel = "">
 		<cfset session.stamp = hash(getTickCount(), "sha-1")>
 
 	</cffunction>
@@ -102,6 +100,7 @@
 		<cfif not findNoCase(".cfc", arguments.template)
 			and not findNoCase("chromeless", arguments.template)
 			and not findNoCase("services", arguments.template)
+			and not findNoCase("partials", arguments.template)
 			and not findNoCase("tasks", arguments.template)>
 			<cfinclude template="header.cfm">
 		<cfelse>
@@ -118,6 +117,8 @@
 		<!--- that user is logged in --->
 		<cfif not session.loggedin
 			and not findNoCase("login.cfm", arguments.template)
+			and not findNoCase("forgot-", arguments.template)
+			and not findNoCase("reset-", arguments.template)
 			and compareNoCase("cfschedule", cgi.http_user_agent) is not 0>
 			<cfset arguments.template = "login.cfm">
 		</cfif>
@@ -135,11 +136,12 @@
 		<cfif not findNoCase(".cfc", arguments.template)
 			and not findNoCase("chromeless", arguments.template)
 			and not findNoCase("services", arguments.template)
+			and not findNoCase("partials", arguments.template)
 			and not findNoCase("tasks", arguments.template)>
 			<cfinclude template="footer.cfm">
 		</cfif>
 
-		<cfset init("Tracking","oTracking","BaseComponents")>
+		<cfset init("Tracking", "oTracking", "BaseComponents")>
 
 		<cfset endAt = getTickCount()>
 		<cfset executionTime = endAt-startAt>
@@ -151,19 +153,16 @@
 			</cfcatch>
 		</cftry>
 
-		<!--- <cfscript>
-			oTracking.insertPageHit (
-							loginTrackingID = session.loginTrackingID,
-							loginID = session.loginID,
-							template = left(trim(cgi.script_name), 255),
-							executionTime = executionTime,
-							queryString = left(trim(cgi.query_string), 1000),
-							IPAddress = oHelpers.getClientIP(),
-							referer = left(trim(cgi.http_referer), 1000),
-							browser = left(trim(cgi.http_user_agent), 1000),
-							browserShort = browserShort
-						);
-		</cfscript> --->
+		<!--- <cfset oTracking.insertPageHit (
+				userId = session.userId,
+				template = left(trim(cgi.script_name), 255),
+				executionTime = executionTime,
+				queryString = left(trim(cgi.query_string), 1000),
+				IPAddress = oHelpers.getClientIP(),
+				referer = left(trim(cgi.http_referer), 1000),
+				browser = left(trim(cgi.http_user_agent), 1000),
+				browserShort = browserShort
+			)> --->
 
 	</cffunction>
 

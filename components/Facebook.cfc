@@ -524,7 +524,7 @@
 					(
 						select datediff(s, '1970-01-01', startDate)
 						from Programs
-						where Id = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
+						where programId = <cfqueryparam value="#arguments.programId#" cfsqltype="cf_sql_integer">
 					)
 				<cfelseif len(arguments.scheduleId)>
 					(

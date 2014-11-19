@@ -55,8 +55,8 @@
 								instagram = instagram
 							)>
 
-							<cfset init("Users")>
-							<cfset oUsers.insertInstagramUser (
+							<cfset init("Entrants")>
+							<cfset oEntrants.insertInstagramUser (
 								user_id = instagram.user.id,
 								bio = instagram.user.bio,
 								full_name = instagram.user.full_name,

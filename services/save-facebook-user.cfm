@@ -12,8 +12,8 @@
 
 <cfif len(form.user_id) and len(form.userID)>
 
-	<cfset init("Users")>
-	<cfset oUsers.insertFacebookUser(
+	<cfset init("Entrants")>
+	<cfset oEntrants.insertFacebookUser(
 		argumentCollection = form
 	)>
 

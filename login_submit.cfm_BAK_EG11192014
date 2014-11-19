@@ -1,0 +1,56 @@
+<cfif not len(trim(form.uName)) or not len(trim(form.uPass))>
+
+	<div class="alert alert-warning">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		All fields below need to be completed.
+	</div>
+
+<cfelse>
+
+	<cfset init("Logins", "oLogins", "BaseComponents")>
+
+	<cfset loginID = oLogins.getLogins(uName=form.uName).loginID>
+
+	<cfif len(trim(loginID))>
+
+		<cfset loginDetail = oLogins.getLoginDetails(loginID)>
+
+		<!--- validate the password --->
+		<cfset passwordIsValid = oLogins.comparePassword(uPass=form.uPass, uSalt=loginDetail.uSalt, passHash=loginDetail.uPass)>
+
+		<cfif passwordIsValid>
+
+			<!--- log user in and forward to index --->
+			<cfset oLogins.updateLoginDate(loginID)>
+			<!--- get logintrackingid for tracking porpoises --->
+			<cfset init("Tracking", "oTracking", "BaseComponents")>
+			<cflock scope="session" timeout="7">
+				<cfset session.loggedIn = true>
+				<cfset session.loginTrackingID = oTracking.trackLogin(loginID = loginID)>
+				<cfset session.loginID = loginID>
+				<cfset session.uName = trim(form.uName)>
+				<cfset session.emailAddress = loginDetail.emailAddress>
+				<cfset session.accessLevel = loginDetail.accessLevel>
+			</cflock>
+
+			<cfset reRoute(destination="index.cfm", message="You have been signed in.")>
+
+		<cfelse>
+
+			<div class="alert alert-danger">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				Either the username or password you have entered is incorrect.
+			</div>
+
+		</cfif>
+
+	<cfelse>
+
+		<div class="alert alert-danger">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			Either the username or password you have entered is incorrect.
+		</div>
+
+	</cfif>
+
+</cfif>

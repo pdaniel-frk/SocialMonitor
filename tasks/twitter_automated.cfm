@@ -43,8 +43,8 @@
 					tweet = tweet
 				)>
 
-				<cfset init("Users")>
-				<cfset oUsers.insertTwitterUser (
+				<cfset init("Entrants")>
+				<cfset oEntrants.insertTwitterUser (
 					id = tweet.user.id,
 					id_str = tweet.user.id_str,
 					location = tweet.user.location,

@@ -1,7 +1,7 @@
 <cfparam name="form.uname" default="">
 <cfparam name="form.upass" default="">
 
-<cfif structKeyExists(form, "signInKey")>
+<cfif structKeyExists(form, "__token")>
 	<cfinclude template="login_submit.cfm">
 </cfif>
 
@@ -48,10 +48,35 @@
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Sign In</button>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-xs-12">
-			<a href="" class="btn btn-link">Forgot username or password?</a>
-		</div>
-	</div>
-	<input type="hidden" name="signInKey" value="<cfoutput>#hash(getTickCount(), 'sha-1')#</cfoutput>">
+
+	<input type="hidden" name="__token" value="<cfoutput>#session.stamp#</cfoutput>">
 </form>
+
+<div class="row">
+	<div class="col-xs-12">
+		<a href="#" class="forgot-username">Forgot your Username?</a> | <a href="#" class="forgot-password">Forgot your Password?</a>
+	</div>
+</div>
+
+<script>
+	$(function(){
+		$(document).on('click', '.forgot-username', function(e){
+			e.preventDefault();
+			$('#myModal .modal-dialog .modal-content').empty();
+			$.get('<cfoutput>#request.webRoot#</cfoutput>partials/forgot-username.cfm', function(data){
+				$('#myModal .modal-dialog .modal-content').html(data);
+				$('#myModal').modal();
+			});
+		});
+
+
+		$(document).on('click', '.forgot-password', function(e){
+			e.preventDefault();
+			$('#myModal .modal-dialog .modal-content').empty();
+			$.get('<cfoutput>#request.webRoot#</cfoutput>partials/forgot-password.cfm', function(data){
+				$('#myModal .modal-dialog .modal-content').html(data);
+				$('#myModal').modal();
+			});
+		});
+	});
+</script>

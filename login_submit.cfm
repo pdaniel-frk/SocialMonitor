@@ -7,50 +7,37 @@
 
 <cfelse>
 
-	<cfset init("Logins","oLogins","BaseComponents")>
+	<cftransaction>
 
-	<cfset loginID = oLogins.getLogins(uName=form.uName).loginID>
-
-	<cfif len(trim(loginID))>
-
-		<cfset loginDetail = oLogins.getLoginDetails(loginID)>
-
-		<!--- validate the password --->
-		<cfset passwordIsValid = oLogins.comparePassword(uPass=form.uPass, uSalt=loginDetail.uSalt, passHash=loginDetail.uPass)>
-
-		<cfif passwordIsValid>
-
-			<!--- log user in and forward to index --->
-			<cfset oLogins.updateLoginDate(loginID)>
-			<!--- get logintrackingid for tracking porpoises --->
-			<cfset init("Tracking","oTracking","BaseComponents")>
-			<cflock scope="session" timeout="7">
-				<cfset session.loggedIn = true>
-				<cfset session.loginTrackingID = oTracking.trackLogin(loginID = loginID)>
-				<cfset session.loginID = loginID>
-				<cfset session.uName = trim(form.uName)>
-				<cfset session.emailAddress = loginDetail.emailAddress>
-				<cfset session.accessLevel = loginDetail.accessLevel>
-			</cflock>
-
-			<cfset reRoute(destination="index.cfm", message="You have been signed in.")>
-
+		<!--- validate login --->
+		<cfset init("Users")>
+		<cfset user = oUsers.getUsers(uName=form.uName)>
+		<cfif user.recordCount>
+			<cfset init("Passwords", "oPasswords", "BaseComponents")>
+			<cfset passwordIsValid = oPasswords.comparePassword(uPass=form.uPass,uSalt=user.uSalt,passHash=user.uPass)>
+			<cfif passwordIsValid>
+				<cflock scope="session" timeout="4" throwontimeout="no">
+					<cfset session.loggedIn = true>
+					<cfset session.customerId = user.customerId>
+					<cfset session.userId = user.userId>
+					<cfset session.uName = user.uName>
+					<cfset session.emailAddress = user.emailAddress>
+					<cfset session.accessLevel = "">
+				</cflock>
+				<cfset reRoute(destination="index.cfm", message="You have been signed in.")>
+			<cfelse>
+				<div class="alert alert-danger">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					Either the username or password you have entered is incorrect.
+				</div>
+			</cfif>
 		<cfelse>
-
 			<div class="alert alert-danger">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				Either the username or password you have entered is incorrect.
 			</div>
-
 		</cfif>
 
-	<cfelse>
-
-		<div class="alert alert-danger">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			Either the username or password you have entered is incorrect.
-		</div>
-
-	</cfif>
+	</cftransaction>
 
 </cfif>
