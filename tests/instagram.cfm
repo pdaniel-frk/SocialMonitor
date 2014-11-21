@@ -1,7 +1,6 @@
 <p>looking up friends</p>
-
-<cfset userIds = "249422808,
-823063352">
+<p>note: this fails if the userId list contains more than 1 element, so just do them 1 at a time.</p>
+<cfset userIds = "1050204647">
 
 <cfloop list="#userIds#" index="userId">
 

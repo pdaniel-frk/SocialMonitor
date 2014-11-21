@@ -96,7 +96,7 @@
 												<th>Comments</th>
 												<th>Likes</th>
 											</cfif> --->
-											<th>Actions</th>
+											<th nowrap>Actions</th>
 										</tr>
 									</thead>
 									<tbody>

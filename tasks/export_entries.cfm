@@ -11,8 +11,9 @@
 
 	<cfset init("POIUtility", "oReader", "BaseComponents")>
 	<cfset reportColumns = "Program,Schedule,Service,EntryType,Link,Text,User,Date,DailyEntries,TotalEntries">
-	<cfset reportColumnTypes = "varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,int,int">
-	<cfset reportColumnNames = reportColumns>
+	<!--- Integer | BigInt | Double | Decimal | VarChar | Binary | Bit | Time | Date | Timestamp | Object --->
+	<cfset reportColumnTypes = "varchar,varchar,varchar,varchar,varchar,varchar,varchar,varchar,integer,integer">
+	<cfset reportColumnNames = "Program,Schedule,Service,Entry Type,Link,Text,User,Date,Daily Entries,Total Entries">
 	<cfset arrSheets = arrayNew(1)>
 
 	<cfset lc = 1>

@@ -110,7 +110,7 @@
 		<cfset arguments.scheduleId = listChangeDelims(arguments.scheduleId, ",", ":")>
 
 		<cfquery name="getSchedules" datasource="#variables.dsn#">
-			select
+			select distinct
 				s.programId,
 				s.scheduleId,
 				s.name,

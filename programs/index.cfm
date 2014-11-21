@@ -6,7 +6,7 @@
 	Programs &raquo; List
 	<span class="pull-right">
 		<button class="btn btn-sm show-finished">Show finished</button>
-		<button class="btn btn-sm show-archived">Show archived</button>
+		<!--- <button class="btn btn-sm show-archived">Show archived</button> --->
 		<a href="add-program.cfm" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="Add a new program">
 			<span class="glyphicon glyphicon-plus"></span>
 		</a>

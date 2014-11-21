@@ -1,5 +1,5 @@
 <cfset init("Programs")>
-<cfset programs = oPrograms.getPrograms(customerId=session.customerId, userId=session.userId)>
+<cfset programs = oPrograms.getPrograms(customerId=session.customerId)>
 
 <cfparam name="url.programId" default="">
 <cfparam name="form.programId" default="#url.programId#">
