@@ -10,9 +10,9 @@
 <cfif not len(form.name)>
     <cfset errorFields = listAppend(errorFields, "name")>
 </cfif>
-<cfif not len(form.searchTerm)>
+<!--- <cfif not len(form.searchTerm)>
     <cfset errorFields = listAppend(errorFields, "searchTerm")>
-</cfif>
+</cfif> --->
 <cfif not isDate(form.startDate)>
 	<cfset errorFields = listAppend(errorFields, "startDate")>
 </cfif>
