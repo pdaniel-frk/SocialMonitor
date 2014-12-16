@@ -24,6 +24,8 @@
 		<!--- blind search, always --->
 		<cfif len(getSchedule.searchTerm)>
 
+			<p>blind search</p><cfabort>
+
 			<cfset EOF = false>
 			<cfset lc = 1>
 
@@ -97,6 +99,8 @@
 
 		<!--- search page (feeds, feed -> comments) for searchTerm --->
 		<cfif len(getSchedule.searchTerm) and len(getSchedule.monitor_page_id)><!--- and not len(getSchedule.monitor_post_id) --->
+
+			<p>search page for term</p><cfabort>
 
 			<!--- get the page and store its deets --->
 			<cfset page_result = oFacebook.getPage (
@@ -230,8 +234,6 @@
 				scheduleId = getSchedule.scheduleId,
 				postId = getSchedule.monitor_post_id,
 				searchTerm = getSchedule.searchTerm,
-				until = until,
-				since = since,
 				access_token = credentials.facebook.page_access_token,
 				save_results = true
 			)>
@@ -239,24 +241,33 @@
 			<!--- get comments for the post --->
 			<cfset EOC = false>
 			<cfset cc = 1>
-			<cfset comment_until = until>
+			<cfset cp = 1>
+			<cfset after = "">
 			<cfloop condition="NOT EOC">
 
-				<!--- <p><cfoutput>comment #cc#</cfoutput></p> --->
+				<p><cfoutput>comment page #cp#</cfoutput></p>
 
 				<cfset comment_result = oFacebook.getComments(
 					programId = getSchedule.programId,
 					scheduleId = getSchedule.scheduleId,
 					id = getSchedule.monitor_post_id,
 					searchTerm = getSchedule.searchTerm,
-					until = comment_until,
 					since = since,
+					after = after,
 					access_token = credentials.facebook.page_access_token,
 					save_results = true
 				)>
 
-				<cfif structKeyExists(comment_result, 'data') and arrayLen(comment_result.data)>
+				<!--- results returned in chronological order now, so you could check timestamp of FIRST and LAST record in set --->
 
+				<!--- <p><cfoutput>since = #since#</cfoutput></p>
+				<p><cfoutput>first created_time = #comment_result.data[1].created_time#</cfoutput></p>
+				<p><cfoutput>last created_time = #comment_result.data[arrayLen(comment_result.data)].created_time#</cfoutput></p>
+				<cfdump var="#oFacebook.parseCommentObject(comment_result.data[1])#"><!--- parsing this will convert create_time from readable (but not usable) timestamp to unix seconds timestamp, but DOES NOT adjust for timezone --->
+				<cfabort> --->
+
+				<!--- note that FB changed the name or these cursors at some point... --->
+				<cfif structKeyExists(comment_result, 'data') and arrayLen(comment_result.data)>
 					<!--- <cfif arrayLen(comment_result.data)>
 						<cfdump var="#comment_result#">
 					</cfif> --->
@@ -264,22 +275,23 @@
 						<cfset EOC = true>
 					<cfelse>
 						<cfif structKeyExists(comment_result.paging, "next")>
-							<!--- extract 'until' from paging.next --->
+							<!--- extract 'after' from paging.next --->
 							<!--- this is a bit awkward, as 'next' (usually, sometimes, maybe always) returns earlier results --->
 							<cfset theUrl = comment_result.paging.next>
 							<cfset theUrl = listRest(theUrl, '?')>
 							<cfloop list="#theUrl#" index="u" delimiters="&">
-								<cfif listFirst(u, "=") eq "until">
-									<cfset comment_until = listLast(u, "=")>
+								<cfif listFirst(u, "=") eq "after">
+									<cfset after = listLast(u, "=")>
 								</cfif>
 							</cfloop>
+							<cfset cp += 1>
 						<cfelse>
 							<cfset EOC = true>
 						</cfif>
 					</cfif>
 
 					<cfset cc += 1>
-					<cfif cc gte sanityCheck>
+					<cfif cp gte sanityCheck>
 						<p>facebook post -> comments results exceeded page count sanity check</p>
 						<cfset EOC = true>
 					</cfif>

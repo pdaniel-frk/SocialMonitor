@@ -281,16 +281,18 @@
 		<cfargument name="scheduleId" required="no" default="">
 		<cfargument name="searchTerm" required="no" default="">
 		<cfargument name="id" required="yes">
-		<cfargument name="until" required="no" default="">
+		<cfargument name="after" required="no" default="">
 		<cfargument name="since" required="no" default="">
-		<cfargument name="limit" required="no" default=25>
+		<cfargument name="limit" required="no" default=200>
 		<cfargument name="access_token" required="no" default="">
 		<cfargument name="save_results" required="no" default=false>
 
 		<cfhttp url="#variables.api_url##arguments.id#/comments" method="get" charset="utf-8">
 			<cfhttpparam type="url" name="access_token" value="#arguments.access_token#">
-			<cfhttpparam type="url" name="until" value="#arguments.until#">
+			<cfhttpparam type="url" name="after" value="#arguments.after#">
 			<cfhttpparam type="url" name="since" value="#arguments.since#">
+			<cfhttpparam type="url" name="summary" value="true">
+			<cfhttpparam type="url" name="filter" value="stream"><!--- this should cause comments to be returned in chronological order --->
 			<cfhttpparam type="url" name="limit" value="#arguments.limit#">
 			<cfhttpparam type="url" name="fields" value="id,from,message,created_time,like_count">
 		</cfhttp>
@@ -306,34 +308,38 @@
 					<cfset thisComment = structGet('comment_result.data[#i#]')>
 					<cfset comment = parseCommentObject(thisComment)>
 
-					<cfset termsFound = true>
-					<cfif len(arguments.searchTerm)>
-						<cfloop list="#arguments.searchTerm#" index="term" delimiters=" ">
-							<cfif not findNoCase(term, comment.message)>
-								<cfset termsFound = false>
-								<cfbreak>
-							</cfif>
-						</cfloop>
-					</cfif>
+					<cfif not len(arguments.since) or comment.created_time gt arguments.since>
 
-					<cfif not len(arguments.searchTerm) or termsFound>
+						<cfset termsFound = true>
+						<cfif len(arguments.searchTerm)>
+							<cfloop list="#arguments.searchTerm#" index="term" delimiters=" ">
+								<cfif not findNoCase(term, comment.message)>
+									<cfset termsFound = false>
+									<cfbreak>
+								</cfif>
+							</cfloop>
+						</cfif>
 
-						<!--- <p><cfoutput>all terms found in comment</cfoutput></p>
-						<cfdump var="#comment#"> --->
+						<cfif not len(arguments.searchTerm) or termsFound>
 
-						<cfset insertFacebookPostComment (
-							programId = arguments.programId,
-							scheduleId = arguments.scheduleId,
-							comment = comment
-						)>
+							<!--- <p><cfoutput>all terms found in comment</cfoutput></p>
+							<cfdump var="#comment#"> --->
 
-						<cfset getUser (
-							id = comment.from.id,
-							access_token = arguments.access_token,
-							save_results = arguments.save_results
-						)>
+							<cfset insertFacebookPostComment (
+								programId = arguments.programId,
+								scheduleId = arguments.scheduleId,
+								comment = comment
+							)>
 
-					</cfif>
+							<cfset getUser (
+								id = comment.from.id,
+								access_token = arguments.access_token,
+								save_results = arguments.save_results
+							)>
+
+						</cfif>
+
+					</cfif><!--- compare timestamps --->
 
 				</cfloop>
 			</cfif>
