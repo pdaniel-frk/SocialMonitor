@@ -1,19 +1,11 @@
 <p>looking up friends</p>
+<p>this is rate limited to 15 records every 15 minutes.</p>
+<p>time now: <cfoutput>#timeFormat(now(), 'HH:mm')#</cfoutput></p>
 
-<cfset userIds = "2716240221,
-40974198,
-16056529,
-1113028153,
-2890689770,
-1931157685,
-338143790,
-2770679534,
-211797887,
-130493237,
-801719023,
-299667448,
-435329277,
-1073881662">
+
+<cfset userIds = "2904066959,
+241909273,
+487497021">
 
 <!--- <p>get @office followers (most recent 5000)</p> --->
 
@@ -34,6 +26,10 @@
 		<cfif listFindNoCase(friendIds, '22209176')>
 			<strong>office found in this users friends</strong>
 		</cfif>
+	<cfelseif structKeyExists(friends, 'errors') and friends.errors[1].code eq 88>
+		rate limit exceeded, stopping your loop.</p>
+		<p>time to run again: <cfoutput>#timeFormat(dateAdd('n', 15, now()), 'HH:mm')#</cfoutput>
+		<cfbreak>
 	<cfelse>
 		<cfdump var="#friends#">
 	</cfif>

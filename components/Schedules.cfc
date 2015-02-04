@@ -120,6 +120,7 @@
 				s.searchTerm,
 				s.startDate,
 				s.endDate,
+				s.cursor_after,
 				page.name as pageName,
 				post.[message] as postMessage
 			from Schedules s

@@ -110,6 +110,10 @@ https://github.com/starlock/vino/wiki/API-Reference
 								<cfset obj = oVine.parseVineObject(vine=thisResult)>
 								<cfset user = oVine.parseUserObject(oVine.getVineUser(userId=obj.userId))>
 
+								<cfdump var="#obj#">
+
+								<cfdump var="#user#">
+
 								<cfoutput>
 
 									<tr <cfif obj.explicitContent>class="danger"</cfif>>

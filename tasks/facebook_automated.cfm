@@ -19,7 +19,7 @@
 		<!--- isnt this functionally the same as no 'until,' though? --->
 		<cfset until = dateDiff('s', '1970-01-01', dateConvert('local2utc', now()))>
 		<cfset since = oFacebook.getSince(getSchedule.scheduleId)>
-		<cfset sanityCheck = 100>
+		<cfparam name="url.sanityCheck" default=100>
 
 		<!--- blind search, always --->
 		<cfif len(getSchedule.searchTerm)>
@@ -81,7 +81,7 @@
 
 						<cfset lc += 1>
 
-						<cfif lc gte sanityCheck>
+						<cfif lc gt val(url.sanityCheck)>
 							<p>facebook search results exceeded page count sanity check</p>
 							<cfset EOF = true>
 						</cfif>
@@ -182,7 +182,7 @@
 									</cfif>
 
 									<cfset cc += 1>
-									<cfif cc gte sanityCheck>
+									<cfif cc gt val(url.sanityCheck)>
 										<p>facebook feed -> comment exceeded page count sanity check</p>
 										<cfset EOC = true>
 									</cfif>
@@ -212,7 +212,7 @@
 
 					<cfset lc += 1>
 
-					<cfif lc gte sanityCheck>
+					<cfif lc gt val(url.sanityCheck)>
 						<p>facebook feed results exceeded page count sanity check</p>
 						<cfset EOF = true>
 					</cfif>
@@ -242,10 +242,11 @@
 			<cfset EOC = false>
 			<cfset cc = 1>
 			<cfset cp = 1>
-			<cfset after = "">
+			<cfset after = getSchedule.cursor_after>
 			<cfloop condition="NOT EOC">
 
 				<p><cfoutput>comment page #cp#</cfoutput></p>
+				<p><cfoutput>after = #after#</cfoutput></p>
 
 				<cfset comment_result = oFacebook.getComments(
 					programId = getSchedule.programId,
@@ -282,6 +283,12 @@
 							<cfloop list="#theUrl#" index="u" delimiters="&">
 								<cfif listFirst(u, "=") eq "after">
 									<cfset after = listLast(u, "=")>
+									<!--- store cursor in database so next iteration can start here --->
+									<cfquery datasource="#this.dsn#">
+										update Schedules
+										set cursor_after = <cfqueryparam value="#after#" cfsqltype="cf_sql_varchar">
+										where scheduleId = <cfqueryparam value="#getSchedule.scheduleId#" cfsqltype="cf_sql_integer">
+									</cfquery>
 								</cfif>
 							</cfloop>
 							<cfset cp += 1>
@@ -291,7 +298,7 @@
 					</cfif>
 
 					<cfset cc += 1>
-					<cfif cp gte sanityCheck>
+					<cfif cp gt val(url.sanityCheck)>
 						<p>facebook post -> comments results exceeded page count sanity check</p>
 						<cfset EOC = true>
 					</cfif>
